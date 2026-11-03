@@ -42,9 +42,6 @@ test('calculate real displayed nutrition targets without saving by default', asy
   expect(await page.evaluate(key => localStorage.getItem(key), storageKey)).toBeNull();
   expect(externalRequests).toEqual([]);
   await expect(page.locator('#remember')).not.toBeChecked();
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.evaluate(() => window.scrollTo(0, 0));
-  await page.screenshot({ path: test.info().outputPath('calculator.png'), fullPage: true });
 });
 
 test('failed module loading cannot submit private profile inputs to the server', async ({ page }) => {
@@ -139,7 +136,7 @@ test('opt-in saving restores inputs but never eligibility or immediate results',
   await page.getByRole('button', { name: 'Calculate my targets' }).click();
   await expect(page.locator('#storage-status')).toContainText('Saved on this device');
   const saved = await page.evaluate(key => JSON.parse(localStorage.getItem(key)), storageKey);
-  expect(Object.keys(saved.profile).sort()).toEqual(['activity', 'age', 'goal', 'height', 'sex', 'targetWeight', 'weeklyRate', 'weight']);
+  expect(Object.keys(saved.profile).sort()).toEqual(['activity', 'age', 'body', 'goal', 'height', 'sex', 'targetWeight', 'weeklyRate', 'weight']);
   expect(saved.profile).not.toHaveProperty('eligible');
   await page.reload();
   await expect(page.locator('#weight')).toHaveValue('70');
@@ -237,9 +234,6 @@ test('target weight and selected loss pace change the displayed plan', async ({ 
   await page.getByRole('button', { name: 'Calculate my targets' }).click();
   await expect(page.getByTestId('calories')).toHaveText('2,219');
   await expect(page.getByTestId('weekly-pace')).toContainText('0.35 kg/week');
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.evaluate(() => window.scrollTo(0, 0));
-  await page.screenshot({ path: test.info().outputPath('weight-plan.png'), fullPage: true });
 });
 
 test('target must agree with the goal direction', async ({ page }) => {
@@ -322,7 +316,7 @@ test('nutrient output distinguishes daily references, limits, and unknown intake
   await enterProfile(page);
   await page.getByRole('button', { name: 'Calculate my targets' }).click();
   await expect(page.locator('#daily-guidance')).toBeVisible();
-  await expect(page.locator('#nutrient-rows tr')).toHaveCount(15);
+  await expect(page.locator('#nutrient-rows tr')).toHaveCount(12);
   await page.getByRole('link', { name: 'Daily nutrients and meal structure' }).click();
   await expect(page.locator('#guidance-title')).toBeInViewport();
   await expect(page.locator('#reference-intro')).toContainText('not measured intake');
@@ -330,10 +324,150 @@ test('nutrient output distinguishes daily references, limits, and unknown intake
   await expect(page.locator('[data-nutrient="saturated-fat"]')).toContainText('Less than about 28.9 g/day');
   await expect(page.locator('[data-nutrient="sodium"]')).toContainText('Less than 2,300 mg/day');
   await expect(page.locator('[data-nutrient="potassium"]')).toContainText('3,400 mg/day');
-  await expect(page.locator('[data-nutrient="sugar"]')).toContainText('No fixed daily target');
-  await expect(page.locator('[data-nutrient="cholesterol"]')).toContainText('No fixed daily target');
+  await expect(page.locator('[data-nutrient="sugar"], [data-nutrient="monounsaturated-fat"], [data-nutrient="polyunsaturated-fat"], [data-nutrient="trans-fat"]')).toHaveCount(0);
+  await expect(page.locator('[data-nutrient="free-sugars"]')).toContainText('32.6 g/day');
+  await expect(page.locator('[data-nutrient="cholesterol"]')).toContainText('300 mg/day');
+  await expect(page.locator('[data-nutrient="cholesterol"]')).toContainText('FDA Daily Value');
   await expect(page.locator('[data-nutrient="omega-3"]')).toContainText('AI (ALA only)');
+  await expect(page.locator('[data-nutrient="omega-3"]')).toContainText('1,600 mg/day');
   await expect(page.locator('[data-nutrient="magnesium"]')).toContainText('400 mg/day');
+});
+
+test('optional assessment uses measurements without changing the nutrition goal', async ({ page }) => {
+  await enterProfile(page);
+  await page.locator('#includeAssessment').check();
+  await page.getByLabel('Waist circumference (cm)', { exact: true }).fill('80');
+  await page.getByRole('button', { name: 'Calculate my targets' }).click();
+  await expect(page.locator('#body-assessment')).toBeVisible();
+  await expect(page.locator('#body-summary')).toContainText('Mid-range weight-for-height');
+  await expect(page.locator('#body-bmi')).toHaveText('21.6');
+  await expect(page.locator('#body-waist-ratio')).toContainText('0.44');
+  await expect(page.getByTestId('calories')).toHaveText('2,604');
+  await page.locator('#waist').fill('105');
+  await expect(page.locator('#body-assessment')).toBeHidden();
+  await page.getByRole('button', { name: 'Calculate my targets' }).click();
+  await expect(page.locator('#body-summary')).toContainText('Raised waist-to-height');
+  await expect(page.getByTestId('calories')).toHaveText('2,604');
+  await expect(page.locator('input[name="goal"][value="maintain"]')).toBeChecked();
+});
+
+test('body assessment can run without choosing a nutrition goal or formula category', async ({ page }) => {
+  await page.locator('#age').fill('30');
+  await page.locator('#weight').fill('70');
+  await page.locator('#height').fill('180');
+  await page.locator('#includeAssessment').check();
+  await page.locator('#waist').fill('80');
+  await page.locator('#eligible').check();
+  await page.getByRole('button', { name: 'Assess my measurements' }).click();
+  await expect(page.locator('#body-assessment')).toBeFocused();
+  await expect(page.locator('#body-summary')).toContainText('Mid-range');
+  await expect(page.locator('#error-summary')).toBeHidden();
+  await expect(page.locator('#nutrition-result')).toBeHidden();
+  await expect(page.locator('#sex')).toHaveValue('');
+});
+
+test('underweight profiles can see a body assessment but no automatic calorie targets', async ({ page }) => {
+  await enterProfile(page, { weight: '50' });
+  await page.locator('#includeAssessment').check();
+  await page.locator('#waist').fill('65');
+  await page.getByRole('button', { name: 'Calculate my targets' }).click();
+  await expect(page.locator('#body-summary')).toContainText('Lower weight-for-height');
+  await expect(page.locator('#limitation')).toBeVisible();
+  await expect(page.locator('#nutrition-result')).toBeHidden();
+  await expect(page.locator('#daily-guidance')).toBeHidden();
+});
+
+test('self-description and existing body-fat estimates stay explicitly self-reported', async ({ page }) => {
+  await enterProfile(page);
+  const requests = [];
+  page.on('request', request => requests.push(request.url()));
+  await page.locator('#includeAssessment').check();
+  await page.locator('#waist').fill('80');
+  await page.locator('#bodyFat').fill('18.5');
+  await page.locator('#bodyFatMethod').selectOption('bia');
+  await page.locator('#bodyDescription').selectOption('muscular');
+  await page.getByRole('button', { name: 'Calculate my targets' }).click();
+  await expect(page.locator('#body-self-description')).toHaveText('Muscular (self-reported)');
+  await expect(page.locator('#body-fat-estimate')).toContainText('18.5%');
+  await expect(page.locator('#body-fat-estimate')).toContainText('user-provided');
+  await expect(page.locator('#body-summary')).not.toContainText('Muscular');
+  await expect(page.locator('#body-assessment')).toContainText('do not measure muscle');
+  expect(await page.evaluate(key => localStorage.getItem(key), storageKey)).toBeNull();
+  expect(requests).toEqual([]);
+});
+
+test('body assessment still appears when every nutrition pace is unavailable', async ({ page }) => {
+  await enterProfile(page, { age: '56', sex: 'female', weight: '50', height: '160', activity: 'sedentary', goal: 'lose', targetWeight: '48', weeklyRate: null });
+  await page.locator('#includeAssessment').check();
+  await page.locator('#waist').fill('70');
+  await page.getByRole('button', { name: 'Calculate my targets' }).click();
+  await expect(page.locator('#body-summary')).toContainText('Mid-range');
+  await expect(page.locator('#limitation')).toBeVisible();
+  await expect(page.locator('#nutrition-result')).toBeHidden();
+});
+
+test('invalid optional measurements have actionable field errors', async ({ page }) => {
+  await enterProfile(page);
+  await page.locator('#includeAssessment').check();
+  await page.locator('#waist').fill('80cm');
+  await page.getByRole('button', { name: 'Calculate my targets' }).click();
+  await expect(page.locator('#waist-error')).toBeVisible();
+  await expect(page.locator('#body-assessment')).toBeHidden();
+  await page.locator('#error-list a').click();
+  await expect(page.locator('#waist')).toBeFocused();
+  await page.locator('#waist').fill('80');
+  await page.locator('#bodyFat').fill('20');
+  await page.getByRole('button', { name: 'Calculate my targets' }).click();
+  await expect(page.locator('#bodyFatMethod-error')).toBeVisible();
+});
+
+test('optional measurements restore only with consent and remain hidden until confirmation', async ({ page }) => {
+  await enterProfile(page);
+  await page.locator('#includeAssessment').check();
+  await page.locator('#waist').fill('80');
+  await page.locator('#bodyDescription').selectOption('muscular');
+  await page.locator('#remember').check();
+  await page.getByRole('button', { name: 'Calculate my targets' }).click();
+  const saved = await page.evaluate(key => JSON.parse(localStorage.getItem(key)), storageKey);
+  expect(saved.version).toBe(3);
+  expect(saved.profile.body.waist).toBe(80);
+  expect(saved.profile.body.bodyDescription).toBe('muscular');
+  expect(saved.profile).not.toHaveProperty('eligible');
+  await page.reload();
+  await expect(page.locator('#includeAssessment')).toBeChecked();
+  await expect(page.locator('#waist')).toHaveValue('80');
+  await expect(page.locator('#body-assessment')).toBeHidden();
+  await expect(page.locator('#eligible')).not.toBeChecked();
+  await page.locator('#eligible').check();
+  await page.getByRole('button', { name: 'Calculate my targets' }).click();
+  await expect(page.locator('#body-summary')).toContainText('Mid-range');
+  await page.locator('#includeAssessment').uncheck();
+  await expect(page.locator('#body-assessment')).toBeHidden();
+  await page.getByRole('button', { name: 'Calculate my targets' }).click();
+  expect(await page.evaluate(key => JSON.parse(localStorage.getItem(key)).profile.body, storageKey)).toBeNull();
+});
+
+test('version-two profiles restore without inventing optional body measurements', async ({ page }) => {
+  await page.evaluate(key => localStorage.setItem(key, JSON.stringify({ version: 2, remember: true, profile: { age: 30, weight: 70, height: 180, sex: 'male', activity: 'moderate', goal: 'maintain', targetWeight: 70, weeklyRate: '0' } })), storageKey);
+  await page.reload();
+  await expect(page.locator('#weight')).toHaveValue('70');
+  await expect(page.locator('#includeAssessment')).not.toBeChecked();
+  await expect(page.locator('#body-assessment')).toBeHidden();
+  await page.locator('#eligible').check();
+  await page.getByRole('button', { name: 'Calculate my targets' }).click();
+  await expect(page.getByTestId('calories')).toHaveText('2,604');
+});
+
+test('body assessment reflows on small screens and clears on eligibility withdrawal', async ({ page }) => {
+  await enterProfile(page);
+  await page.locator('#includeAssessment').check();
+  await page.locator('#waist').fill('80');
+  await page.getByRole('button', { name: 'Assess my measurements' }).click();
+  await expect(page.locator('#body-assessment')).toBeVisible();
+  await page.setViewportSize({ width: 320, height: 800 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.locator('#eligible').uncheck();
+  await expect(page.locator('#body-assessment')).toBeHidden();
 });
 
 test('reference values update across age and category boundaries', async ({ page }) => {
@@ -377,7 +511,6 @@ test('guidance is hidden without eligibility and for unsupported profiles', asyn
 });
 
 test('nutrient and meal estimates refresh with calories without page overflow', async ({ page }) => {
-  const viewport = page.viewportSize();
   await enterProfile(page, { goal: 'lose', targetWeight: '65', weeklyRate: '0.5' });
   await page.getByRole('button', { name: 'Calculate my targets' }).click();
   await expect(page.locator('[data-nutrient="fiber"]')).toContainText('31.1 g/day');
@@ -386,8 +519,4 @@ test('nutrient and meal estimates refresh with calories without page overflow', 
   await page.setViewportSize({ width: 320, height: 800 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await expect(page.locator('#reference-scope')).toContainText('not supplement doses');
-  await page.setViewportSize(viewport);
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.evaluate(() => window.scrollTo(0, 0));
-  await page.screenshot({ path: test.info().outputPath('daily-guidance.png'), fullPage: true });
 });

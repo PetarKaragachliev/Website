@@ -21,6 +21,7 @@ The calculator includes target weight and restricted desired weekly gain/loss, r
 | [TEST_PLAN.md](TEST_PLAN.md) | Test strategy, TDD workflow, and verification evidence |
 | [NUTRITION_POLICY.md](NUTRITION_POLICY.md) | Approved starting calculations, sourced rationale, arithmetic fixtures, and remaining safety gates |
 | [NUTRIENT_REFERENCES.md](NUTRIENT_REFERENCES.md) | Daily nutrient reference tables, limits, sources, and flexible meal guidance; not a food diary or supplement plan |
+| [BODY_ASSESSMENT.md](BODY_ASSESSMENT.md) | Optional waist/BMI assessment, self-reported context, interpretation limits, and storage/consent behavior |
 | [STATUS.md](STATUS.md) | Current state, blockers, and recorded results |
 
 ## Start Here
@@ -38,6 +39,7 @@ The calculator includes target weight and restricted desired weekly gain/loss, r
 - Browser setup: `npx playwright install chromium firefox webkit`. Chromium and Firefox installed; this host currently denies writing WebKit's executable (`EPERM`), so the full install/check is blocked.
 - Verified available-browser matrix: `npm run test:e2e -- --project=chromium-desktop --project=chromium-mobile --project=chromium-tablet --project=firefox`.
 - Full matrix including WebKit: `npm run test:e2e`. WebKit remains configured, not skipped; fix its host installation problem before expecting this command to pass.
+- Owner requirement: do not generate website screenshots, screen recordings, or browser traces unless explicitly requested. All explicit screenshot calls are removed; Playwright screenshot/trace/video capture is off. Text-only diagnostics go to the OS temporary directory under `opencode/liftfuel-test-results`, outside OneDrive. The website itself has no display/camera-capture feature.
 - Build: None. The active GitHub Pages workflow publishes only `public/`; node_modules, tests, and development artifacts are not part of the hosted site.
 
 ## GitHub Publishing
@@ -71,7 +73,9 @@ Future updates: review changes, commit the intended files, and use **Push origin
 - `public/index.html`, `public/styles.css`: Accessible form and dark/green responsive interface.
 - `public/js/nutrition.js`: Input validation and nutrition calculations, shared by browser and unit tests.
 - `public/js/guidance.js`: Sourced age/category nutrient references and optional four-occasion meal structure. Values are references/limits, not actual intake or supplement doses. Four-hour spacing is an example, not a universal health rule.
+- `public/js/body-assessment.js`: Optional BMI/waist screening indicators and goal discussion; existing body-fat estimates and build descriptions are user-provided, not inferred. No automatic calorie/exercise changes.
+- `public/js/measurements.js`: Strict metric parsing shared by nutrition and body assessment.
 - `public/js/app.js`: DOM rendering and consent-based local profile storage.
 - `tests/unit/`, `tests/e2e/`: Independent numerical fixtures and real browser scenarios.
 
-No profile data is sent to an application backend. Saving keeps the browser key `liftfuel.profile.v1`, with record version 2 storing target weight and pace. Earlier version-1 profiles restore validated base inputs without inventing new plan choices. Eligibility confirmation is never persisted. Explicit research links navigate to external sites only when activated.
+No profile data is sent to an application backend. Saving keeps browser key `liftfuel.profile.v1`, now with record version 3: target/pace and an optional body object (waist, existing estimate/method, self-description). Versions 1/2 restore without inventing missing fields. Eligibility and assessment results are never persisted. Body details are included only when assessment and device remembering are explicitly enabled; Calculate saves, the standalone assessment button does not. Explicit source links navigate externally only when activated.

@@ -8,7 +8,7 @@ test('eligible calculator output includes all requested nutrient references', ()
   const result = calculateNutrition(baseline).result;
   assert.ok(result.guidance, 'calculated results must include daily reference guidance');
   assert.deepEqual(result.guidance.nutrients.map(nutrient => nutrient.id), [
-    'fiber', 'sugar', 'free-sugars', 'saturated-fat', 'monounsaturated-fat', 'trans-fat', 'cholesterol',
+    'fiber', 'free-sugars', 'saturated-fat', 'cholesterol',
     'sodium', 'potassium', 'vitamin-a', 'vitamin-c', 'calcium', 'iron', 'omega-3', 'magnesium'
   ]);
 });
@@ -17,7 +17,7 @@ test('energy-based references distinguish intake guidance from limits', () => {
   const { nutrients } = calculateNutrition(baseline).result.guidance;
   const reference = Object.fromEntries(nutrients.map(nutrient => [nutrient.id, nutrient]));
   assert.ok(Math.abs(reference.fiber.value - 36.456) < 1e-9);
-  assert.ok(Math.abs(reference['free-sugars'].value - 65.1) < 1e-9);
+  assert.ok(Math.abs(reference['free-sugars'].value - 32.55) < 1e-9);
   assert.ok(Math.abs(reference['saturated-fat'].value - 28.933333333333334) < 1e-9);
   assert.equal(reference.fiber.kind, 'reference');
   assert.equal(reference['free-sugars'].kind, 'limit');
@@ -26,28 +26,34 @@ test('energy-based references distinguish intake guidance from limits', () => {
   assert.equal(reference.sodium.kind, 'limit');
 });
 
-for (const id of ['sugar', 'monounsaturated-fat', 'trans-fat', 'cholesterol']) {
-  test(`${id} does not get a fabricated numeric intake target`, () => {
+for (const id of ['sugar', 'monounsaturated-fat', 'polyunsaturated-fat', 'trans-fat']) {
+  test(`${id} is not shown as a separate nutrient row`, () => {
     const nutrient = calculateNutrition(baseline).result.guidance.nutrients.find(item => item.id === id);
-    assert.equal(nutrient.value, null);
-    assert.equal(nutrient.kind, 'information');
-    assert.ok(nutrient.advice.length > 0);
+    assert.equal(nutrient, undefined);
   });
 }
 
+test('cholesterol is the FDA label Daily Value, not a universal maximum', () => {
+  const nutrient = calculateNutrition(baseline).result.guidance.nutrients.find(item => item.id === 'cholesterol');
+  assert.equal(nutrient.value, 300);
+  assert.equal(nutrient.unit, 'mg');
+  assert.equal(nutrient.basis, 'FDA Daily Value');
+  assert.equal(nutrient.kind, 'reference');
+});
+
 for (const [sex, age, values] of [
-  ['male', '18', [900, 75, 1300, 11, 410, 3000, 1.6]],
-  ['female', '18', [700, 65, 1300, 15, 360, 2300, 1.1]],
-  ['male', '19', [900, 90, 1000, 8, 400, 3400, 1.6]],
-  ['female', '19', [700, 75, 1000, 18, 310, 2600, 1.1]],
-  ['male', '30', [900, 90, 1000, 8, 400, 3400, 1.6]],
-  ['female', '30', [700, 75, 1000, 18, 310, 2600, 1.1]],
-  ['male', '31', [900, 90, 1000, 8, 420, 3400, 1.6]],
-  ['female', '31', [700, 75, 1000, 18, 320, 2600, 1.1]],
-  ['female', '50', [700, 75, 1000, 18, 320, 2600, 1.1]],
-  ['male', '51', [900, 90, 1000, 8, 420, 3400, 1.6]],
-  ['female', '51', [700, 75, 1200, 8, 320, 2600, 1.1]],
-  ['female', '56', [700, 75, 1200, 8, 320, 2600, 1.1]]
+  ['male', '18', [900, 75, 1300, 11, 410, 3000, 1600]],
+  ['female', '18', [700, 65, 1300, 15, 360, 2300, 1100]],
+  ['male', '19', [900, 90, 1000, 8, 400, 3400, 1600]],
+  ['female', '19', [700, 75, 1000, 18, 310, 2600, 1100]],
+  ['male', '30', [900, 90, 1000, 8, 400, 3400, 1600]],
+  ['female', '30', [700, 75, 1000, 18, 310, 2600, 1100]],
+  ['male', '31', [900, 90, 1000, 8, 420, 3400, 1600]],
+  ['female', '31', [700, 75, 1000, 18, 320, 2600, 1100]],
+  ['female', '50', [700, 75, 1000, 18, 320, 2600, 1100]],
+  ['male', '51', [900, 90, 1000, 8, 420, 3400, 1600]],
+  ['female', '51', [700, 75, 1200, 8, 320, 2600, 1100]],
+  ['female', '56', [700, 75, 1200, 8, 320, 2600, 1100]]
 ]) {
   test(`US intake reference boundaries for ${sex} aged ${age}`, () => {
     const { nutrients } = calculateNutrition({ ...baseline, sex, age }).result.guidance;
@@ -56,6 +62,7 @@ for (const [sex, age, values] of [
     assert.equal(reference['vitamin-a'].unit, 'mcg RAE');
     assert.equal(reference.potassium.basis, 'AI');
     assert.equal(reference['omega-3'].basis, 'AI (ALA only)');
+    assert.equal(reference['omega-3'].unit, 'mg');
   });
 }
 

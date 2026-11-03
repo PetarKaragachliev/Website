@@ -156,6 +156,25 @@ input:read-only, select:disabled { color: var(--muted); background: #192019; }
 .method-section { margin-top: 60px; padding-bottom: 44px; }
 .daily-guidance { margin-top: 44px; }
 .guidance-jump { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; margin-top: 16px; color: var(--accent); font-size: 12px; }
+.body-options { border-top: 1px solid var(--border); padding-top: 20px; margin-bottom: 24px; }
+.body-options > .check-label { min-height: 30px; font-size: 12px; font-weight: 600; }
+.body-fields { min-width: 0; border: 0; padding: 18px 0 0; margin: 16px 0 0; }
+.body-fields legend { padding: 0; color: var(--accent); }
+.secondary-button { width: 100%; min-height: 48px; padding: 12px; border-radius: 8px; border: 1px solid #8ba64f; background: #1c2916; color: var(--accent); font-weight: 600; font-size: 13px; }
+.secondary-button:hover { background: #2a3a1e; }
+.body-assessment { margin-top: 36px; padding: 30px; background: linear-gradient(135deg, #213017, var(--panel) 55%); }
+.body-assessment h2 { font-size: clamp(28px, 3vw, 42px); margin: 15px 0; overflow-wrap: anywhere; }
+.body-assessment p:not(.eyebrow) { color: var(--muted); font-size: 12px; margin-top: 16px; }
+.body-metrics { display: grid; grid-template-columns: 1fr 1fr 1.6fr; gap: 16px; margin: 24px 0; }
+.body-metrics > div { padding: 17px; min-width: 0; background: #0f1710; border: 1px solid var(--border); border-radius: 8px; }
+.body-metrics dt { color: var(--muted); font-size: 11px; }
+.body-metrics dd { margin: 8px 0 0; font-size: 21px; font-weight: 650; color: var(--accent); overflow-wrap: anywhere; }
+.body-metrics > div:last-child dd { font-size: 14px; }
+.body-self-label strong { color: var(--text); font-weight: 600; }
+.body-method { border-top: 1px solid var(--border); margin-top: 22px; padding-top: 12px; font-size: 12px; }
+.body-method summary { cursor: pointer; min-height: 44px; display: list-item; padding: 10px 0; }
+.body-method a { display: inline-block; margin-top: 14px; color: var(--accent); }
+@media (max-width: 650px) { .body-assessment { padding: 22px 20px; } .body-metrics { grid-template-columns: 1fr 1fr; gap: 10px; } .body-metrics > div:last-child { grid-column: 1 / -1; } .body-metrics > div { padding: 13px; } }
 .guidance-grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); gap: 24px; align-items: start; }
 .reference-panel, .meal-panel { padding: 28px; min-width: 0; }
 .reference-panel > h3, .meal-panel > h3 { font-size: 24px; letter-spacing: -.04em; margin-top: 8px; }

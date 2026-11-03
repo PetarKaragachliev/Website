@@ -1,7 +1,10 @@
 import { defineConfig } from '@playwright/test';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 export default defineConfig({
   testDir: './tests/e2e',
+  outputDir: join(tmpdir(), 'opencode', 'liftfuel-test-results'),
   timeout: 30_000,
   expect: { timeout: 5_000 },
   retries: 0,
@@ -10,8 +13,9 @@ export default defineConfig({
   reporter: 'list',
   use: {
     baseURL: 'http://127.0.0.1:4173',
-    trace: 'retain-on-failure',
-    screenshot: 'only-on-failure'
+    trace: 'off',
+    screenshot: 'off',
+    video: 'off'
   },
   webServer: {
     command: 'npm run dev',

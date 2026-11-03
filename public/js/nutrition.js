@@ -1,4 +1,6 @@
 import { getDailyGuidance } from './guidance.js';
+import { parseMetric } from './measurements.js';
+import { calculateBodyAssessment, validateBodyMeasurements } from './body-assessment.js';
 
 const activities = { sedentary: 1.2, light: 1.375, moderate: 1.55, very: 1.725 };
 const plans = {
@@ -8,16 +10,8 @@ const plans = {
   gain: { '0.25': 0.1, '0.5': 0.15 }
 };
 
-function metric(value, min, max, whole = false) {
-  if (typeof value !== 'string' && typeof value !== 'number') return null;
-  const text = String(value).trim();
-  if (!(whole ? /^\d+$/ : /^\d+(?:[.,]\d)?$/).test(text)) return null;
-  const number = Number(text.replace(',', '.'));
-  return Number.isFinite(number) && number >= min && number <= max ? number : null;
-}
-
 export function getWeeklyPaces(goal, weight) {
-  const currentWeight = metric(weight, 35, 250);
+  const currentWeight = parseMetric(weight, 35, 250);
   if (typeof goal !== 'string' || !Object.hasOwn(plans, goal) || currentWeight === null) return [];
   return Object.keys(plans[goal]).map(value => ({ value, percent: Number(value), kg: currentWeight * Number(value) / 100 }));
 }
@@ -25,14 +19,15 @@ export function getWeeklyPaces(goal, weight) {
 export function validateProfile(input) {
   const source = input && typeof input === 'object' ? input : {};
   const profile = {
-    age: metric(source.age, 18, 56, true),
-    weight: metric(source.weight, 35, 250),
-    height: metric(source.height, 130, 230),
+    age: parseMetric(source.age, 18, 56, true),
+    weight: parseMetric(source.weight, 35, 250),
+    height: parseMetric(source.height, 130, 230),
     sex: source.sex,
     activity: source.activity,
     goal: source.goal,
     targetWeight: null,
-    weeklyRate: source.weeklyRate
+    weeklyRate: source.weeklyRate,
+    body: null
   };
   const errors = {};
   if (profile.age === null) errors.age = 'Enter a whole-number age from 18 to 56.';
@@ -44,9 +39,9 @@ export function validateProfile(input) {
   if (!errors.goal && profile.goal === 'maintain') {
     profile.targetWeight = profile.weight;
     profile.weeklyRate = source.weeklyRate ?? '0';
-    if (source.targetWeight !== undefined && profile.weight !== null && metric(source.targetWeight, 35, 250) !== profile.weight) errors.targetWeight = 'For maintenance, target weight must match your current weight.';
+    if (source.targetWeight !== undefined && profile.weight !== null && parseMetric(source.targetWeight, 35, 250) !== profile.weight) errors.targetWeight = 'For maintenance, target weight must match your current weight.';
   } else if (!errors.goal) {
-    profile.targetWeight = metric(source.targetWeight, 35, 250);
+    profile.targetWeight = parseMetric(source.targetWeight, 35, 250);
     if (profile.targetWeight === null) errors.targetWeight = 'Enter a target from 35-250 kg, with at most one decimal place.';
     else if (profile.weight !== null && (profile.goal === 'lose' ? profile.targetWeight >= profile.weight : profile.targetWeight <= profile.weight)) {
       errors.targetWeight = profile.goal === 'lose' ? 'Choose a target below your current weight for fat loss.' : 'Choose a target above your current weight for weight gain.';
@@ -56,13 +51,20 @@ export function validateProfile(input) {
     }
   }
   if (!errors.goal && profile.weight !== null && (typeof profile.weeklyRate !== 'string' || !Object.hasOwn(plans[profile.goal], profile.weeklyRate))) errors.weeklyRate = 'Choose one of the supported weekly paces for your goal.';
+  if (source.includeAssessment !== undefined && typeof source.includeAssessment !== 'boolean') errors.includeAssessment = 'Use the checkbox to choose whether to include a body assessment.';
+  if (source.includeAssessment === true) {
+    const measured = validateBodyMeasurements(source);
+    Object.assign(errors, measured.errors);
+    profile.body = measured.body;
+  }
   return { errors, profile: Object.keys(errors).length ? null : profile };
 }
 
 export function calculateNutrition(input) {
   const { errors, profile } = validateProfile(input);
   if (input?.eligible !== true) errors.eligible = 'Confirm that you understand who this tool is intended for.';
-  const output = { errors, profile, result: null, limitation: null };
+  const output = { errors, profile, result: null, limitation: null, assessment: null };
+  if (input?.includeAssessment === true && input?.eligible === true) output.assessment = calculateBodyAssessment(input).assessment;
   if (Object.keys(errors).length) return output;
 
   const { weight, height, age, sex, activity, goal, weeklyRate } = profile;

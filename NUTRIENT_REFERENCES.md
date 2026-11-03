@@ -17,15 +17,14 @@ Let `E` be the unrounded calculated daily calorie estimate.
 | Nutrient | Displayed guidance | Meaning / source |
 | --- | --- | --- |
 | Fiber | About `14 * E / 1000` g/day | Energy-density reference from the DRI AI framework; increase gradually with adequate fluids [S1] |
-| Sugar (total) | No fixed daily target | No established FDA Daily Value; includes naturally occurring and added sugars; do not apply a free-sugar limit to whole fruit or plain milk [S2] |
-| Free sugars | Less than about `0.1 * E / 4` g/day | WHO under-10%-of-energy limit, not a goal to fill. Includes added sugars, honey, syrups, and juice sugars; excludes sugars within intact fruit/plain milk [S3] |
+| Free / added sugars | Less than about `0.05 * E / 4` g/day | Owner-selected stricter 5%-of-energy limit, corresponding to WHO's conditional recommendation. Free sugars include added sugars plus honey/syrup/juice sugars; not a quota to consume and not a limit on intact-fruit/plain-milk sugars [S3] |
 | Saturated fat | Less than about `0.1 * E / 9` g/day | WHO under-10%-of-energy limit, not a required intake; individual guidance can be stricter [S3] |
-| Monounsaturated fat | No fixed daily target | No established RDA/AI; prefer unsaturated fats in place of saturated/trans fats within the total-fat allocation [S1] |
-| Trans fat | Keep as low as possible | Avoid industrial trans fats; do not display an allowance to consume [S3] |
-| Cholesterol | No fixed daily target | No established required intake; FDA's labeling Daily Value is not a personalized consumption goal, and no fixed target does not imply unlimited intake [S2] |
+| Cholesterol | FDA Daily Value: 300 mg/day | Labeling reference, not required intake, a personalized target, or a universal maximum for every healthy person [S2] |
 | Sodium | Less than 2300 mg/day | General intake limit, not the 1500 mg AI or a formal universal UL; chronic-disease-risk-reduction guidance and individual sweat/medical needs differ [S4] |
 
 WHO free-sugar guidance is deliberately named and distinguished from total sugar and FDA added-sugar labeling. It is not presented as the latest US DGA added-sugar prescription. Numeric display is rounded to at most one decimal place and marked approximate where energy-based; the underlying calculations retain precision.
+
+Per the owner's revised scope, there is one free/added-sugars row and no separate total-sugar, monounsaturated-fat, polyunsaturated-fat, or trans-fat row. Removal does not recommend zero unsaturated fat. The stricter sugar calculation yields 25 g at 2000 kcal and 32.55 g at 2604 kcal before display rounding.
 
 ## Age and Category References
 
@@ -39,7 +38,7 @@ Each cell is **male / female**. Identical source age bands are merged only where
 | Iron, mg | 11 / 15 | 8 / 18 | 8 / 18 | 8 / 8 | RDA [S8] |
 | Magnesium, mg | 410 / 360 | 400 / 310 | 420 / 320 | 420 / 320 | RDA [S9] |
 | Potassium, mg | 3000 / 2300 | 3400 / 2600 | 3400 / 2600 | 3400 / 2600 | AI [S10] |
-| Omega-3 ALA, g | 1.6 / 1.1 | 1.6 / 1.1 | 1.6 / 1.1 | 1.6 / 1.1 | AI for ALA only [S11] |
+| Omega-3 ALA, mg | 1600 / 1100 | 1600 / 1100 | 1600 / 1100 | 1600 / 1100 | AI for ALA only [S11] |
 
 Vitamin A uses **mcg RAE**, not unqualified micrograms or IU. Omega-3 is explicitly **ALA**, not an EPA+DHA, fish-oil, or total-omega-3 dose. Potassium uses current age/category AIs, not the 4700 mg FDA label Daily Value.
 

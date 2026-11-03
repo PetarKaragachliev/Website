@@ -1,4 +1,5 @@
 import { calculateNutrition, getWeeklyPaces, validateProfile } from './nutrition.js';
+import { calculateBodyAssessment } from './body-assessment.js';
 
 const storageKey = 'liftfuel.profile.v1';
 const form = document.querySelector('#profile-form');
@@ -12,13 +13,31 @@ const emptyResult = document.querySelector('#empty-result');
 const resultState = document.querySelector('#result-state');
 const guidanceRegion = document.querySelector('#daily-guidance');
 const guidanceLink = document.querySelector('#guidance-link');
+const bodyRegion = document.querySelector('#body-assessment');
+const bodyLink = document.querySelector('#body-link');
+const bodyChoice = document.querySelector('#includeAssessment');
+const bodyFields = document.querySelector('#body-fields');
 const number = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
 const goalLabels = { lose: 'Lose fat / gradual weight reduction', maintain: 'Maintain weight / estimated maintenance', muscle: 'Build muscle / minimize excess fat gain', gain: 'Gain weight / accept some fat gain' };
 const factors = { sedentary: '1.2', light: '1.375', moderate: '1.55', very: '1.725' };
 const weightNumber = new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 });
 const paceNumber = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const referenceNumber = new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 });
+const ratioNumber = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
 let unavailablePaceReason = null;
+
+function readInputs() {
+  return { ...Object.fromEntries(new FormData(form)), eligible: form.elements.eligible.checked, includeAssessment: bodyChoice.checked };
+}
+
+function updateAssessmentFields() {
+  bodyFields.disabled = !bodyChoice.checked;
+  bodyFields.hidden = !bodyChoice.checked;
+  const hasEstimate = form.elements.bodyFat.value.trim() !== '';
+  form.elements.bodyFatMethod.disabled = !bodyChoice.checked || !hasEstimate;
+  form.elements.bodyFatMethod.required = bodyChoice.checked && hasEstimate;
+  if (!hasEstimate) form.elements.bodyFatMethod.value = '';
+}
 
 function updatePlanFields(reset = false) {
   const goal = form.elements.goal.value;
@@ -38,7 +57,7 @@ function updatePlanFields(reset = false) {
     const label = goal === 'maintain' ? 'No planned weekly change' : `${goal === 'lose' ? 'Lose' : 'Gain'} about ${paceNumber.format(pace.kg)} kg/week (${pace.percent}% of current weight)`;
     const option = new Option(label, pace.value);
     // Preview availability only; actual results still require explicit eligibility confirmation.
-    const candidate = calculateNutrition({ ...Object.fromEntries(new FormData(form)), eligible: true, weeklyRate: pace.value });
+    const candidate = calculateNutrition({ ...readInputs(), eligible: true, weeklyRate: pace.value });
     if (['calories-range', 'pace-range'].includes(candidate.limitation)) {
       blockedPaces.push(candidate.limitation);
       option.disabled = true;
@@ -70,9 +89,23 @@ function invalidateResults() {
   resultRegion.hidden = true;
   guidanceRegion.hidden = true;
   guidanceLink.hidden = true;
+  bodyRegion.hidden = true;
+  bodyLink.hidden = true;
   limitation.hidden = true;
   emptyResult.hidden = false;
   resultState.textContent = 'YOUR STARTING POINT';
+}
+
+function renderBodyAssessment(assessment) {
+  document.querySelector('#body-summary').textContent = assessment.summary;
+  document.querySelector('#body-bmi').textContent = referenceNumber.format(assessment.bmi);
+  document.querySelector('#body-waist-ratio').textContent = ratioNumber.format(assessment.waistRatio);
+  document.querySelector('#body-fat-estimate').textContent = assessment.bodyFat ? `${referenceNumber.format(assessment.bodyFat.percent)}% (user-provided; ${assessment.bodyFat.methodLabel})` : 'Not provided; not estimated here';
+  document.querySelector('#body-self-description').textContent = assessment.selfDescription ?? 'Not provided';
+  document.querySelector('#body-waist-note').textContent = assessment.waistNote;
+  document.querySelector('#body-goal-context').textContent = assessment.goalContext;
+  bodyRegion.hidden = false;
+  bodyLink.hidden = false;
 }
 
 function renderDailyGuidance(profile, guidance) {
@@ -161,10 +194,20 @@ function restoreProfile() {
     const raw = localStorage.getItem(storageKey);
     if (raw === null) return;
     const saved = JSON.parse(raw);
-    if (![1, 2].includes(saved?.version) || saved?.remember !== true || !saved.profile || typeof saved.profile !== 'object') throw new Error('Invalid saved record');
+    if (![1, 2, 3].includes(saved?.version) || saved?.remember !== true || !saved.profile || typeof saved.profile !== 'object' || Array.isArray(saved.profile)) throw new Error('Invalid saved record');
     const legacy = saved.version === 1;
     if (legacy && (typeof saved.profile.goal !== 'string' || !Object.hasOwn(goalLabels, saved.profile.goal))) throw new Error('Invalid saved goal');
-    const { errors, profile } = validateProfile(legacy ? { ...saved.profile, goal: 'maintain', targetWeight: undefined, weeklyRate: undefined } : saved.profile);
+    const storedBody = saved.version === 3 ? saved.profile.body : null;
+    if (storedBody !== null && (!storedBody || typeof storedBody !== 'object' || Array.isArray(storedBody))) throw new Error('Invalid saved measurements');
+    const restoredInput = {
+      ...saved.profile,
+      includeAssessment: storedBody !== null,
+      waist: storedBody?.waist,
+      bodyFat: storedBody?.bodyFat,
+      bodyFatMethod: storedBody?.bodyFatMethod,
+      bodyDescription: storedBody?.bodyDescription
+    };
+    const { errors, profile } = validateProfile(legacy ? { ...restoredInput, goal: 'maintain', targetWeight: undefined, weeklyRate: undefined } : restoredInput);
     if (Object.keys(errors).length) throw new Error('Invalid saved profile');
     if (legacy) {
       profile.goal = saved.profile.goal;
@@ -175,8 +218,11 @@ function restoreProfile() {
     }
     for (const [field, value] of Object.entries(profile)) {
       if (field === 'goal') form.querySelector(`input[name="goal"][value="${value}"]`).checked = true;
-      else if (field !== 'weeklyRate') form.elements.namedItem(field).value = value;
+      else if (field !== 'weeklyRate' && field !== 'body') form.elements.namedItem(field).value = value;
     }
+    bodyChoice.checked = profile.body !== null;
+    if (profile.body) for (const [field, value] of Object.entries(profile.body)) form.elements.namedItem(field).value = value ?? '';
+    updateAssessmentFields();
     updatePlanFields();
     const restoredPace = Array.from(form.elements.weeklyRate.options).find(option => option.value === profile.weeklyRate && !option.disabled);
     if (restoredPace) form.elements.weeklyRate.value = restoredPace.value;
@@ -190,7 +236,7 @@ function restoreProfile() {
 function saveProfile(profile) {
   if (!remember.checked) return;
   try {
-    localStorage.setItem(storageKey, JSON.stringify({ version: 2, remember: true, profile }));
+    localStorage.setItem(storageKey, JSON.stringify({ version: 3, remember: true, profile }));
     storageStatus.textContent = 'Saved on this device. Your eligibility confirmation is not saved.';
   } catch {
     storageStatus.textContent = 'Your inputs were not saved because browser storage is unavailable. Your calculation still works.';
@@ -216,14 +262,14 @@ form.addEventListener('submit', event => {
   event.preventDefault();
   clearErrors();
   invalidateResults();
-  const input = Object.fromEntries(new FormData(form));
-  input.eligible = form.elements.eligible.checked;
+  const input = readInputs();
   const output = calculateNutrition(input);
   if (unavailablePaceReason) delete output.errors.weeklyRate;
   if (Object.keys(output.errors).length) {
     showErrors(output.errors);
     return;
   }
+  if (output.assessment) renderBodyAssessment(output.assessment);
   if (unavailablePaceReason) {
     showLimitation(unavailablePaceReason);
     return;
@@ -248,9 +294,9 @@ form.addEventListener('submit', event => {
 
 form.addEventListener('input', event => {
   if (event.target === remember) return;
+  updateAssessmentFields();
   updatePlanFields(event.target.name === 'goal');
-  const input = Object.fromEntries(new FormData(form));
-  input.eligible = form.elements.eligible.checked;
+  const input = readInputs();
   const { errors } = calculateNutrition(input);
   if (unavailablePaceReason) delete errors.weeklyRate;
   for (const control of form.querySelectorAll('[aria-invalid]')) {
@@ -271,6 +317,19 @@ form.addEventListener('input', event => {
   if (remember.checked) storageStatus.textContent = 'Changes are not saved until you calculate again.';
 });
 
+document.querySelector('#assess-body').addEventListener('click', () => {
+  if (!bodyChoice.checked) return;
+  clearErrors();
+  invalidateResults();
+  const output = calculateBodyAssessment(readInputs());
+  if (Object.keys(output.errors).length) {
+    showErrors(output.errors);
+    return;
+  }
+  renderBodyAssessment(output.assessment);
+  bodyRegion.focus();
+});
+
 remember.addEventListener('change', () => {
   if (remember.checked) {
     storageStatus.textContent = 'Your inputs will be saved when you calculate. Only use this on a browser you trust.';
@@ -282,12 +341,14 @@ remember.addEventListener('change', () => {
 document.querySelector('#delete-data').addEventListener('click', () => {
   const removed = removeSavedProfile();
   form.reset();
+  updateAssessmentFields();
   updatePlanFields();
   clearErrors();
   invalidateResults();
   if (removed) storageStatus.textContent = 'Your saved data has been deleted. Nothing is saved unless you opt in.';
 });
 
+updateAssessmentFields();
 restoreProfile();
 document.querySelector('#app-status').hidden = true;
 form.querySelector('[type="submit"]').disabled = false;

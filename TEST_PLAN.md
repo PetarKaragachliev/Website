@@ -50,6 +50,7 @@ For website journeys, define agreed browser and viewport coverage, keyboard inte
 | FR-002, FR-004 | AC-011 through AC-013 | APP-007 | Target direction/BMI, restricted rates, calorie effects, current-weight basis, zero-change maintenance, all-disabled guidance, accessible dependencies, persisted/legacy profiles | Unit + browser | tests/unit/nutrition.test.js; tests/e2e/calculator.spec.js | STATUS.md |
 | FR-003, FR-005 | AC-005, AC-006, AC-010 | APP-003, APP-004 | Workout generation and exercise guidance | Planned | Not created | Not run; deferred |
 | FR-006, FR-007 | AC-014 through AC-017 | APP-009 | All nutrient rows; source-table boundaries/units; reference/limit distinctions; meal totals; optional spacing; eligibility/stale hiding; responsive navigation | Unit + browser | tests/unit/guidance.test.js; tests/e2e/calculator.spec.js | STATUS.md; NUTRIENT_REFERENCES.md supplies expected values |
+| FR-008, FR-004 | AC-018 through AC-020 | APP-010 | Unrounded waist/BMI thresholds; method/input validation; measured-vs-reported distinction; independent unsupported-pace/BMI paths; no calorie overrides; consent and v1/v2/v3 restoration | Unit + browser | tests/unit/body-assessment.test.js; tests/e2e/calculator.spec.js | STATUS.md; BODY_ASSESSMENT.md records the rules/sources |
 
 Individual scenario names are in the linked test files; extend traceability as workout requirements become executable tests.
 
@@ -89,13 +90,13 @@ Scripts are configured: `dev` serves `public/` on loopback port 4173; `test` run
 
 | Check | Command / procedure | Current result |
 | --- | --- | --- |
-| Unit tests | `npm test` | 108 calculator/input/target/pace/nutrient/meal tests passing; see STATUS.md |
+| Unit tests | `npm test` | 147 calculator/nutrient/meal/body-assessment and capture-policy tests; latest execution in STATUS.md |
 | Integration / component tests | Actual DOM/storage scenarios in the Playwright suite | Chromium/Firefox exercised; no simulated DOM claims |
-| Available browser matrix | `npm run test:e2e -- --project=chromium-desktop --project=chromium-mobile --project=chromium-tablet --project=firefox` | 124 passed (31 scenarios per project); evidence in STATUS.md |
+| Available browser matrix | `npm run test:e2e -- --project=chromium-desktop --project=chromium-mobile --project=chromium-tablet --project=firefox` | 40 scenarios per project; final results recorded in STATUS.md |
 | Full browser matrix | `npm run test:e2e` | Local run blocked by WebKit executable permissions; active CI executes the full matrix on Linux, not waived |
 | Formatting / lint / type checks, as applicable | TBD | Not configured |
 | Production build | None required for native static files; verify deployed static site separately | GitHub Pages development preview active; not production/content-review approval |
-| Visual / accessibility review | Desktop/mobile screenshots, keyboard focus/error-description checks, 320 CSS px overflow assertions | Screenshots and basic browser checks exercised; manual screen-reader/zoom and real-device checks remain open |
+| Visual / accessibility review | Keyboard focus/error-description checks, 320 CSS px overflow assertions, owner visual feedback | Historical screenshots were reviewed before the owner prohibited further capture; new screenshots/traces/videos are disabled; manual assistive-tech/device checks remain open |
 
 Populate commands after stack selection and record successful execution, not assumed syntax.
 
@@ -105,7 +106,7 @@ After owner approval of relevant validation/safety rules, establish a deliberate
 
 Every product test must assert a specified output or observable boundary behavior. Browser tests must go beyond page-load checks: submit a real profile, assert the displayed kcal/macros, exercise an exclusion or validation case, and separately verify storage lifecycle as that feature is built. Keep one scenario per test. Fail setup/checks if zero applicable tests are discovered; no default retries masking failures.
 
-Use a 30-second browser-test timeout and 5-second assertion timeout initially; capture trace/screenshots on failures with synthetic profiles only. No external services or paid APIs are needed. Add no fixed coverage percentage now; explicitly cover all approved formula/eligibility branches and investigate uncovered behavior before exclusions.
+Use a 30-second browser-test timeout and 5-second assertion timeout. At the owner's request, do not capture screenshots, traces, or video, including on failures. Explicit screenshot calls were removed; configuration turns all capture off. Text-only test artifacts go to the OS temporary directory under `opencode/liftfuel-test-results`, outside the OneDrive workspace. No external services or paid APIs are needed. Add no fixed coverage percentage now; cover approved branches and investigate uncovered behavior before exclusions.
 
 Tool references: https://nodejs.org/docs/latest-v24.x/api/test.html and https://playwright.dev/docs/intro . Playwright and the static server are installed development dependencies only. Initial installation reported no npm vulnerabilities and a transitive whatwg-encoding deprecation notice. WebKit reinstallation (`npx playwright install --force webkit`) fails with EPERM writing its executable; do not waive the check or change OS security settings to claim a full pass.
 
