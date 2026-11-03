@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b0f0c">
+  <meta name="description" content="Find a starting calorie and macro target for your training goals. A private, browser-based calculator for generally healthy adults aged 18-56.">
+  <title>LiftFuel | Fuel the Work</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23c4f542'/%3E%3Cpath d='M10 7v18h14v-5h-9V7z' fill='%2310150b'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./js/app.js"></script>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to content</a>
+  <div class="app-shell">
+    <header class="sidebar">
+      <a class="brand" href="#main" aria-label="LiftFuel home"><span class="brand-icon" aria-hidden="true">LF</span> LIFT<span>FUEL</span><span class="brand-dot" aria-hidden="true">.</span></a>
+      <div class="sidebar-body">
+        <p class="eyebrow nav-caption">YOUR TRAINING TOOLKIT</p>
+        <nav aria-label="Main navigation">
+          <a class="nav-link active" href="#calculator"><span aria-hidden="true">01</span> Nutrition calculator</a>
+          <a class="nav-link" href="#method"><span aria-hidden="true">02</span> The method</a>
+          <a class="nav-link" href="#next"><span aria-hidden="true">03</span> What's next</a>
+        </nav>
+        <div class="sidebar-note"><span class="small-label">LESS GUESSWORK.</span><p>More intention.<br>One session at a time.</p><span class="status-dot"></span><span class="muted">Private by design</span></div>
+      </div>
+      <span class="sidebar-version">NUTRITION / FIRST RELEASE</span>
+    </header>
+
+    <main id="main">
+      <div class="topline"><span class="eyebrow">BUILT FOR YOUR NEXT REP</span><span class="privacy-tag"><span class="status-dot"></span> No account. Your device.</span></div>
+      <p class="preview-notice" role="note"><strong>Development preview.</strong> Calculator available for feedback, not medical guidance. Workout generation and qualified content review are still pending.</p>
+      <section class="hero" aria-labelledby="hero-title">
+        <div class="hero-copy"><p class="eyebrow accent">A STRONGER START</p><h1 id="hero-title">FUEL THE WORK.<br><span>BUILD YOUR NEXT.</span></h1><p class="hero-description">Give your training a starting point. Find daily calorie and macro estimates that fit the goal you're working toward.</p></div>
+        <div class="hero-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="orbit orbit-three"></div><div class="art-mark">LF<span>+</span></div><div class="art-caption">INTENTION IN.<br>PROGRESS AHEAD.</div></div>
+      </section>
+
+      <div class="section-heading" id="calculator"><h2><span class="section-number">01 /</span> SET YOUR FOUNDATION</h2><span class="small-label">METRIC UNITS / AGES 18-56</span></div>
+      <noscript><p class="notice">JavaScript is required to calculate targets and save a profile. Enable it to use this tool.</p></noscript>
+      <div class="calculator-layout">
+        <section class="panel profile-panel" aria-labelledby="profile-title">
+          <div class="panel-heading"><div><p class="eyebrow">THE INPUT</p><h3 id="profile-title">A little about you.</h3></div><span class="panel-index" aria-hidden="true">01</span></div>
+          <form id="profile-form" novalidate>
+            <div id="error-summary" class="notice error-summary" tabindex="-1" role="alert" hidden><strong>Let's check a few things.</strong><ul id="error-list"></ul></div>
+            <div class="measurement-grid">
+              <div class="field"><label for="age">Age</label><div class="input-wrap"><input id="age" name="age" type="text" inputmode="numeric" autocomplete="off" maxlength="3" required aria-describedby="age-hint age-error"><span aria-hidden="true">years</span></div><small id="age-hint">18-56 years</small><p class="field-error" id="age-error" hidden></p></div>
+              <div class="field"><label for="weight">Weight (kg)</label><div class="input-wrap"><input id="weight" name="weight" type="text" inputmode="decimal" autocomplete="off" maxlength="8" required aria-describedby="weight-hint weight-error"><span aria-hidden="true">kg</span></div><small id="weight-hint">35-250 kg</small><p class="field-error" id="weight-error" hidden></p></div>
+              <div class="field"><label for="height">Height (cm)</label><div class="input-wrap"><input id="height" name="height" type="text" inputmode="decimal" autocomplete="off" maxlength="8" required aria-describedby="height-hint height-error"><span aria-hidden="true">cm</span></div><small id="height-hint">130-230 cm</small><p class="field-error" id="height-error" hidden></p></div>
+            </div>
+            <div class="field"><label for="sex">Equation category</label><select id="sex" name="sex" required aria-describedby="sex-hint sex-error"><option value="">Choose a formula category</option><option value="male">Male equation</option><option value="female">Female equation</option></select><small id="sex-hint">Mifflin-St Jeor uses these two categories to estimate resting energy, not to define gender. If neither is suitable for you, seek an individual estimate.</small><p class="field-error" id="sex-error" hidden></p></div>
+            <div class="field"><label for="activity">Daily activity</label><select id="activity" name="activity" required aria-describedby="activity-hint activity-error"><option value="">Think about your whole day</option><option value="sedentary">Mostly sedentary - mainly seated, little exercise</option><option value="light">Lightly active - some walking and light exercise</option><option value="moderate">Moderately active - regular movement and training</option><option value="very">Very active - high daily movement and training</option></select><small id="activity-hint">Include work, walking, and training. Workout days alone don't determine activity. Exercise calories are already included.</small><p class="field-error" id="activity-error" hidden></p></div>
+
+            <fieldset class="goal-fieldset" id="goal" tabindex="-1" aria-describedby="goal-hint goal-error"><legend>What are you working toward?</legend><p class="field-hint" id="goal-hint">Choose the priority, not a promise. Both gaining options can add fat as well as muscle.</p><div class="goal-grid">
+              <label class="goal-option"><input type="radio" name="goal" value="lose" required><span><strong>Lose fat</strong><small>Conservative weekly loss</small></span><span class="goal-adjustment">LOSS</span></label>
+              <label class="goal-option"><input type="radio" name="goal" value="maintain"><span><strong>Maintain weight</strong><small>Weight stability</small></span><span class="goal-adjustment">BASE</span></label>
+              <label class="goal-option"><input type="radio" name="goal" value="muscle"><span><strong>Build muscle</strong><small>Minimize excess fat gain</small></span><span class="goal-adjustment">SLOW</span></label>
+              <label class="goal-option"><input type="radio" name="goal" value="gain"><span><strong>Gain weight</strong><small>Accept some fat gain</small></span><span class="goal-adjustment">GAIN</span></label>
+            </div><p class="field-error" id="goal-error" hidden></p></fieldset>
+
+            <div class="weight-plan">
+              <p class="eyebrow">THE DIRECTION</p>
+              <div class="field"><label for="targetWeight">Target weight (kg)</label><div class="input-wrap"><input id="targetWeight" name="targetWeight" type="text" inputmode="decimal" autocomplete="off" maxlength="8" disabled aria-describedby="targetWeight-hint targetWeight-error"><span aria-hidden="true">kg</span></div><small id="targetWeight-hint">Choose a goal first. Weight-change targets must stay within the calculator's BMI support range. Maintenance keeps your current weight.</small><p class="field-error" id="targetWeight-error" hidden></p></div>
+              <div class="field"><label for="weeklyRate">Weekly pace</label><select id="weeklyRate" name="weeklyRate" disabled aria-describedby="weeklyRate-hint pace-availability weeklyRate-error"><option value="">Choose a goal and enter your weight first</option></select><small id="weeklyRate-hint">Restricted, conservative options scale with current bodyweight. Paces outside calorie/deficit limits are disabled. These are desired averages, not guaranteed or universally healthy rates.</small><p class="field-hint" id="pace-availability" role="status" hidden></p><p class="field-error" id="weeklyRate-error" hidden></p></div>
+            </div>
+
+            <div class="consent-block"><label class="check-label"><input id="eligible" name="eligible" type="checkbox" required aria-describedby="eligible-hint eligible-error"><span>I understand this tool is for generally healthy adults and is not intended for pregnancy/breastfeeding, injury rehabilitation, or conditions requiring individualized nutrition or exercise guidance.</span></label><p class="field-hint" id="eligible-hint">For eating-disorder concerns or sudden/unexplained weight loss, seek qualified guidance rather than using automated targets.</p><p class="field-error" id="eligible-error" hidden></p></div>
+            <button class="primary-button" type="submit" disabled>Calculate my targets <span aria-hidden="true">&#8599;</span></button>
+            <p id="app-status" class="field-hint" role="status">Calculator loading. If this message remains, JavaScript could not load. Calculation is disabled to keep your profile out of server requests.</p>
+            <p class="submit-note">A starting estimate. Not a prescription or a guarantee.</p>
+            <div class="saving-options"><label class="check-label"><input id="remember" type="checkbox" aria-describedby="remember-hint"><span>Remember on this device</span></label><p class="field-hint" id="remember-hint">Optional. Your inputs save after calculation in this browser only. Anyone sharing this browser may see them. Clearing browser data removes them. No account or cross-device sync.</p><p id="storage-status" class="storage-status" role="status">Nothing is saved unless you opt in.</p><button id="delete-data" class="text-button" type="button">Delete my saved data</button></div>
+          </form>
+        </section>
+
+        <aside class="result-column" aria-label="Nutrition output">
+          <div class="panel result-panel"><div class="result-topline"><p class="eyebrow">THE OUTPUT</p><span id="result-state" class="output-state">YOUR STARTING POINT</span></div>
+            <div id="empty-result" class="empty-result"><div class="target-symbol" aria-hidden="true"><span></span></div><h3>YOUR GOAL.<br>YOUR DAILY FUEL.</h3><p>Enter your profile and choose a goal. Your estimated daily calories and macros will appear here.</p><div class="empty-macros"><span>PROTEIN</span><span>CARBS</span><span>FAT</span></div></div>
+            <section id="nutrition-result" tabindex="-1" aria-labelledby="result-title" hidden><h3 id="result-title">Your daily starting target.</h3><p id="goal-description" class="result-goal"></p><div class="plan-summary"><div><span class="small-label">TARGET WEIGHT</span><strong data-testid="target-weight"></strong></div><div><span class="small-label">DESIRED WEEKLY PACE</span><strong data-testid="weekly-pace"></strong></div></div><div class="calorie-display"><span data-testid="calories"></span><span>kcal / day</span></div><p class="calorie-caption">Estimated daily energy intake</p><dl class="macro-list"><div><dt><span class="macro-dot protein-dot"></span>Protein</dt><dd><span data-testid="protein"></span><small>g / day</small></dd></div><div><dt><span class="macro-dot carbs-dot"></span>Carbohydrates</dt><dd><span data-testid="carbs"></span><small>g / day</small></dd></div><div><dt><span class="macro-dot fat-dot"></span>Fat</dt><dd><span data-testid="fat"></span><small>g / day</small></dd></div></dl><div class="result-assumptions"><p class="eyebrow">BEHIND YOUR NUMBERS</p><p id="calculation-detail"></p><p id="pace-assumptions"></p><p>Protein: 2.0 g/kg of current weight. Fat: 25% of target energy. Carbohydrates: remaining energy. Whole-gram rounding can cause a small calorie difference.</p></div><p class="result-footnote">Use this as an initial estimate, not a measurement of your needs. Weekly pace is a preference, not a prediction or completion-date promise. Reassess over several weeks using weight trends, training, and recovery. No calculator can promise muscle-only gain.</p></section>
+            <section id="limitation" class="limitation" tabindex="-1" aria-labelledby="limitation-title" hidden><span class="small-label">A MORE INDIVIDUAL APPROACH</span><h3 id="limitation-title">One size doesn't fit every body.</h3><p id="limitation-detail"></p><p>This does not diagnose a condition or mean you cannot exercise. A qualified dietitian or clinician can help establish appropriate nutrition targets.</p><a href="#method" class="inline-link">Understand the limits <span aria-hidden="true">&#8599;</span></a></section>
+          </div>
+          <div class="next-card" id="next"><div><span class="small-label">NEXT IN THE TOOLKIT</span><h3>Your training.<br>With a plan.</h3><p>Gym and home workout generation is next. Exercise selection and progression rules are still being defined; no workout plan is available yet.</p></div><span class="next-card-number" aria-hidden="true">02</span></div>
+        </aside>
+      </div>
+
+      <section class="method-section" id="method" aria-labelledby="method-title"><div class="section-heading"><h2 id="method-title"><span class="section-number">02 /</span> KNOW YOUR NUMBERS</h2><span class="small-label">TRANSPARENCY OVER PROMISES</span></div><div class="method-grid"><article><span class="method-index">01.</span><h3>Estimate, don't guess.</h3><p>Mifflin-St Jeor and activity estimate maintenance. Loss uses a rough 7,700 kcal/kg starting heuristic; gain uses modest surpluses linked to your chosen pace. Neither predicts actual weight change. Targets and pace don't guarantee health, muscle gain, or a completion date.</p><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3880593/" target="_blank" rel="noopener noreferrer">Why weight-change estimates vary <span class="sr-only">(opens in a new tab)</span><span aria-hidden="true">&#8599;</span></a></article><article><span class="method-index">02.</span><h3>Understand the limits.</h3><p>Automated nutrition targets are limited to ages 18-56, current and target BMI 18.5 to below 30, and computed targets of 1,500-4,500 kcal/day. Loss deficits above 20% of estimated maintenance are blocked. These are product limits, not a diagnosis or safe-intake guarantee. BMI doesn't distinguish fat from muscle; age 18 is outside the original equation sample.</p></article><article><span class="method-index">03.</span><h3>Keep the bigger picture.</h3><p>Macros are not a complete eating plan. Food quality, fibre, micronutrients, rest, and consistent training matter too. For weight extremes, medical needs, or unexplained changes, get individual guidance.</p><a href="https://www.nhs.uk/live-well/healthy-weight/managing-your-weight/healthy-ways-to-gain-weight/" target="_blank" rel="noopener noreferrer">General weight-gain guidance <span class="sr-only">(opens in a new tab)</span><span aria-hidden="true">&#8599;</span></a></article></div></section>
+      <footer><a class="footer-brand" href="#main">LIFTFUEL.</a><p>Built for intention. Not perfection.</p><span>LOCAL-FIRST / NO ACCOUNT</span></footer>
+    </main>
+  </div>
+</body>
+</html>

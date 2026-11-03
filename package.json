@@ -1,0 +1,16 @@
+{
+  "name": "liftfuel",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=24 <25" },
+  "scripts": {
+    "dev": "http-server public -a 127.0.0.1 -p 4173 -c-1",
+    "test": "node --test --test-reporter=spec \"tests/unit/*.test.js\"",
+    "test:e2e": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.1",
+    "http-server": "14.1.1"
+  }
+}
