@@ -4,7 +4,7 @@ import { calculateNutrition } from '../../public/js/nutrition.js';
 import { calculateBodyAssessment } from '../../public/js/body-assessment.js';
 
 const baseline = { age: '30', weight: '70', height: '180', sex: 'male', activity: 'moderate', goal: 'maintain', eligible: true };
-const measured = { ...baseline, includeAssessment: true, waist: '80' };
+const measured = { ...baseline, includeAssessment: true, waist: '80', waistSite: 'midpoint' };
 
 test('optional body assessment combines BMI and waist without inventing muscle mass', () => {
   const output = calculateNutrition(measured);
@@ -93,7 +93,7 @@ test('eligibility is required for body interpretation too', () => {
 });
 
 test('standalone assessment needs no nutrition goal, activity, or formula category', () => {
-  const output = calculateBodyAssessment({ age: '18', weight: '70', height: '180', waist: '80', eligible: true });
+  const output = calculateBodyAssessment({ age: '18', weight: '70', height: '180', waist: '80', waistSite: 'midpoint', eligible: true });
   assert.deepEqual(output.errors, {});
   assert.equal(output.assessment.code, 'mid-range');
 });

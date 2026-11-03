@@ -51,6 +51,7 @@ For website journeys, define agreed browser and viewport coverage, keyboard inte
 | FR-003, FR-005 | AC-005, AC-006, AC-010 | APP-003, APP-004 | Workout generation and exercise guidance | Planned | Not created | Not run; deferred |
 | FR-006, FR-007 | AC-014 through AC-017 | APP-009 | All nutrient rows; source-table boundaries/units; reference/limit distinctions; meal totals; optional spacing; eligibility/stale hiding; responsive navigation | Unit + browser | tests/unit/guidance.test.js; tests/e2e/calculator.spec.js | STATUS.md; NUTRIENT_REFERENCES.md supplies expected values |
 | FR-008, FR-004 | AC-018 through AC-020 | APP-010 | Unrounded waist/BMI thresholds; method/input validation; measured-vs-reported distinction; independent unsupported-pace/BMI paths; no calorie overrides; consent and v1/v2/v3 restoration | Unit + browser | tests/unit/body-assessment.test.js; tests/e2e/calculator.spec.js | STATUS.md; BODY_ASSESSMENT.md records the rules/sources |
+| FR-008, D-014 | AC-018, AC-020 | APP-011 | Published RFM male/female fixtures; age/protocol/out-of-range limits; no fabricated correction; switching site and v3/v4 migration; workspace/sync-root alias refusal | Unit + browser / CLI | tests/unit/rfm.test.js; tests/unit/workspace.test.js; tests/e2e/calculator.spec.js | BODY_ASSESSMENT.md; guard tests create/clean only their own OS-temp fixtures |
 
 Individual scenario names are in the linked test files; extend traceability as workout requirements become executable tests.
 
@@ -90,9 +91,9 @@ Scripts are configured: `dev` serves `public/` on loopback port 4173; `test` run
 
 | Check | Command / procedure | Current result |
 | --- | --- | --- |
-| Unit tests | `npm test` | 147 calculator/nutrient/meal/body-assessment and capture-policy tests; latest execution in STATUS.md |
+| Unit tests | `npm test` | 163 calculator/reference/body/RFM and capture/workspace-policy tests; latest execution in STATUS.md |
 | Integration / component tests | Actual DOM/storage scenarios in the Playwright suite | Chromium/Firefox exercised; no simulated DOM claims |
-| Available browser matrix | `npm run test:e2e -- --project=chromium-desktop --project=chromium-mobile --project=chromium-tablet --project=firefox` | 40 scenarios per project; final results recorded in STATUS.md |
+| Available browser matrix | `npm run test:e2e -- --project=chromium-desktop --project=chromium-mobile --project=chromium-tablet --project=firefox` | 180 passed, 45 scenarios per project, run from the non-OneDrive checkout |
 | Full browser matrix | `npm run test:e2e` | Local run blocked by WebKit executable permissions; active CI executes the full matrix on Linux, not waived |
 | Formatting / lint / type checks, as applicable | TBD | Not configured |
 | Production build | None required for native static files; verify deployed static site separately | GitHub Pages development preview active; not production/content-review approval |

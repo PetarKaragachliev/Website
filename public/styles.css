@@ -165,11 +165,14 @@ input:read-only, select:disabled { color: var(--muted); background: #192019; }
 .body-assessment { margin-top: 36px; padding: 30px; background: linear-gradient(135deg, #213017, var(--panel) 55%); }
 .body-assessment h2 { font-size: clamp(28px, 3vw, 42px); margin: 15px 0; overflow-wrap: anywhere; }
 .body-assessment p:not(.eyebrow) { color: var(--muted); font-size: 12px; margin-top: 16px; }
-.body-metrics { display: grid; grid-template-columns: 1fr 1fr 1.6fr; gap: 16px; margin: 24px 0; }
+.body-metrics { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; margin: 24px 0; }
 .body-metrics > div { padding: 17px; min-width: 0; background: #0f1710; border: 1px solid var(--border); border-radius: 8px; }
 .body-metrics dt { color: var(--muted); font-size: 11px; }
 .body-metrics dd { margin: 8px 0 0; font-size: 21px; font-weight: 650; color: var(--accent); overflow-wrap: anywhere; }
+.body-metrics > div:last-child { grid-column: 1 / -1; }
 .body-metrics > div:last-child dd { font-size: 14px; }
+.body-metrics > .rfm-metric { grid-column: 1 / -1; border-color: #536c34; }
+.body-metrics > .rfm-metric dd { font-size: 30px; }
 .body-self-label strong { color: var(--text); font-weight: 600; }
 .body-method { border-top: 1px solid var(--border); margin-top: 22px; padding-top: 12px; font-size: 12px; }
 .body-method summary { cursor: pointer; min-height: 44px; display: list-item; padding: 10px 0; }

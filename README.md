@@ -2,6 +2,8 @@
 
 Temporary working name. Visual direction: dark charcoal and lime green, inspired by the owner's Dribbble fitness reference; see PRD.md for details.
 
+Active development folder on this computer: `C:\Users\Petar\Projects\LiftFuel`, outside OneDrive. The previous OneDrive copy is no longer used for development and was left untouched. Open this new folder in OpenCode and GitHub Desktop; remove the old Desktop repository entry without deleting files to stop background fetches into its synced `.git` folder.
+
 Website preview: https://petarkaragachliev.github.io/Website/ . Source: https://github.com/PetarKaragachliev/Website .
 
 [![Test and Publish Preview](https://github.com/PetarKaragachliev/Website/actions/workflows/pages.yml/badge.svg)](https://github.com/PetarKaragachliev/Website/actions/workflows/pages.yml)
@@ -33,6 +35,7 @@ The calculator includes target weight and restricted desired weekly gain/loss, r
 ## Local Development
 
 - Prerequisites: Node.js 24 LTS and npm. Development uses a static server; there is no production Node backend.
+- Run Git/npm/tests only in a checkout outside OneDrive or other sync folders. `.gitignore` does not exclude files from OneDrive. The `predev`, `pretest`, and `pretest:e2e` hooks refuse detected OneDrive workspaces, including configured root aliases/junctions. These hooks do not intercept arbitrary Git commands or guarantee `npm install` creates no files before lifecycle checks; the external checkout is the actual fix.
 - Dependencies: `npm install` (executed successfully); use `npm ci` for subsequent lockfile-based clean installations.
 - Development: `npm run dev`, then open http://127.0.0.1:4173 . Do not open index.html directly via `file://`; browser ES modules need HTTP serving.
 - Unit tests: `npm test`.
@@ -60,7 +63,7 @@ Editing local files does not update GitHub by itself. Approved updates must be c
 Initial setup is already complete for `PetarKaragachliev/Website`; these steps describe first-time publishing, not a request to create another repository.
 
 1. Sign into your GitHub account in GitHub Desktop.
-2. Choose **File > Add Local Repository** and select `C:\Users\Petar\OneDrive\Desktop\Website`. This folder is already initialized as a Git repository; do not create a second repository inside it.
+2. Choose **File > Add Local Repository** and select `C:\Users\Petar\Projects\LiftFuel`. This active folder is already a Git repository connected to the existing GitHub project; do not create a nested repository or continue using the old OneDrive copy.
 3. For a new repository, click **Publish repository**, choose its name, and uncheck **Keep this code private** if public sharing is intended. The current project's published repository is named `Website`.
 4. Open the repository on GitHub, then **Settings > Pages**. Under **Build and deployment**, set **Source** to **GitHub Actions**.
 5. Open **Actions > Test and Publish Preview**. If the first run failed because Pages was not enabled yet, use **Re-run all jobs** after step 4.
@@ -73,9 +76,9 @@ Future updates: review changes, commit the intended files, and use **Push origin
 - `public/index.html`, `public/styles.css`: Accessible form and dark/green responsive interface.
 - `public/js/nutrition.js`: Input validation and nutrition calculations, shared by browser and unit tests.
 - `public/js/guidance.js`: Sourced age/category nutrient references and optional four-occasion meal structure. Values are references/limits, not actual intake or supplement doses. Four-hour spacing is an example, not a universal health rule.
-- `public/js/body-assessment.js`: Optional BMI/waist screening indicators and goal discussion; existing body-fat estimates and build descriptions are user-provided, not inferred. No automatic calorie/exercise changes.
+- `public/js/body-assessment.js`: Optional RFM body-fat estimate from hipbone-level waist/height/category for ages 20-56; separate midpoint-waist screening, user-provided results, and approximate profile context. No automatic calorie/exercise changes or inferred muscle diagnosis.
 - `public/js/measurements.js`: Strict metric parsing shared by nutrition and body assessment.
 - `public/js/app.js`: DOM rendering and consent-based local profile storage.
 - `tests/unit/`, `tests/e2e/`: Independent numerical fixtures and real browser scenarios.
 
-No profile data is sent to an application backend. Saving keeps browser key `liftfuel.profile.v1`, now with record version 3: target/pace and an optional body object (waist, existing estimate/method, self-description). Versions 1/2 restore without inventing missing fields. Eligibility and assessment results are never persisted. Body details are included only when assessment and device remembering are explicitly enabled; Calculate saves, the standalone assessment button does not. Explicit source links navigate externally only when activated.
+No profile data is sent to an application backend. Saving keeps key `liftfuel.profile.v1`, now at record version 4 with an explicit waist measurement site. Version-3 waist data retains its original midpoint protocol; it is not silently reused for RFM. Earlier versions restore without invented fields. Eligibility and calculated results are never persisted. Body details are included only with explicit assessment/remembering choices; Calculate saves, the standalone assessment button does not. Source links navigate externally only when activated.

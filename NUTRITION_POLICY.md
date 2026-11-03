@@ -146,7 +146,7 @@ Workout guidance should also explain that sharp pain, dizziness, or chest pain i
 - AC-007 through AC-009: V-009 opt-in, restoration requiring the single eligibility confirmation, deletion, and malformed/unavailable-storage cases.
 - All affected result journeys: V-008 stale-result invalidation and accessible error feedback.
 - AC-011/AC-012: V-010 through V-012 target and weekly-pace validation, calculation effects, maintenance behavior, and unsupported-choice guidance.
-- AC-013/AC-020: Keep browser key `liftfuel.profile.v1`; new record version 3 retains target/pace and an optional validated body object. Restore version 1 without invented targets/rates and version 2 without invented body details. Nothing is rewritten until the consented Calculate action; eligibility/interpretations are never restored. See BODY_ASSESSMENT.md.
+- AC-013/AC-020: Keep key `liftfuel.profile.v1`; record version 4 retains target/pace/body inputs with an explicit waist site. Version 3 waists are restored as midpoint-only, not guessed as hipbone measurements. Earlier versions do not acquire invented fields. Nothing is rewritten until the consented Calculate action; derived RFM, eligibility, and interpretations are never restored. See BODY_ASSESSMENT.md.
 
 The nutrition/profile-saving portions are exercised by tests/unit/nutrition.test.js and tests/e2e/calculator.spec.js. Workout-specific parts remain planned, not implemented; no saved workout plan exists yet. JavaScript-disabled or failed-module visits cannot submit profile inputs because the submit control remains disabled until the application initializes.
 

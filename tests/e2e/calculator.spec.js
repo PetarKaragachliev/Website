@@ -336,6 +336,7 @@ test('nutrient output distinguishes daily references, limits, and unknown intake
 test('optional assessment uses measurements without changing the nutrition goal', async ({ page }) => {
   await enterProfile(page);
   await page.locator('#includeAssessment').check();
+  await page.locator('#waistSite').selectOption('midpoint');
   await page.getByLabel('Waist circumference (cm)', { exact: true }).fill('80');
   await page.getByRole('button', { name: 'Calculate my targets' }).click();
   await expect(page.locator('#body-assessment')).toBeVisible();
@@ -429,8 +430,9 @@ test('optional measurements restore only with consent and remain hidden until co
   await page.locator('#remember').check();
   await page.getByRole('button', { name: 'Calculate my targets' }).click();
   const saved = await page.evaluate(key => JSON.parse(localStorage.getItem(key)), storageKey);
-  expect(saved.version).toBe(3);
+  expect(saved.version).toBe(4);
   expect(saved.profile.body.waist).toBe(80);
+  expect(saved.profile.body.waistSite).toBe('iliac');
   expect(saved.profile.body.bodyDescription).toBe('muscular');
   expect(saved.profile).not.toHaveProperty('eligible');
   await page.reload();
@@ -467,6 +469,75 @@ test('body assessment reflows on small screens and clears on eligibility withdra
   await page.setViewportSize({ width: 320, height: 800 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.locator('#eligible').uncheck();
+  await expect(page.locator('#body-assessment')).toBeHidden();
+});
+
+test('waist and height calculate RFM without entering an existing body-fat percentage', async ({ page }) => {
+  await enterProfile(page);
+  await page.locator('#includeAssessment').check();
+  await expect(page.locator('#waistSite')).toHaveValue('iliac');
+  await page.locator('#waist').fill('80');
+  await expect(page.locator('#bodyFat')).toHaveValue('');
+  await page.getByRole('button', { name: 'Calculate my targets' }).click();
+  await expect(page.locator('#body-fat-calculated')).toHaveText('About 19% (RFM)');
+  await expect(page.locator('#body-rfm-note')).toContainText('not a direct measurement');
+  await expect(page.locator('#body-fat-estimate')).toContainText('Not provided');
+  await expect(page.getByTestId('calories')).toHaveText('2,604');
+  await page.locator('#sex').selectOption('female');
+  await expect(page.locator('#body-assessment')).toBeHidden();
+  await page.getByRole('button', { name: 'Calculate my targets' }).click();
+  await expect(page.locator('#body-fat-calculated')).toHaveText('About 31% (RFM)');
+});
+
+test('changing waist protocol requires remeasurement and never applies both models to one waist', async ({ page }) => {
+  await enterProfile(page);
+  await page.locator('#includeAssessment').check();
+  await page.locator('#waist').fill('80');
+  await page.getByRole('button', { name: 'Calculate my targets' }).click();
+  await expect(page.locator('#body-fat-calculated')).toContainText('19%');
+  await page.locator('#waistSite').selectOption('midpoint');
+  await expect(page.locator('#waist')).toHaveValue('');
+  await expect(page.locator('#body-assessment')).toBeHidden();
+  await expect(page.locator('#waist-hint')).toContainText('midway');
+  await page.locator('#waist').fill('80');
+  await page.getByRole('button', { name: 'Calculate my targets' }).click();
+  await expect(page.locator('#body-rfm-note')).toContainText('hipbone');
+  await expect(page.locator('#body-fat-calculated')).not.toContainText('19%');
+  await expect(page.locator('#body-waist-note')).toContainText('No raised waist-ratio');
+});
+
+test('adult RFM age boundary does not remove nutrition or the rest of the body assessment', async ({ page }) => {
+  await enterProfile(page, { age: '18' });
+  await page.locator('#includeAssessment').check();
+  await page.locator('#waist').fill('80');
+  await page.getByRole('button', { name: 'Calculate my targets' }).click();
+  await expect(page.locator('#body-rfm-note')).toContainText('18-19');
+  await expect(page.locator('#body-fat-calculated')).toHaveText('Estimate unavailable');
+  await expect(page.locator('#nutrition-result')).toBeVisible();
+  await expect(page.locator('#body-bmi')).toHaveText('21.6');
+});
+
+test('version-three saved waist is explicitly restored as midpoint, not silently used for RFM', async ({ page }) => {
+  await page.evaluate(key => localStorage.setItem(key, JSON.stringify({ version: 3, remember: true, profile: { age: 30, weight: 70, height: 180, sex: 'male', activity: 'moderate', goal: 'maintain', targetWeight: 70, weeklyRate: '0', body: { waist: 80, bodyFat: null, bodyFatMethod: null, bodyDescription: '' } } })), storageKey);
+  await page.reload();
+  await expect(page.locator('#waistSite')).toHaveValue('midpoint');
+  await expect(page.locator('#waist')).toHaveValue('80');
+  await page.locator('#eligible').check();
+  await page.getByRole('button', { name: 'Calculate my targets' }).click();
+  await expect(page.locator('#body-rfm-note')).toContainText('hipbone');
+  await page.locator('#waistSite').selectOption('iliac');
+  await expect(page.locator('#waist')).toHaveValue('');
+  await page.locator('#waist').fill('80');
+  await page.getByRole('button', { name: 'Calculate my targets' }).click();
+  await expect(page.locator('#body-fat-calculated')).toHaveText('About 19% (RFM)');
+});
+
+test('new saved records with an unknown waist protocol are rejected rather than guessed', async ({ page }) => {
+  await page.evaluate(key => localStorage.setItem(key, JSON.stringify({ version: 4, remember: true, profile: { age: 30, weight: 70, height: 180, sex: 'male', activity: 'moderate', goal: 'maintain', targetWeight: 70, weeklyRate: '0', body: { waist: 80, waistSite: 'navel', bodyFat: null, bodyFatMethod: null, bodyDescription: '' } } })), storageKey);
+  await page.reload();
+  await expect(page.locator('#storage-status')).toContainText('could not be restored');
+  await expect(page.locator('#weight')).toHaveValue('');
+  await expect(page.locator('#includeAssessment')).not.toBeChecked();
   await expect(page.locator('#body-assessment')).toBeHidden();
 });
 

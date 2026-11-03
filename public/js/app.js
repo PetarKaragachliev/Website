@@ -37,6 +37,9 @@ function updateAssessmentFields() {
   form.elements.bodyFatMethod.disabled = !bodyChoice.checked || !hasEstimate;
   form.elements.bodyFatMethod.required = bodyChoice.checked && hasEstimate;
   if (!hasEstimate) form.elements.bodyFatMethod.value = '';
+  document.querySelector('#waist-hint').textContent = form.elements.waistSite.value === 'iliac'
+    ? 'For RFM, measure around the bare trunk at the uppermost border of the right hipbone, tape horizontal, standing and breathing out naturally. Supported entry: 35-200 cm, not a healthy range.'
+    : 'Measure midway between your lowest ribs and the top of your hips, breathing out naturally. Do not use trouser size. This midpoint measurement supports NICE waist interpretation, not RFM. Supported entry: 35-200 cm, not a healthy range.';
 }
 
 function updatePlanFields(reset = false) {
@@ -100,7 +103,9 @@ function renderBodyAssessment(assessment) {
   document.querySelector('#body-summary').textContent = assessment.summary;
   document.querySelector('#body-bmi').textContent = referenceNumber.format(assessment.bmi);
   document.querySelector('#body-waist-ratio').textContent = ratioNumber.format(assessment.waistRatio);
-  document.querySelector('#body-fat-estimate').textContent = assessment.bodyFat ? `${referenceNumber.format(assessment.bodyFat.percent)}% (user-provided; ${assessment.bodyFat.methodLabel})` : 'Not provided; not estimated here';
+  document.querySelector('#body-fat-estimate').textContent = assessment.bodyFat ? `${referenceNumber.format(assessment.bodyFat.percent)}% (user-provided; ${assessment.bodyFat.methodLabel})` : 'Not provided; separate from RFM';
+  document.querySelector('#body-fat-calculated').textContent = assessment.rfm.percent === null ? 'Estimate unavailable' : `About ${number.format(assessment.rfm.percent)}% (RFM)`;
+  document.querySelector('#body-rfm-note').textContent = assessment.rfm.reason ?? 'RFM is a rough population-model estimate, not a direct measurement. Individual errors can be substantial, particularly with unusual proportions, high muscle mass, or leanness. It does not confirm a body type or automatically change your calorie or workout plan.';
   document.querySelector('#body-self-description').textContent = assessment.selfDescription ?? 'Not provided';
   document.querySelector('#body-waist-note').textContent = assessment.waistNote;
   document.querySelector('#body-goal-context').textContent = assessment.goalContext;
@@ -194,15 +199,17 @@ function restoreProfile() {
     const raw = localStorage.getItem(storageKey);
     if (raw === null) return;
     const saved = JSON.parse(raw);
-    if (![1, 2, 3].includes(saved?.version) || saved?.remember !== true || !saved.profile || typeof saved.profile !== 'object' || Array.isArray(saved.profile)) throw new Error('Invalid saved record');
+    if (![1, 2, 3, 4].includes(saved?.version) || saved?.remember !== true || !saved.profile || typeof saved.profile !== 'object' || Array.isArray(saved.profile)) throw new Error('Invalid saved record');
     const legacy = saved.version === 1;
     if (legacy && (typeof saved.profile.goal !== 'string' || !Object.hasOwn(goalLabels, saved.profile.goal))) throw new Error('Invalid saved goal');
-    const storedBody = saved.version === 3 ? saved.profile.body : null;
+    const storedBody = saved.version >= 3 ? saved.profile.body : null;
     if (storedBody !== null && (!storedBody || typeof storedBody !== 'object' || Array.isArray(storedBody))) throw new Error('Invalid saved measurements');
+    if (saved.version === 4 && storedBody !== null && !['midpoint', 'iliac'].includes(storedBody.waistSite)) throw new Error('Missing saved waist protocol');
     const restoredInput = {
       ...saved.profile,
       includeAssessment: storedBody !== null,
       waist: storedBody?.waist,
+      waistSite: saved.version === 3 ? 'midpoint' : storedBody?.waistSite,
       bodyFat: storedBody?.bodyFat,
       bodyFatMethod: storedBody?.bodyFatMethod,
       bodyDescription: storedBody?.bodyDescription
@@ -236,7 +243,7 @@ function restoreProfile() {
 function saveProfile(profile) {
   if (!remember.checked) return;
   try {
-    localStorage.setItem(storageKey, JSON.stringify({ version: 3, remember: true, profile }));
+    localStorage.setItem(storageKey, JSON.stringify({ version: 4, remember: true, profile }));
     storageStatus.textContent = 'Saved on this device. Your eligibility confirmation is not saved.';
   } catch {
     storageStatus.textContent = 'Your inputs were not saved because browser storage is unavailable. Your calculation still works.';
@@ -294,6 +301,7 @@ form.addEventListener('submit', event => {
 
 form.addEventListener('input', event => {
   if (event.target === remember) return;
+  if (event.target.name === 'waistSite') form.elements.waist.value = '';
   updateAssessmentFields();
   updatePlanFields(event.target.name === 'goal');
   const input = readInputs();
