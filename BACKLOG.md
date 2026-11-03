@@ -58,7 +58,8 @@ Calculator/profile-storage items now have implementation evidence. They remain o
 | APP-005 | 3 | FR-004 / AC-007 through AC-009 | Profile-only saving delivered with calculator; workout saving deferred; WebKit verification open | In Progress |
 | APP-006 | Release Validation | All MVP requirements and quality criteria | Responsive, keyboard, browser, safety, privacy, and regression validation | Draft |
 | APP-007 | 1 | FR-002, FR-004 / AC-011 through AC-013 | Target weight, restricted weekly pace, updated calories/results, and legacy profile restoration implemented; unit/available-browser checks pass, WebKit/release review remains open | Blocked |
-| APP-008 | Preview Sharing | D-011 | Local Git repository and tested Pages workflow prepared; owner must publish via GitHub Desktop and enable Pages; remote workflow/live URL verification outstanding | Blocked |
+| APP-008 | Preview Sharing | D-011 | Public PetarKaragachliev/Website repository, successful Pages workflow, and live development-preview URL verified | Done |
+| APP-009 | Nutrition Guidance | FR-006, FR-007 / AC-014 through AC-017 | Requested nutrient references/limits, age/category boundaries, flexible four-occasion meal example and even split implemented/tested; qualified nutrition/content review remains a release gate | Blocked |
 
 ## Implementation Item Template
 

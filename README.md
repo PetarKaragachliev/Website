@@ -2,6 +2,10 @@
 
 Temporary working name. Visual direction: dark charcoal and lime green, inspired by the owner's Dribbble fitness reference; see PRD.md for details.
 
+Website preview: https://petarkaragachliev.github.io/Website/ . Source: https://github.com/PetarKaragachliev/Website .
+
+[![Test and Publish Preview](https://github.com/PetarKaragachliev/Website/actions/workflows/pages.yml/badge.svg)](https://github.com/PetarKaragachliev/Website/actions/workflows/pages.yml)
+
 A browser-based nutrition calculator and workout planner for generally healthy adults aged 18-56. The agreed MVP supports metric inputs, fat loss, maintenance, muscle building, conservative weight gain, gym/home plans, and device-local saving.
 
 Built with HTML, CSS, and JavaScript; no accounts or backend. Exercise instructions will include sets, reps, rest, technique cues, and progression. Videos are deferred until the owner supplies reviewed clips.
@@ -16,6 +20,7 @@ The calculator includes target weight and restricted desired weekly gain/loss, r
 | [BACKLOG.md](BACKLOG.md) | Sprint plan and testable work items |
 | [TEST_PLAN.md](TEST_PLAN.md) | Test strategy, TDD workflow, and verification evidence |
 | [NUTRITION_POLICY.md](NUTRITION_POLICY.md) | Approved starting calculations, sourced rationale, arithmetic fixtures, and remaining safety gates |
+| [NUTRIENT_REFERENCES.md](NUTRIENT_REFERENCES.md) | Daily nutrient reference tables, limits, sources, and flexible meal guidance; not a food diary or supplement plan |
 | [STATUS.md](STATUS.md) | Current state, blockers, and recorded results |
 
 ## Start Here
@@ -33,11 +38,11 @@ The calculator includes target weight and restricted desired weekly gain/loss, r
 - Browser setup: `npx playwright install chromium firefox webkit`. Chromium and Firefox installed; this host currently denies writing WebKit's executable (`EPERM`), so the full install/check is blocked.
 - Verified available-browser matrix: `npm run test:e2e -- --project=chromium-desktop --project=chromium-mobile --project=chromium-tablet --project=firefox`.
 - Full matrix including WebKit: `npm run test:e2e`. WebKit remains configured, not skipped; fix its host installation problem before expecting this command to pass.
-- Build: None. The GitHub Pages workflow publishes only `public/`; node_modules, tests, and development artifacts are not part of the hosted site. Remote setup/deployment is pending GitHub authentication; see STATUS.md.
+- Build: None. The active GitHub Pages workflow publishes only `public/`; node_modules, tests, and development artifacts are not part of the hosted site.
 
 ## GitHub Publishing
 
-The owner approved a public repository named `liftfuel` and a publicly accessible GitHub Pages development preview. The source and planning documents will be public. Publishing a preview does not mean the nutrition/exercise content has completed qualified review or that all MVP features are built.
+The owner published the public repository `PetarKaragachliev/Website` and its GitHub Pages development preview (the original proposed repository name was `liftfuel`). Source and planning documents are public. Publishing a preview does not mean content has completed qualified review or all MVP features are built.
 
 - Workflow: `.github/workflows/pages.yml`. Pull requests run tests only; pushes to `main` and manual runs on `main` deploy after tests pass.
 - Checks: Node.js 24, `npm ci`, unit tests, and the complete Playwright matrix on Linux, including WebKit. The local WebKit installation failure is not waived in CI.
@@ -46,13 +51,15 @@ The owner approved a public repository named `liftfuel` and a publicly accessibl
 - Authentication: GitHub Desktop can handle sign-in and publishing. Its login does not automatically sign the GitHub CLI in; CLI use is optional for the owner. Never put tokens/passwords in source or chat. The publishing account needs repository access and permission to push workflow files.
 - User data: Profiles remain in the viewer's browser. GitHub serves the website and receives normal hosting requests; "local profile saving" does not mean the hosting provider sees no traffic. Localhost profiles do not transfer to the GitHub Pages origin.
 
-Repository and live website URLs will be recorded here after creation and verification. No public URL is available yet.
+Editing local files does not update GitHub by itself. Approved updates must be committed and pushed to `main`; tests and successful deployment then update the public preview automatically. The workflow badge above shows its current state.
 
 ### Publish With Desktop
 
+Initial setup is already complete for `PetarKaragachliev/Website`; these steps describe first-time publishing, not a request to create another repository.
+
 1. Sign into your GitHub account in GitHub Desktop.
 2. Choose **File > Add Local Repository** and select `C:\Users\Petar\OneDrive\Desktop\Website`. This folder is already initialized as a Git repository; do not create a second repository inside it.
-3. Click **Publish repository**, use `liftfuel` as the name, and uncheck **Keep this code private** as agreed. Publish to your own account.
+3. For a new repository, click **Publish repository**, choose its name, and uncheck **Keep this code private** if public sharing is intended. The current project's published repository is named `Website`.
 4. Open the repository on GitHub, then **Settings > Pages**. Under **Build and deployment**, set **Source** to **GitHub Actions**.
 5. Open **Actions > Test and Publish Preview**. If the first run failed because Pages was not enabled yet, use **Re-run all jobs** after step 4.
 6. After a successful deployment, the Pages settings/environment shows the shareable website URL. The repository URL is for source code; share the Pages URL to let others use the calculator.
@@ -63,6 +70,7 @@ Future updates: review changes, commit the intended files, and use **Push origin
 
 - `public/index.html`, `public/styles.css`: Accessible form and dark/green responsive interface.
 - `public/js/nutrition.js`: Input validation and nutrition calculations, shared by browser and unit tests.
+- `public/js/guidance.js`: Sourced age/category nutrient references and optional four-occasion meal structure. Values are references/limits, not actual intake or supplement doses. Four-hour spacing is an example, not a universal health rule.
 - `public/js/app.js`: DOM rendering and consent-based local profile storage.
 - `tests/unit/`, `tests/e2e/`: Independent numerical fixtures and real browser scenarios.
 

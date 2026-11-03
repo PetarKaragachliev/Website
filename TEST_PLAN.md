@@ -49,6 +49,7 @@ For website journeys, define agreed browser and viewport coverage, keyboard inte
 | FR-004 | AC-007 through AC-009 | APP-005 (profile portion) | Opt-in, reload, confirmation not persisted, opt-out, deletion, malformed data, unavailable storage | Browser | tests/e2e/calculator.spec.js | STATUS.md; workout storage not built |
 | FR-002, FR-004 | AC-011 through AC-013 | APP-007 | Target direction/BMI, restricted rates, calorie effects, current-weight basis, zero-change maintenance, all-disabled guidance, accessible dependencies, persisted/legacy profiles | Unit + browser | tests/unit/nutrition.test.js; tests/e2e/calculator.spec.js | STATUS.md |
 | FR-003, FR-005 | AC-005, AC-006, AC-010 | APP-003, APP-004 | Workout generation and exercise guidance | Planned | Not created | Not run; deferred |
+| FR-006, FR-007 | AC-014 through AC-017 | APP-009 | All nutrient rows; source-table boundaries/units; reference/limit distinctions; meal totals; optional spacing; eligibility/stale hiding; responsive navigation | Unit + browser | tests/unit/guidance.test.js; tests/e2e/calculator.spec.js | STATUS.md; NUTRIENT_REFERENCES.md supplies expected values |
 
 Individual scenario names are in the linked test files; extend traceability as workout requirements become executable tests.
 
@@ -80,7 +81,7 @@ Exercise approved options across beginner/intermediate/advanced, 2-5 days/week, 
 - Test data: synthetic 70 kg/180 cm/age-30 reference profile and explicit validation/support-limit variants. Each Playwright test uses an isolated browser context; storage tests only use synthetic data.
 - External services: None approved for the MVP. Review network behavior to ensure profile data is not sent off-device.
 - Application environment variables: None required. No credentials or external service keys.
-- CI provider: GitHub Actions workflow `.github/workflows/pages.yml`, configured locally but not yet executed remotely. Node 24, lockfile-based installation, unit tests, and all five browser projects including Linux WebKit must pass before Pages deployment. PRs test without deploying. Actual GitHub permissions, Pages settings, and remote results remain unverified until the owner publishes.
+- CI provider: active GitHub Actions workflow `.github/workflows/pages.yml`. A previous successful test/deploy run and live Pages URL have been verified. Node 24, lockfile-based installation, unit tests, and all five browser projects including Linux WebKit must pass before each Pages deployment. PRs test without deploying. See the README workflow badge for current remote status; local WebKit remains separately blocked by host permissions.
 
 ## Verification Commands
 
@@ -88,12 +89,12 @@ Scripts are configured: `dev` serves `public/` on loopback port 4173; `test` run
 
 | Check | Command / procedure | Current result |
 | --- | --- | --- |
-| Unit tests | `npm test` | 87 calculator/input/target/pace tests passing; see STATUS.md |
+| Unit tests | `npm test` | 108 calculator/input/target/pace/nutrient/meal tests passing; see STATUS.md |
 | Integration / component tests | Actual DOM/storage scenarios in the Playwright suite | Chromium/Firefox exercised; no simulated DOM claims |
-| Available browser matrix | `npm run test:e2e -- --project=chromium-desktop --project=chromium-mobile --project=chromium-tablet --project=firefox` | Final 104 passed (26 scenarios per project, including development-preview notice); evidence in STATUS.md |
-| Full browser matrix | `npm run test:e2e` | Blocked by WebKit executable permissions; not skipped or reported passing |
+| Available browser matrix | `npm run test:e2e -- --project=chromium-desktop --project=chromium-mobile --project=chromium-tablet --project=firefox` | 124 passed (31 scenarios per project); evidence in STATUS.md |
+| Full browser matrix | `npm run test:e2e` | Local run blocked by WebKit executable permissions; active CI executes the full matrix on Linux, not waived |
 | Formatting / lint / type checks, as applicable | TBD | Not configured |
-| Production build | None required for native static files; verify the deployed static site separately | No deployment yet |
+| Production build | None required for native static files; verify deployed static site separately | GitHub Pages development preview active; not production/content-review approval |
 | Visual / accessibility review | Desktop/mobile screenshots, keyboard focus/error-description checks, 320 CSS px overflow assertions | Screenshots and basic browser checks exercised; manual screen-reader/zoom and real-device checks remain open |
 
 Populate commands after stack selection and record successful execution, not assumed syntax.

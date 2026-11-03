@@ -317,3 +317,77 @@ test('missing current weight does not create an unfocusable dependent pace error
   await page.locator('#error-list a').click();
   await expect(page.locator('#weight')).toBeFocused();
 });
+
+test('nutrient output distinguishes daily references, limits, and unknown intake', async ({ page }) => {
+  await enterProfile(page);
+  await page.getByRole('button', { name: 'Calculate my targets' }).click();
+  await expect(page.locator('#daily-guidance')).toBeVisible();
+  await expect(page.locator('#nutrient-rows tr')).toHaveCount(15);
+  await page.getByRole('link', { name: 'Daily nutrients and meal structure' }).click();
+  await expect(page.locator('#guidance-title')).toBeInViewport();
+  await expect(page.locator('#reference-intro')).toContainText('not measured intake');
+  await expect(page.locator('[data-nutrient="fiber"]')).toContainText('36.5 g/day');
+  await expect(page.locator('[data-nutrient="saturated-fat"]')).toContainText('Less than about 28.9 g/day');
+  await expect(page.locator('[data-nutrient="sodium"]')).toContainText('Less than 2,300 mg/day');
+  await expect(page.locator('[data-nutrient="potassium"]')).toContainText('3,400 mg/day');
+  await expect(page.locator('[data-nutrient="sugar"]')).toContainText('No fixed daily target');
+  await expect(page.locator('[data-nutrient="cholesterol"]')).toContainText('No fixed daily target');
+  await expect(page.locator('[data-nutrient="omega-3"]')).toContainText('AI (ALA only)');
+  await expect(page.locator('[data-nutrient="magnesium"]')).toContainText('400 mg/day');
+});
+
+test('reference values update across age and category boundaries', async ({ page }) => {
+  await enterProfile(page, { age: '18', sex: 'female' });
+  await page.getByRole('button', { name: 'Calculate my targets' }).click();
+  await expect(page.locator('[data-nutrient="calcium"]')).toContainText('1,300 mg/day');
+  await expect(page.locator('[data-nutrient="iron"]')).toContainText('15 mg/day');
+  await expect(page.locator('[data-nutrient="magnesium"]')).toContainText('360 mg/day');
+  await page.locator('#age').fill('51');
+  await expect(page.locator('#daily-guidance')).toBeHidden();
+  await page.getByRole('button', { name: 'Calculate my targets' }).click();
+  await expect(page.locator('[data-nutrient="calcium"]')).toContainText('1,200 mg/day');
+  await expect(page.locator('[data-nutrient="iron"]')).toContainText('8 mg/day');
+  await expect(page.locator('[data-nutrient="magnesium"]')).toContainText('320 mg/day');
+});
+
+test('meal recommendation is a flexible four-occasion example, not a health requirement', async ({ page }) => {
+  await enterProfile(page);
+  await page.getByRole('button', { name: 'Calculate my targets' }).click();
+  await expect(page.locator('#meal-count')).toHaveText('4');
+  await expect(page.locator('#meal-times li')).toHaveCount(4);
+  await expect(page.locator('#meal-times')).toContainText('08:00');
+  await expect(page.locator('#meal-times')).toContainText('20:00');
+  await expect(page.locator('#meal-summary')).toContainText('651 kcal');
+  await expect(page.locator('#meal-summary')).toContainText('35 g protein');
+  await expect(page.locator('#meal-spacing-note')).toContainText('not established as healthiest');
+  await expect(page.locator('#meal-guidance')).toContainText('Three or four meals can work');
+});
+
+test('guidance is hidden without eligibility and for unsupported profiles', async ({ page }) => {
+  await expect(page.locator('#daily-guidance')).toBeHidden();
+  await enterProfile(page);
+  await page.getByRole('button', { name: 'Calculate my targets' }).click();
+  await expect(page.locator('#daily-guidance')).toBeVisible();
+  await page.locator('#eligible').uncheck();
+  await expect(page.locator('#daily-guidance')).toBeHidden();
+  await enterProfile(page, { goal: 'gain', weight: '50', targetWeight: '75' });
+  await page.getByRole('button', { name: 'Calculate my targets' }).click();
+  await expect(page.locator('#limitation')).toBeVisible();
+  await expect(page.locator('#daily-guidance')).toBeHidden();
+});
+
+test('nutrient and meal estimates refresh with calories without page overflow', async ({ page }) => {
+  const viewport = page.viewportSize();
+  await enterProfile(page, { goal: 'lose', targetWeight: '65', weeklyRate: '0.5' });
+  await page.getByRole('button', { name: 'Calculate my targets' }).click();
+  await expect(page.locator('[data-nutrient="fiber"]')).toContainText('31.1 g/day');
+  await expect(page.locator('#meal-summary')).toContainText('555 kcal');
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.setViewportSize({ width: 320, height: 800 });
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await expect(page.locator('#reference-scope')).toContainText('not supplement doses');
+  await page.setViewportSize(viewport);
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({ path: test.info().outputPath('daily-guidance.png'), fullPage: true });
+});

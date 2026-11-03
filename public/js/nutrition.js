@@ -1,3 +1,5 @@
+import { getDailyGuidance } from './guidance.js';
+
 const activities = { sedentary: 1.2, light: 1.375, moderate: 1.55, very: 1.725 };
 const plans = {
   lose: { '0.25': 0, '0.5': 0 },
@@ -91,6 +93,7 @@ export function calculateNutrition(input) {
     output.limitation = 'macro-allocation';
     return output;
   }
-  output.result = { rmr, maintenance, calories, protein, fat, carbs, bmi, weeklyKg, adjustment };
+  const guidance = getDailyGuidance({ age, sex, calories, protein });
+  output.result = { rmr, maintenance, calories, protein, fat, carbs, bmi, weeklyKg, adjustment, guidance };
   return output;
 }

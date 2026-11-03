@@ -9,16 +9,16 @@ Last updated: 2026-11-03.
 | Project phase | First calculator slice implemented; browser/release checks incomplete |
 | Documentation | Calculator baseline and test traceability recorded; workout/content-review decisions remain open |
 | Product scope and approval | Approved calculator policy, nutrition support limits, single confirmation, and optional local saving; workout rules pending |
-| Stack and hosting | Native HTML/CSS/JavaScript; local Git initialized on main; GitHub Pages workflow prepared; remote repository/website not published yet |
+| Stack and hosting | Native HTML/CSS/JavaScript; public PetarKaragachliev/Website repository and GitHub Pages preview verified; test-gated publishing on main pushes |
 | Name and design | LiftFuel (temporary); dark/green direction agreed; supplied fitness mockup reviewed |
 | Active implementation sprint | Nutrition slice; profile-only saving delivered early with calculator |
-| Application code | Working calculator with target weight, restricted weekly pace, and profile saving in public/; no workout generation or videos |
-| Automated tests and CI | 87 unit tests; 26 browser scenarios per configured project; GitHub Actions workflow prepared locally, no remote run verified |
-| Release readiness | Not approved; WebKit, content review, manual accessibility/device checks, workouts, and deployment incomplete |
+| Application code | Calculator, target/pace, local saving, sourced nutrient references, and optional four-occasion meal example; no workout generator/videos or actual food-intake tracking |
+| Automated tests and CI | 108 unit tests; 31 browser scenarios per configured project; active Linux CI includes WebKit and gates Pages deployment |
+| Release readiness | Development preview active; qualified content review, manual accessibility/device checks, and workout features remain incomplete; local WebKit installation still blocked |
 
 ## Current Focus
 
-The calculator can be run locally with `npm run dev`. Unit and Chromium/Firefox evidence exists; resolve the host WebKit installation problem to complete the browser matrix. Next product work is defining workout selection, volume, progression, and reviewed exercise content. Do not treat a working calculator as a completed workout website or approved public release.
+Preview: https://petarkaragachliev.github.io/Website/ . Repository/workflow: https://github.com/PetarKaragachliev/Website/actions/workflows/pages.yml . Local edits alone are not uploaded: approved work is committed/pushed, then test-gated deployment publishes it. Nutrient output is reference guidance, not measured intake or a supplement plan; four-hour meal spacing is optional. Next product work remains workout selection/progression and reviewed content.
 
 ## Blockers and Decisions
 
@@ -26,13 +26,13 @@ The calculator can be run locally with `npm run dev`. Unit and Chromium/Firefox 
 | --- | --- | --- | --- | --- |
 | B-001 | Qualified nutrition/exercise review is unassigned | Public safety/content claims remain unverified | Project owner / reviewer TBD | Assign and complete review before release; current product limits are not clinical validation |
 | B-002 | Detailed workout rules, catalog, and review ownership are undefined | Safe, compatible plan expectations cannot be finalized | TBD | Resolve PRD Q-003/Q-005 within agreed option ranges |
-| B-003 | WebKit executable disappears/is unavailable; reinstallation fails with EPERM opening Playwright.exe | Full browser matrix incomplete; WebKit launch failures are not product-test passes | Host owner / implementation owner | Resolve host filesystem/security permissions without disabling protection; reinstall WebKit and run `npm run test:e2e -- --project=webkit` |
+| B-003 | Local WebKit installation fails with EPERM opening Playwright.exe | Local full-browser command blocked; Linux CI runs WebKit independently rather than skipping it | Host owner / implementation owner | Resolve local host permissions without disabling protection; do not confuse CI coverage with successful local installation or real Safari-device testing |
 | B-004 | Manual screen-reader/zoom, real-device browser review, hosting, and deployment checks incomplete | No accessibility-conformance or production-readiness claim | Implementation owner / project owner | Complete the release checklist after functionality/content review |
-| B-005 | GitHub CLI is unauthenticated; owner prefers GitHub Desktop for publishing | No remote repository or live website URL can be verified yet | Project owner | Add the existing local repository to Desktop, publish public liftfuel, select GitHub Actions in Pages settings, and share the repository/Pages URLs. Desktop login is separate from CLI login |
+| B-005 (resolved) | Owner published through GitHub Desktop | Public repository, initial successful workflow, and hosted preview verified | Project owner / implementation owner | Git push and workflow checks now work through existing authorized Git access; no credentials are stored in the repository |
 
 ## Verification Evidence
 
-Evidence includes intentional TDD failures, subsequent passing checks, and the blocked full-browser run. No production deployment or CI run has been performed. There is no build step for the static application.
+Evidence includes intentional TDD failures, subsequent passing checks, the locally blocked WebKit run, and verified GitHub Pages/CI setup. There is no build step for the static application. An active development preview is not a production or clinical approval; the README workflow badge reports current remote status.
 
 Use one entry per verification run. Preserve the initial red result and later green result as separate entries.
 
@@ -56,6 +56,9 @@ Use one entry per verification run. Preserve the initial red result and later gr
 | 2026-11-03 | APP-007 rounding and dependencies | Red / Fix | Browser rounding assertion, then no-available-pace and disabled-error-link regressions; unit missing-weight dependency check | Decimal 0.175 displays 0.18; impossible pace selections get guidance; error links remain focusable | Found native toFixed rounding mismatch and two dependent-control defects; each fixed without weakening assertions | Intl decimal formatting; explicit all-unavailable limit path; pace validation waits for valid current weight |
 | 2026-11-03 | APP-007 | Green | `npm test`; available-browser matrix command above | All existing and new target/pace/profile-migration scenarios pass | 87 unit tests passed; 100 browser checks passed across Chromium desktop/mobile/tablet and Firefox, exit 0 | WebKit remains blocked by previously recorded host error; no new WebKit pass claimed |
 | 2026-11-03 | APP-008 preparation | Local verification | Git initialization; action SHA refs checked with git ls-remote; workflow review; `npm test`; available-browser matrix | Local repository ready; no unexpected action refs; preview notice and existing behavior pass | Local main initialized; pinned refs verified; workflow reviewed; 87 unit and 104 browser checks passed | No actual GitHub Actions run, Pages settings change, remote push, or hosted URL verified. CLI browser authorization timed out and auth status remains unauthenticated; owner will use Desktop |
+| 2026-11-03 | APP-008 verification | Hosted preview / CI | Read origin/main, dry-run authorized Git push, GitHub CLI repository/run queries using existing authorized access, and fetched Pages URL | Public repository and successful initial deployment exist | PetarKaragachliev/Website public, main branch; workflow run 41682204644 completed successfully; hosted calculator reachable | https://github.com/PetarKaragachliev/Website/actions/runs/41682204644 ; local standalone CLI login is not required for Desktop publishing |
+| 2026-11-03 | APP-009 | Red | Unit test for nutrient guidance on eligible calculator output; browser nutrient-output scenario | Reference/meal feature must exist and be shown | Unit assertion failed for absent result.guidance; browser failed for missing daily-guidance region before implementation | Intended behavior-level failures |
+| 2026-11-03 | APP-009 | Local Green | `npm test`; available-browser matrix; static review | Reference values/units/age boundaries, optional meal split, stale hiding, and mobile layout pass | 108 unit tests and 124 browser checks passed; review found no concrete issues | No actual-intake, deficiency, supplement-dose, or universal meal-timing claim; new source document records definitions/evidence |
 | 2026-11-03 | APP-007 visual / preview | Review | Reran target/pace browser journey on desktop/mobile, inspected weight-plan.png screenshots, restarted static preview, and fetched current HTML/module | Target, pace, and new results visible without broken layout; current assets served | Two targeted browser checks passed; screenshots reviewed; HTML/module HTTP 200 and new field/function markers found | Preview restarted at http://127.0.0.1:4173 (PID 10764); earlier preview PID 3596 stopped for tests |
 | 2026-11-03 | Local preview | HTTP smoke check | Started local static server; fetched `/` and `/js/nutrition.js` with Node and asserted status/content | Calculator HTML and module served successfully | Both HTTP 200 at http://127.0.0.1:4173; HTML title and calculation action found | Preview left running (PID 3596); initial inline smoke command needed ESM syntax correction, then passed; stop this preview before running Playwright on the same port |
 
@@ -79,7 +82,9 @@ Include environment or revision details when needed to reproduce a run. Record f
 - Added target weight and goal-specific weekly gain/loss choices, kg/week labels, pace-sensitive calorie/macro estimates, current/target BMI checks, maximum 20% loss-deficit guard, and explanations when every pace is outside product limits. Target/pace changes invalidate old results.
 - Added saved record version 2 while preserving the existing storage key; legacy records restore validated base inputs and explicitly request missing target/pace rather than guessing. Eligibility is never persisted.
 - The requested target/pace feature supersedes the earlier fixed goal adjustments. New rate choices and surplus mappings are conservative product heuristics, not clinically reviewed guarantees.
-- Prepared public GitHub/Pages development-preview publishing: local main branch, pinned Actions workflow, tests before deployment, public/-only artifact, development-preview notice, and GitHub Desktop instructions. Publishing is still an owner action; no repository or website URL is claimed.
+- Initially prepared local Git and a pinned Pages workflow, then verified the owner's subsequent public repository and preview publication. Only public/ is deployed; qualified content review is still pending.
+- Verified the owner-published public Website repository and initial successful Pages workflow/live calculator. Source updates require an explicit commit/push; the publishing workflow is automatic afterward, not on every local edit.
+- Added 14 requested nutrient categories plus a separate free-sugars limit; sourced age/category references, RDA/AI/limit labels, no invented numeric goals, ALA-specific omega-3, and explicit unknown-intake/supplement caveats. Added an optional four-occasion meal example and even calorie/protein split without changing daily totals or storage schema.
 - Product approval and test passes are not clinical validation; full browser/release checks remain incomplete.
 
 ## Next Milestones

@@ -154,6 +154,34 @@ input:read-only, select:disabled { color: var(--muted); background: #192019; }
 .next-card p { color: #b0bf9f; font-size: 11px; margin-top: 12px; }
 .next-card-number { position: absolute; right: -5px; top: 22px; color: #2b3a20; font: 110px/1 var(--display); }
 .method-section { margin-top: 60px; padding-bottom: 44px; }
+.daily-guidance { margin-top: 44px; }
+.guidance-jump { display: inline-flex; align-items: center; gap: 10px; min-height: 44px; margin-top: 16px; color: var(--accent); font-size: 12px; }
+.guidance-grid { display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, 1fr); gap: 24px; align-items: start; }
+.reference-panel, .meal-panel { padding: 28px; min-width: 0; }
+.reference-panel > h3, .meal-panel > h3 { font-size: 24px; letter-spacing: -.04em; margin-top: 8px; }
+#reference-intro, .meal-panel > p:not(.eyebrow):not(.small-label) { font-size: 12px; color: var(--muted); margin-top: 15px; }
+.reference-scope { font-size: 11px; color: var(--muted); margin: 14px 0 23px; }
+.reference-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+.reference-table th, .reference-table td { padding: 17px 0; border-bottom: 1px solid var(--border); vertical-align: top; overflow-wrap: anywhere; text-align: left; }
+.reference-table th:first-child { width: 58%; padding-right: 18px; }
+.reference-table thead th { font-size: 10px; letter-spacing: .04em; color: var(--muted); font-weight: 600; }
+.reference-table tbody th { font-weight: 600; font-size: 13px; }
+.reference-table tbody th a { text-decoration-color: #60794b; }
+.nutrient-note { display: block; color: var(--muted); font-size: 11px; line-height: 1.55; font-weight: 400; margin-top: 7px; }
+.reference-value { font-size: 14px; font-weight: 650; }
+.reference-basis { display: block; font-size: 10px; font-weight: 400; color: var(--muted); margin-top: 6px; }
+.reference-table tr[data-kind="limit"] .reference-value { color: #e3d6a2; }
+.reference-disclaimer { font-size: 11px; color: var(--muted); background: #0e1510; padding: 16px; border-radius: 8px; margin-top: 24px; }
+.meal-panel { background: linear-gradient(145deg, #253419, var(--panel) 50%); }
+.meal-panel > h3 { font: 37px/1.15 var(--display); margin-top: 12px; }
+.meal-panel .meal-example { font-size: 9px; color: var(--accent); margin-top: 25px; }
+.meal-times { list-style: none; padding: 0; margin: 12px 0 20px; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.meal-times li { border: 1px solid #405231; border-radius: 7px; padding: 13px; background: #111a10; }
+.meal-times time { display: block; font: 27px var(--display); color: var(--accent); }
+.meal-times span { display: block; font-size: 10px; color: var(--muted); margin-top: 4px; }
+.meal-panel .meal-summary { padding: 15px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); color: var(--text) !important; }
+.meal-panel > .inline-link { display: inline-block; margin-top: 18px; }
+@media (max-width: 800px) { .guidance-grid { grid-template-columns: 1fr; } .reference-panel, .meal-panel { padding: 22px 20px; } .reference-table th:first-child { width: 56%; padding-right: 14px; } .reference-value { font-size: 13px; } }
 .method-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--border); }
 .method-grid article { padding: 24px 20px 0 0; }
 .method-grid article + article { padding-left: 20px; border-left: 1px solid var(--border); }

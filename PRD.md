@@ -51,6 +51,8 @@ All requirements below are MVP scope and high priority. Refine policy-dependent 
 | FR-003: Workout generation | G-002 / J-002 | Use environment, equipment, experience, schedule, session length, and limitations to select exact exercises with complete written guidance |
 | FR-004: Local persistence | G-001, G-002 / J-003 | Save profile and plan only with optional "Remember on this device" consent (off by default); explain shared-device implications and provide "Delete my saved data" |
 | FR-005: Video-free first release | G-002 / J-002 | Provide useful text instructions without implying that unavailable videos exist |
+| FR-006: Daily nutrient references | G-001 / J-001 | Show all requested nutrients as sourced intake references, limits, or nonnumeric guidance; distinguish these from actual food intake; use age/category-specific DRIs where applicable |
+| FR-007: Flexible meal structure | G-001 / J-001 | Suggest four eating occasions with an optional four-hour example and even calorie/protein split; explain that three or four meals can work and no interval is universally healthiest |
 
 | Acceptance ID | Requirement | Given / When | Observable outcome |
 | --- | --- | --- | --- |
@@ -67,6 +69,10 @@ All requirements below are MVP scope and high priority. Refine policy-dependent 
 | AC-011 | FR-002 | Choose a weight-change goal and target | Target is required, has at most one decimal place, agrees with the goal direction, and stays within supported bounds/BMI; maintenance keeps current weight |
 | AC-012 | FR-002 | Choose or edit a weekly pace | Only goal-specific rates are selectable; show bodyweight-scaled kg/week and selected target in results; changing pace recalculates calories/macros; unsupported choices are disabled and all-unavailable cases get an explanation, not an impossible selection error |
 | AC-013 | FR-004 | Restore a saved profile from before or after target/pace fields existed | New profiles retain target and pace; legacy base inputs are validated/restored without inventing missing plan choices; eligibility still requires a fresh confirmation |
+| AC-014 | FR-006 | Eligible valid nutrition result | Display fiber, total sugar, free sugars, saturated/MUFA/trans fat, cholesterol, sodium, potassium, vitamins A/C, calcium, iron, ALA omega-3, and magnesium, with units, source links, and reference-vs-limit meaning; no fabricated numeric targets for total sugar/MUFA/trans fat/cholesterol |
+| AC-015 | FR-006 | Change age/category/calories and recalculate | Age 18, 19, 30/31, and 50/51 reference boundaries follow NUTRIENT_REFERENCES.md; energy-based references update without implying measured intake or supplement doses |
+| AC-016 | FR-007 | Display meal guidance | Four optional occasions at example times 08:00/12:00/16:00/20:00; estimated per-occasion energy/protein divide existing totals; four hours is not claimed healthiest or mandatory |
+| AC-017 | FR-006, FR-007 | Eligibility/input changes, unsupported output, or reload before confirmation | Hide nutrient/meal guidance with other stale results; supported recalculation refreshes it; maintain responsive and keyboard-accessible navigation |
 
 Review stale-result behavior after changing eligibility or profile inputs when refining UI criteria. No previous result should be presented as a newly valid prescription for an excluded profile.
 
@@ -108,6 +114,7 @@ Dark/green direction is agreed. Detailed accessibility/browser targets below rem
 | D-009 | Eligibility interaction and local-saving consent | Project owner | Approved: single general-health eligibility confirmation instead of medical questions; optional "Remember on this device" off by default and "Delete my saved data" action; eligibility confirmation is not persisted |
 | D-010 | Target weight and weekly pace | Project owner request / implementation policy | Add target weight and restricted desired weekly gain/loss; replaces D-006's fixed goal adjustments with pace-sensitive rules in NUTRITION_POLICY.md. No unrestricted/aggressive entry, guaranteed health claim, or completion-date prediction |
 | D-011 | Source control and shared development preview | Project owner | Public GitHub repository named liftfuel and GitHub Pages preview approved. Public source includes planning documents; only public/ is deployed. Preview labels unfinished features/content review, and does not imply production or clinical approval |
+| D-012 | Actual repository and extended nutrition guidance | Project owner request / implementation | Owner published PetarKaragachliev/Website (rather than proposed liftfuel). Add sourced nutrient references and a flexible meal example, not a food diary/menu, actual nutrient-intake calculation, supplement plan, or universal four-hour health prescription |
 | Q-001 | What activity descriptions, bounds, safety handling, rounding, and tolerances should apply? | Implementation owner / reviewer TBD | Calculator implementation baseline selected in NUTRITION_POLICY.md and exercised in tests; qualified safety/content review is still a release gate |
 | Q-002 | What distinguishes muscle-building and weight-gain targets and plans? | Project owner | Minimize excess fat gain vs prioritize overall gain. Restricted muscle-focused paces use 5%/10% starting surpluses; overall gain uses 10%/15%. No need to invent different exercises solely for these labels |
 | Q-003 | Which splits, volume, progression rules, exact equipment capabilities, and exercise catalog are supported within agreed options? | TBD | Input options agreed; generation/content rules pending |

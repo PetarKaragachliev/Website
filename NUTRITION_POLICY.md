@@ -152,6 +152,8 @@ The nutrition/profile-saving portions are exercised by tests/unit/nutrition.test
 
 ## Approval and Remaining Gates
 
+Daily nutrient reference values, limits, and the optional meal-count/spacing example are specified in [NUTRIENT_REFERENCES.md](NUTRIENT_REFERENCES.md). They do not change the macro calculation or imply actual nutrient consumption. They appear only with eligible supported results and are not stored as observed intake.
+
 - Retained approved baseline: Mifflin-St Jeor with activity-based maintenance estimation; protein 2.0 g/kg current weight, fat 25% of target calories, carbohydrate from remaining calories. The owner's new target/pace requirement replaces fixed goal multipliers with the documented pace-sensitive policy.
 - Activity descriptions, full-precision arithmetic, whole-number display, and parsing bounds are implemented and tested as the calculator baseline.
 - V-001 through V-012 calculator behavior is implemented; workout-specific storage/generation behavior is still deferred. Nutrition support limits and single-confirmation behavior are accepted product scope, not clinical validation.

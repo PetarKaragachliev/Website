@@ -10,11 +10,14 @@ const resultRegion = document.querySelector('#nutrition-result');
 const limitation = document.querySelector('#limitation');
 const emptyResult = document.querySelector('#empty-result');
 const resultState = document.querySelector('#result-state');
+const guidanceRegion = document.querySelector('#daily-guidance');
+const guidanceLink = document.querySelector('#guidance-link');
 const number = new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 });
 const goalLabels = { lose: 'Lose fat / gradual weight reduction', maintain: 'Maintain weight / estimated maintenance', muscle: 'Build muscle / minimize excess fat gain', gain: 'Gain weight / accept some fat gain' };
 const factors = { sedentary: '1.2', light: '1.375', moderate: '1.55', very: '1.725' };
 const weightNumber = new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 });
 const paceNumber = new Intl.NumberFormat('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const referenceNumber = new Intl.NumberFormat('en-US', { maximumFractionDigits: 1 });
 let unavailablePaceReason = null;
 
 function updatePlanFields(reset = false) {
@@ -65,9 +68,60 @@ function clearErrors() {
 
 function invalidateResults() {
   resultRegion.hidden = true;
+  guidanceRegion.hidden = true;
+  guidanceLink.hidden = true;
   limitation.hidden = true;
   emptyResult.hidden = false;
   resultState.textContent = 'YOUR STARTING POINT';
+}
+
+function renderDailyGuidance(profile, guidance) {
+  const rows = document.createDocumentFragment();
+  for (const nutrient of guidance.nutrients) {
+    const row = document.createElement('tr');
+    row.dataset.nutrient = nutrient.id;
+    row.dataset.kind = nutrient.kind;
+    const name = document.createElement('th');
+    name.scope = 'row';
+    const source = document.createElement('a');
+    source.href = nutrient.source;
+    source.target = '_blank';
+    source.rel = 'noopener noreferrer';
+    source.textContent = nutrient.name;
+    source.setAttribute('aria-label', `${nutrient.name} source (opens in a new tab)`);
+    const note = document.createElement('span');
+    note.className = 'nutrient-note';
+    note.textContent = nutrient.note;
+    name.append(source, note);
+    const reference = document.createElement('td');
+    const value = document.createElement('span');
+    value.className = 'reference-value';
+    const prefix = nutrient.kind === 'limit' ? (nutrient.id === 'sodium' ? 'Less than ' : 'Less than about ') : (nutrient.id === 'fiber' ? 'About ' : '');
+    value.textContent = nutrient.value === null ? nutrient.advice : `${prefix}${referenceNumber.format(nutrient.value)} ${nutrient.unit}/day`;
+    const basis = document.createElement('span');
+    basis.className = 'reference-basis';
+    basis.textContent = `${nutrient.basis}${nutrient.kind === 'limit' ? ' / ceiling, not target' : ''}`;
+    reference.append(value, basis);
+    row.append(name, reference);
+    rows.append(row);
+  }
+  document.querySelector('#nutrient-rows').replaceChildren(rows);
+  document.querySelector('#reference-profile').textContent = `Baseline US dietary reference tables use age ${profile.age} and the selected ${profile.sex} category. This reuses the equation-category selection; it is not a complete account of physiology or individual needs. Food-first guidance for generally healthy, nonpregnant/nonlactating users, not personalized medical advice.`;
+  document.querySelector('#meal-count').textContent = guidance.meals.count;
+  const times = guidance.meals.exampleTimes.map((time, index) => {
+    const item = document.createElement('li');
+    const clock = document.createElement('time');
+    clock.dateTime = time;
+    clock.textContent = time;
+    const label = document.createElement('span');
+    label.textContent = `Eating occasion ${index + 1}`;
+    item.append(clock, label);
+    return item;
+  });
+  document.querySelector('#meal-times').replaceChildren(...times);
+  document.querySelector('#meal-summary').textContent = `If divided evenly: about ${number.format(guidance.meals.caloriesPerMeal)} kcal and ${referenceNumber.format(guidance.meals.proteinPerMeal)} g protein per occasion. This divides your existing daily totals; it adds no extra calories and need not be followed exactly.`;
+  guidanceRegion.hidden = false;
+  guidanceLink.hidden = false;
 }
 
 function showErrors(errors) {
@@ -185,6 +239,7 @@ form.addEventListener('submit', event => {
   document.querySelector('[data-testid="weekly-pace"]').textContent = output.profile.goal === 'maintain' ? 'Maintain / no planned weekly change' : `${output.profile.goal === 'lose' ? 'Lose' : 'Gain'} about ${paceNumber.format(output.result.weeklyKg)} kg/week (${output.profile.weeklyRate}% of current weight)`;
   document.querySelector('#calculation-detail').textContent = `Mifflin-St Jeor (${output.profile.sex} equation): ${number.format(output.result.rmr)} kcal resting estimate. Activity factor ${factors[output.profile.activity]} gives estimated maintenance of ${number.format(output.result.maintenance)} kcal/day. Selected starting adjustment: ${output.result.adjustment >= 0 ? '+' : '-'}${number.format(Math.abs(output.result.adjustment))} kcal/day.`;
   document.querySelector('#pace-assumptions').textContent = output.profile.goal === 'lose' ? 'Loss uses a rough 7,700 kcal/kg energy heuristic to choose an initial deficit, limited to 20% of estimated maintenance. Metabolic adaptation and tissue/water changes mean actual progress will differ.' : output.profile.goal === 'maintain' ? 'Maintenance keeps your current weight as the target. Reassess using multiweek trends, not a single weigh-in.' : 'Gain uses a modest starting surplus: muscle-focused paces map to 5% or 10%; overall-gain paces map to 10% or 15%. This is not a calorie-per-kilogram prediction or a promise of the selected pace. The faster gain option may not suit advanced trainees.';
+  renderDailyGuidance(output.profile, output.result.guidance);
   emptyResult.hidden = true;
   resultRegion.hidden = false;
   resultState.textContent = 'ESTIMATES, NOT LIMITS';
