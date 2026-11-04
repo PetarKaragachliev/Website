@@ -23,7 +23,7 @@ p, dd, dt, a, summary, label { overflow-wrap: anywhere; }
 .nav-caption { margin: 58px 0 17px 9px; font-size: 9px; }
 .sidebar nav { display: grid; gap: 8px; }
 .nav-link { display: flex; align-items: center; gap: 12px; min-height: 46px; padding: 10px; border: 1px solid transparent; border-radius: 7px; font-size: 12px; font-weight: 600; text-decoration: none; color: var(--muted); }
-.nav-link > span { font-size: 11px; opacity: .75; }
+.nav-link > span { flex-shrink: 0; font-size: 11px; opacity: .75; white-space: nowrap; }
 .nav-link.active { border-color: #344127; background: #1a2414; color: var(--accent); }
 .nav-link:hover { background: #1a211b; color: var(--text); }
 .sidebar-note { margin-top: auto; padding: 40px 10px; }

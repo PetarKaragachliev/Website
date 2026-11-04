@@ -335,6 +335,7 @@ $('#delete-data').addEventListener('click', () => {
   form.elements.eligible.checked = false;
   form.elements.regularTraining.checked = false;
   for (const details of document.querySelectorAll('details')) details.open = false;
+  $('#nutrition-details').open = true;
   updatePlanFields(true);
   showErrors({});
   invalidateResults();
@@ -347,7 +348,7 @@ updatePlanFields();
 restoreProfile();
 invalidateResults();
 $('#measurements-details').open = false;
-$('#nutrition-details').open = false;
+$('#nutrition-details').open = true;
 $('#app-status').hidden = true;
 $('#result-state').setAttribute('role', 'status');
 $('#analyze').textContent = 'Анализирай телосложението ми';

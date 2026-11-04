@@ -8,7 +8,7 @@ Website preview: https://petarkaragachliev.github.io/Website/ . Source: https://
 
 [![Test and Publish Preview](https://github.com/PetarKaragachliev/Website/actions/workflows/pages.yml/badge.svg)](https://github.com/PetarKaragachliev/Website/actions/workflows/pages.yml)
 
-The site opens directly in Bulgarian, with no English selector. The original sidebar, central input panel, right-hand results panel and LF hero artwork are restored. Enter the five required measurements, confirm eligibility, and select **Анализирай телосложението ми**. Additional measurements are optional. For calories and the vertical right-hand nutrient list below fats, expand **Хранителни ориентири** and choose activity and a goal explicitly; no dietary values are invented when those choices are missing.
+The site opens directly in Bulgarian, with no English selector. The original sidebar, central input panel, right-hand results panel and LF hero artwork are restored. Enter the five required measurements, confirm eligibility, and select **Анализирай телосложението ми**. Additional measurements are optional. **Хранителни ориентири** is expanded by default: choose activity and a goal for calories and the vertical nutrient list below fats. The right panel shows calorie/protein/carbohydrate/fat placeholders before calculation, not invented targets; body-only analysis remains available.
 
 A browser-based nutrition calculator and workout planner for generally healthy adults aged 18-56. The agreed MVP supports metric inputs, fat loss, maintenance, muscle building, conservative weight gain, gym/home plans, and device-local saving.
 

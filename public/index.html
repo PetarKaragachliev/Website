@@ -39,7 +39,7 @@
         <div class="main-stack">
           <section class="panel profile-panel" aria-labelledby="profile-title">
             <div class="panel-heading"><div><p class="eyebrow">ТВОИТЕ ДАННИ</p><h2 id="profile-title">Малко повече за теб.</h2></div><span class="panel-index" aria-hidden="true">01</span></div>
-            <p class="section-intro">Попълни основните измервания. Хранителна цел и ниво на активност не са необходими за анализа на телосложението.</p>
+            <p class="section-intro">Попълни измерванията, активността и целта си за дневни калории, макроси и анализ на телосложението. Можеш да направиш и само анализ, без хранителна цел.</p>
             <form id="profile-form" novalidate>
               <div id="error-summary" class="notice error-summary" hidden tabindex="-1" role="alert"><strong>Провери посочените полета.</strong><ul id="error-list"></ul></div>
               <div class="measurement-grid basic-measurements">
@@ -64,9 +64,9 @@
               </details>
               <div class="training-context"><label class="check-label"><input id="regularTraining" name="regularTraining" type="checkbox" aria-describedby="regularTraining-hint regularTraining-error"><span>Тренирам редовно със силово натоварване</span></label><p id="regularTraining-hint" class="field-hint">Незадължителна, самоотчетена информация. Не потвърждава количество мускули или тип телосложение.</p><p id="regularTraining-error" class="field-error" hidden></p></div>
 
-              <details id="nutrition-details" class="disclosure">
+              <details id="nutrition-details" class="disclosure" open>
                 <summary>Хранителни ориентири <span>Незадължително</span></summary>
-                <p class="field-hint">Отвори само ако искаш и хранителни ориентири в дясната колона. Избери активност и цел изрично; анализът на тялото не ги изисква.</p>
+                <p class="field-hint">Избери активност и цел, за да изчислиш калориите и хранителните показатели вдясно. За анализ само на телосложението можеш да оставиш тези полета празни.</p>
                 <button id="clear-nutrition" class="text-button" type="button">Само анализ на тялото: изчисти хранителната цел</button>
                 <div class="field details-content"><label for="activity">Ежедневна активност</label><select id="activity" name="activity" aria-describedby="activity-hint activity-error"><option value="">Избери активност</option><option value="sedentary">Предимно седящо ежедневие</option><option value="light">Лека активност</option><option value="moderate">Умерена активност</option><option value="very">Висока активност</option></select><small id="activity-hint">Включи работата, ходенето и тренировките за целия ден, не само времето в залата.</small><p id="activity-error" class="field-error" hidden></p></div>
                 <fieldset id="goal" class="goal-fieldset" tabindex="-1" aria-describedby="goal-hint goal-error"><legend>Хранителна цел</legend><p id="goal-hint" class="field-hint">Няма предварително избрана цел. Покачването може да включва и мазнини; мускулен растеж не е гарантиран.</p><div class="goal-grid">
@@ -111,7 +111,16 @@
         <div class="result-column">
         <aside id="nutrition-panel" class="panel result-panel" aria-labelledby="nutrition-title">
           <div class="result-topline"><h2 id="nutrition-title" class="eyebrow">ТВОИТЕ РЕЗУЛТАТИ</h2><span class="small-label accent">ОРИЕНТИРИ, НЕ ПРЕДПИСАНИЕ</span></div>
-          <div id="empty-result" class="empty-result"><span class="target-symbol" aria-hidden="true"></span><h3>Първо тялото.<br>После целта.</h3><p>За хранителни ориентири отвори „Хранителни ориентири“ във формуляра и избери активност и цел. Те не са необходими за анализа на телосложението.</p></div>
+          <div id="empty-result" class="empty-result">
+            <h3>Твоите дневни калории и макроси.</h3>
+            <p>Попълни данните, избери активност и хранителна цел и натисни „Анализирай телосложението ми“. Тук ще се покажат изчислените стойности, а под мазнините и останалите хранителни показатели.</p>
+            <div class="calorie-display"><span aria-label="Все още няма изчислена стойност">-</span><span>ккал / ден</span></div><p class="calorie-caption">Калории / очаква изчисление</p>
+            <dl class="macro-list">
+              <div><dt><span class="macro-dot protein-dot" aria-hidden="true"></span>Белтъчини</dt><dd><span>-</span> <small>г / ден</small></dd></div>
+              <div><dt><span class="macro-dot carbs-dot" aria-hidden="true"></span>Въглехидрати</dt><dd><span>-</span> <small>г / ден</small></dd></div>
+              <div><dt><span class="macro-dot fat-dot" aria-hidden="true"></span>Мазнини</dt><dd><span>-</span> <small>г / ден</small></dd></div>
+            </dl>
+          </div>
           <section id="nutrition-result" hidden tabindex="-1" aria-labelledby="result-title">
             <span id="result-state" class="output-state"></span><h3 id="result-title">Твоята дневна отправна точка.</h3><p id="goal-description"></p>
             <dl class="plan-summary"><div><dt>Целево тегло</dt><dd data-testid="target-weight"></dd></div><div><dt>Желано седмично темпо</dt><dd data-testid="weekly-pace"></dd></div></dl>

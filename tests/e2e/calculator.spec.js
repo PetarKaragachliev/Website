@@ -22,12 +22,16 @@ async function nutrition(page, overrides = {}) {
 
 test.beforeEach(async ({ page }) => { await page.goto('/'); });
 
-test('Bulgarian first screen keeps optional inputs collapsed and has no English switch', async ({ page }) => {
+test('Bulgarian first screen exposes nutrition controls and calorie/macro placeholders without invented targets', async ({ page }) => {
   await expect(page.locator('html')).toHaveAttribute('lang', 'bg');
   await expect(page.getByRole('button', { name: 'Анализирай телосложението ми' })).toBeEnabled();
   await expect(page.locator('#language')).toHaveCount(0);
   await expect(page.locator('#measurements-details')).not.toHaveAttribute('open');
-  await expect(page.locator('#nutrition-details')).not.toHaveAttribute('open');
+  await expect(page.locator('#nutrition-details')).toHaveAttribute('open');
+  await expect(page.locator('#activity')).toBeVisible();
+  await expect(page.locator('#empty-result')).toContainText('Калории');
+  await expect(page.locator('#empty-result .macro-list dt')).toHaveText(['Белтъчини', 'Въглехидрати', 'Мазнини']);
+  await expect(page.locator('#empty-result .macro-list dd')).toHaveText(['- г / ден', '- г / ден', '- г / ден']);
   await expect(page.locator('#body-assessment')).toBeHidden();
   await expect(page.locator('#remember')).not.toBeChecked();
 });
@@ -207,6 +211,7 @@ test('nutrition is optional and all additional nutrients are vertical after fats
   await expect(page.getByTestId('carbs')).toHaveText('348');
   await expect(page.getByTestId('fat')).toHaveText('72');
   await expect(page.locator('#nutrition-panel #nutrient-rows tr')).toHaveCount(12);
+  await expect(page.locator('#empty-result')).toBeHidden();
   await expect(page.locator('[data-nutrient="fiber"]')).toContainText('Фибри / хранителни влакнини');
   await expect(page.locator('[data-nutrient="free-sugars"]')).toContainText('32,6');
   await expect(page.locator('[data-nutrient="cholesterol"]')).toContainText('FDA');
