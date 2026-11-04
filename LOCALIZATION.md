@@ -1,6 +1,6 @@
 # Bulgarian Interface
 
-The current analyzer and training placeholder are Bulgarian-only, per the owner's simplified redesign. The previous English/Bulgarian selector and static DOM-translation machinery were removed; old language preferences do not change the interface. Scientific names, LiftFuel branding, the requested Skinny Fat term, and original external sources retain their names.
+The current analyzer and training placeholder are Bulgarian-only, per the owner's explicit language choice. The original visual layout is restored without restoring English. The previous English/Bulgarian selector and static DOM-translation machinery were removed; old language preferences do not change the interface. Scientific names, LiftFuel branding, the requested Skinny Fat term, and original external sources retain their names.
 
 Static HTML and body-model results use Bulgarian directly. `i18n.js`, `bg-models.js` and `bg-app.js` provide local translations for the existing language-independent nutrition model and its templates. No translation service or profile upload is used. Number display uses `bg-BG`; input parsing accepts decimal commas or dots without changing internal precision. RFM displays exactly one decimal place.
 

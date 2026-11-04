@@ -8,7 +8,7 @@ Website preview: https://petarkaragachliev.github.io/Website/ . Source: https://
 
 [![Test and Publish Preview](https://github.com/PetarKaragachliev/Website/actions/workflows/pages.yml/badge.svg)](https://github.com/PetarKaragachliev/Website/actions/workflows/pages.yml)
 
-The site now opens directly in Bulgarian, with no English selector. Enter the five required measurements, confirm eligibility, and select **Анализирай телосложението ми**. Additional measurements are optional. For calories and the vertical right-hand nutrient list, expand **Хранителни ориентири** and choose activity and a goal explicitly; no dietary values are invented when those choices are missing.
+The site opens directly in Bulgarian, with no English selector. The original sidebar, central input panel, right-hand results panel and LF hero artwork are restored. Enter the five required measurements, confirm eligibility, and select **Анализирай телосложението ми**. Additional measurements are optional. For calories and the vertical right-hand nutrient list below fats, expand **Хранителни ориентири** and choose activity and a goal explicitly; no dietary values are invented when those choices are missing.
 
 A browser-based nutrition calculator and workout planner for generally healthy adults aged 18-56. The agreed MVP supports metric inputs, fat loss, maintenance, muscle building, conservative weight gain, gym/home plans, and device-local saving.
 
@@ -83,7 +83,7 @@ Future updates: review changes, commit the intended files, and use **Push origin
 - `public/js/profile-storage.js`: strict normalized v5 profile records and protocol-preserving v1-v4 restoration, without saved eligibility or calculated results.
 - `public/js/measurements.js`: Strict metric parsing shared by nutrition and body assessment.
 - `public/js/i18n.js`, `public/js/bg-models.js`, `public/js/bg-app.js`: local Bulgarian nutrition-model translations; static analyzer text is Bulgarian directly.
-- `public/training.html`: separate, clearly labeled future-feature page opened from the completed analysis; no workout generation or health data in URLs.
+- `public/training.html`: separate, clearly labeled future-feature page opened in the same browser tab from the completed analysis, with a return link; no workout generation or health data in URLs.
 - `public/js/app.js`: DOM rendering and consent-based local profile storage.
 - `tests/unit/`, `tests/e2e/`: Independent numerical fixtures and real browser scenarios.
 

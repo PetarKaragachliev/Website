@@ -12,32 +12,42 @@
 <body>
   <a class="skip-link" href="#main">Към съдържанието</a>
   <div class="app-shell">
-    <header class="site-header">
+    <header class="sidebar">
       <a class="brand" href="./index.html" aria-label="LiftFuel, начало"><span class="brand-icon" aria-hidden="true">LF</span> LIFT<span>FUEL.</span></a>
-      <nav aria-label="Основна навигация"><a href="#calculator" aria-current="page">Телосложение</a><a href="#method">Методика</a></nav>
-      <span class="privacy-tag">Без регистрация. На твоето устройство.</span>
+      <div class="sidebar-body">
+        <p class="eyebrow nav-caption">ТВОИТЕ ИНСТРУМЕНТИ ЗА ТРЕНИРОВКИ</p>
+        <nav aria-label="Основна навигация">
+          <a class="nav-link active" href="#calculator"><span aria-hidden="true">01</span> Хранене и телосложение</a>
+          <a class="nav-link" href="#method"><span aria-hidden="true">02</span> Методиката</a>
+          <a class="nav-link" href="#next"><span aria-hidden="true">03</span> Какво предстои</a>
+        </nav>
+        <div class="sidebar-note"><span class="small-label">ПО-МАЛКО ГАДАЕНЕ.</span><p>Повече посока.<br>Тренировка след тренировка.</p><span class="status-dot"></span><span class="muted">Поверителност по замисъл</span></div>
+      </div>
+      <span class="sidebar-version">ХРАНЕНЕ / ПЪРВА ВЕРСИЯ</span>
     </header>
     <main id="main">
+      <div class="topline"><span class="eyebrow">ЗА СЛЕДВАЩОТО ТИ ПОВТОРЕНИЕ</span><span class="privacy-tag"><span class="status-dot"></span>Без регистрация. На твоето устройство.</span></div>
       <section class="hero" aria-labelledby="hero-title">
-        <p class="eyebrow accent">ПОЗНАЙ ОТПРАВНАТА СИ ТОЧКА</p>
-        <h1 id="hero-title">Твоето тяло.<br><span>По-ясна посока.</span></h1>
-        <p class="hero-description">Измери, разбери, продължи. Ориентировъчен анализ на телосложението, без етикети и без обещания за идеална форма.</p>
-        <p class="preview-notice"><strong>В процес на разработка.</strong> Инструментът не заменя медицинска оценка. Генераторът на тренировки предстои.</p>
+        <div class="hero-copy"><p class="eyebrow accent">ПО-СИЛНО НАЧАЛО</p>
+        <h1 id="hero-title">ЗАРЕДИ УСИЛИЕТО.<br><span>НАДГРАДИ СЕБЕ СИ.</span></h1>
+        <p class="hero-description">Дай отправна точка на тренировките си. Открий дневни калорийни и хранителни ориентири и разбери по-добре телосложението си.</p></div>
+        <div class="hero-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="orbit orbit-three"></div><div class="art-mark">LF<span>+</span></div><div class="art-caption">ЯСНА ПОСОКА.<br>НАПРЕДЪК ПРЕД ТЕБ.</div></div>
       </section>
+      <div class="section-heading" id="calculator"><h2><span class="section-number">01 /</span> ПОСТАВИ ОСНОВАТА</h2><span class="small-label">МЕТРИЧНИ ЕДИНИЦИ / 18-56 Г.</span></div>
       <noscript><p class="notice">За анализа е необходим JavaScript. Бутонът остава неактивен, за да не бъдат изпратени данните от формуляра към сървъра.</p></noscript>
-      <div class="calculator-layout" id="calculator">
+      <div class="calculator-layout">
         <div class="main-stack">
           <section class="panel profile-panel" aria-labelledby="profile-title">
-            <div class="panel-heading"><div><p class="eyebrow accent">01 / ТВОИТЕ ДАННИ</p><h2 id="profile-title">Основата на анализа</h2></div><span class="panel-index" aria-hidden="true">01</span></div>
+            <div class="panel-heading"><div><p class="eyebrow">ТВОИТЕ ДАННИ</p><h2 id="profile-title">Малко повече за теб.</h2></div><span class="panel-index" aria-hidden="true">01</span></div>
             <p class="section-intro">Попълни основните измервания. Хранителна цел и ниво на активност не са необходими за анализа на телосложението.</p>
             <form id="profile-form" novalidate>
               <div id="error-summary" class="notice error-summary" hidden tabindex="-1" role="alert"><strong>Провери посочените полета.</strong><ul id="error-list"></ul></div>
-              <div class="measurement-grid">
-                <div class="field"><label for="sex">Пол</label><select id="sex" name="sex" required aria-describedby="sex-hint sex-error"><option value="">Избери</option><option value="male">Мъж</option><option value="female">Жена</option></select><small id="sex-hint">Категория за формулите, не определение за идентичност. Ако не е подходяща, потърси индивидуална оценка.</small><p id="sex-error" class="field-error" hidden></p></div>
+              <div class="measurement-grid basic-measurements">
                 <div class="field"><label for="age">Възраст</label><div class="input-wrap"><input id="age" name="age" type="text" inputmode="numeric" maxlength="3" autocomplete="off" required aria-describedby="age-hint age-error"><span aria-hidden="true">г.</span></div><small id="age-hint">Поддържана възраст 18-56 г. RFM и категориите за ИТМ на възрастни са само за 20+ години.</small><p id="age-error" class="field-error" hidden></p></div>
-                <div class="field"><label for="height">Ръст</label><div class="input-wrap"><input id="height" name="height" type="text" inputmode="decimal" maxlength="8" autocomplete="off" required aria-describedby="height-hint height-error"><span aria-hidden="true">см</span></div><small id="height-hint">Без обувки, изправен до стена.</small><p id="height-error" class="field-error" hidden></p></div>
                 <div class="field"><label for="weight">Тегло</label><div class="input-wrap"><input id="weight" name="weight" type="text" inputmode="decimal" maxlength="8" autocomplete="off" required aria-describedby="weight-hint weight-error"><span aria-hidden="true">кг</span></div><small id="weight-hint">На равна повърхност, с леко облекло.</small><p id="weight-error" class="field-error" hidden></p></div>
+                <div class="field"><label for="height">Ръст</label><div class="input-wrap"><input id="height" name="height" type="text" inputmode="decimal" maxlength="8" autocomplete="off" required aria-describedby="height-hint height-error"><span aria-hidden="true">см</span></div><small id="height-hint">Без обувки, изправен до стена.</small><p id="height-error" class="field-error" hidden></p></div>
               </div>
+              <div class="field"><label for="sex">Пол</label><select id="sex" name="sex" required aria-describedby="sex-hint sex-error"><option value="">Избери</option><option value="male">Мъж</option><option value="female">Жена</option></select><small id="sex-hint">Категория за формулите, не определение за идентичност. Ако не е подходяща, потърси индивидуална оценка.</small><p id="sex-error" class="field-error" hidden></p></div>
               <div class="field waist-field"><label for="waistRfm">Талия за RFM при горния ръб на тазовата кост</label><div class="input-wrap"><input id="waistRfm" name="waistRfm" type="text" inputmode="decimal" maxlength="8" autocomplete="off" required aria-describedby="waistRfm-hint waistRfm-error"><span aria-hidden="true">см</span></div><small id="waistRfm-hint">За RFM: измери върху гола кожа на нивото на най-горния ръб на дясната тазова кост. Лентата е хоризонтална, без притискане, след нормално издишване. Не използвай автоматично най-тясната част на талията.</small><p id="waistRfm-error" class="field-error" hidden></p></div>
 
               <details id="measurements-details" class="disclosure">
@@ -93,21 +103,23 @@
             <details class="disclosure"><summary>Допълнителни пропорции</summary><dl id="body-proportions" class="proportion-list"></dl><p id="proportion-note"></p></details>
             <details class="disclosure"><summary>Методика и референтни стойности</summary><p id="body-bmi-note"></p><p id="body-reference-note"></p><a href="https://omronhealthcare.com/storage/pdfs/1665708-0f_hbf-514c-z_e_m_web_alt_text_acc.pdf" target="_blank" rel="noopener noreferrer">Таблица на Omron по Gallagher (PDF, нов раздел)</a></details>
             <section class="result-section" aria-labelledby="body-direction-title"><h3 id="body-direction-title">Обща посока</h3><p id="body-goal-context"></p></section>
-            <a id="training-link" class="training-link" href="./training.html" target="_blank" rel="noopener noreferrer">Генериране на тренировъчен план<span class="sr-only"> (отваря се в нов раздел)</span></a>
+            <a id="training-link" class="training-link" href="./training.html">Генериране на тренировъчен план</a>
           </section>
           <details id="method" class="method-section disclosure"><summary>Как работи анализът</summary><p>Всички входни измервания са метрични: сантиметри и килограми. ИТМ е ориентир за пълнолетни и не различава мазнини от мускули. RFM оценява само процента мазнини за възраст 20+ чрез ръст, пол и талия при горния ръб на тазовата кост; не измерва мускули.</p><p>Оценката по NICE използва отделна талия по средата между ребрата и таза и се прилага само при ИТМ под 35. Двете места за измерване на талията не са взаимозаменяеми. Хранителните изчисления са незадължителни начални ориентири, не предписание.</p><div class="source-links"><a href="https://www.nature.com/articles/s41598-018-29362-1" target="_blank" rel="noopener noreferrer">Оригинално изследване за RFM<span class="sr-only"> (нов раздел)</span></a><a href="https://www.nice.org.uk/guidance/ng246/chapter/Identifying-and-assessing-overweight-obesity-and-central-adiposity" target="_blank" rel="noopener noreferrer">Насоки на NICE за измерване<span class="sr-only"> (нов раздел)</span></a></div></details>
         </div>
 
+        <div class="result-column">
         <aside id="nutrition-panel" class="panel result-panel" aria-labelledby="nutrition-title">
-          <p class="eyebrow accent">ДОПЪЛНИТЕЛНА ПОСОКА</p><h2 id="nutrition-title">Хранене</h2>
+          <div class="result-topline"><h2 id="nutrition-title" class="eyebrow">ТВОИТЕ РЕЗУЛТАТИ</h2><span class="small-label accent">ОРИЕНТИРИ, НЕ ПРЕДПИСАНИЕ</span></div>
           <div id="empty-result" class="empty-result"><span class="target-symbol" aria-hidden="true"></span><h3>Първо тялото.<br>После целта.</h3><p>За хранителни ориентири отвори „Хранителни ориентири“ във формуляра и избери активност и цел. Те не са необходими за анализа на телосложението.</p></div>
           <section id="nutrition-result" hidden tabindex="-1" aria-labelledby="result-title">
-            <span id="result-state" class="output-state"></span><h3 id="result-title">Дневни хранителни ориентири</h3><p id="goal-description"></p>
+            <span id="result-state" class="output-state"></span><h3 id="result-title">Твоята дневна отправна точка.</h3><p id="goal-description"></p>
+            <dl class="plan-summary"><div><dt>Целево тегло</dt><dd data-testid="target-weight"></dd></div><div><dt>Желано седмично темпо</dt><dd data-testid="weekly-pace"></dd></div></dl>
+            <div class="calorie-display"><span data-testid="calories"></span><span>ккал / ден</span></div><p class="calorie-caption">Ориентировъчен дневен енергиен прием</p>
             <dl class="macro-list">
-              <div class="calorie-row"><dt>Енергия <small>ккал / ден</small></dt><dd data-testid="calories"></dd></div>
-              <div><dt>Белтъчини <small>г / ден</small></dt><dd data-testid="protein"></dd></div>
-              <div><dt>Въглехидрати <small>г / ден</small></dt><dd data-testid="carbs"></dd></div>
-              <div><dt>Мазнини <small>г / ден</small></dt><dd data-testid="fat"></dd></div>
+              <div><dt><span class="macro-dot protein-dot" aria-hidden="true"></span>Белтъчини</dt><dd><span data-testid="protein"></span><small>г / ден</small></dd></div>
+              <div><dt><span class="macro-dot carbs-dot" aria-hidden="true"></span>Въглехидрати</dt><dd><span data-testid="carbs"></span><small>г / ден</small></dd></div>
+              <div><dt><span class="macro-dot fat-dot" aria-hidden="true"></span>Мазнини</dt><dd><span data-testid="fat"></span><small>г / ден</small></dd></div>
             </dl>
             <section id="daily-guidance" class="daily-guidance" aria-labelledby="reference-title">
               <h3 id="reference-title">Дневни хранителни референции</h3>
@@ -117,12 +129,14 @@
               <p id="reference-scope" class="reference-disclaimer">RDA: препоръчителен дневен прием. AI: адекватен прием. UL: горна допустима граница, не цел. Това не са дози за добавки или диагноза за недостиг. Индивидуалните нужди зависят от здравето и други фактори. Не добавяй тези стойности като допълнителни калории или мазнини към общите количества.</p>
               <details id="meal-guidance" class="disclosure"><summary>Примерно разпределение на храненията</summary><p>Брой хранения в примера: <strong id="meal-count"></strong>. Това е незадължителна организация на същия дневен прием.</p><ol id="meal-times" class="meal-times"></ol><p id="meal-summary"></p><p id="meal-spacing-note">Около 4 часа между храненията е възможен ритъм, не доказано най-здравословният за всеки. Съобрази го с глада, съня и тренировките; не насилвай късни хранения.</p></details>
             </section>
-            <dl class="plan-summary"><div><dt>Целево тегло</dt><dd data-testid="target-weight"></dd></div><div><dt>Желано седмично темпо</dt><dd data-testid="weekly-pace"></dd></div></dl>
             <details class="disclosure"><summary>Допускания и ограничения</summary><p id="calculation-detail"></p><p id="pace-assumptions"></p><p>Начална оценка, не измерване на нуждите. Темпото не обещава срок или покачване само на мускули. Проследявай тенденциите, възстановяването и тренировките през няколко седмици.</p></details>
           </section>
           <section id="limitation" class="limitation" hidden tabindex="-1" aria-labelledby="limitation-title"><h3 id="limitation-title">Необходим е индивидуален подход</h3><p id="limitation-detail"></p><p>Това не е диагноза и не означава, че не можеш да тренираш. Квалифициран диетолог или лекар може да помогне с подходящи хранителни цели.</p></section>
         </aside>
+        <section class="next-card" id="next" aria-labelledby="next-title"><span class="small-label accent">СЛЕДВАЩИЯТ ИНСТРУМЕНТ</span><h3 id="next-title">Твоята тренировка.<br>С ясен план.</h3><p>Генераторът на тренировки за зала и у дома предстои. Подборът на упражнения и правилата за напредък са в процес на разработка.</p><span class="next-card-number" aria-hidden="true">02</span></section>
+        </div>
       </div>
+      <p class="preview-notice"><strong>В процес на разработка.</strong> Инструментът не заменя медицинска оценка. Генераторът на тренировки предстои.</p>
       <footer><a class="brand footer-brand" href="./index.html">LIFT<span>FUEL.</span></a><p>Повече яснота. Без обещания за съвършенство.</p></footer>
     </main>
   </div>

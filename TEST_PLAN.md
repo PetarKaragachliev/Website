@@ -94,7 +94,7 @@ Scripts are configured: `dev` serves `public/` on loopback port 4173; `test` run
 | --- | --- | --- |
 | Unit tests | `npm test` | 295 calculation/reference/storage/body/RFM/local-translation and workspace-policy tests passed |
 | Integration / component tests | Actual DOM/storage scenarios in the Playwright suite | Chromium/Firefox exercised; no simulated DOM claims |
-| Available browser matrix | `npm run test:e2e -- --project=chromium-desktop --project=chromium-mobile --project=chromium-tablet --project=firefox` | Final 128 passed, 32 current-flow scenarios per project, one final full local run after targeted fixes; no media capture |
+| Available browser matrix | `npm run test:e2e -- --project=chromium-desktop --project=chromium-mobile --project=chromium-tablet --project=firefox` | Final 132 passed, 33 current-flow scenarios per project, including restored desktop columns/mobile reflow and same-tab training navigation/return; no media capture |
 | Full browser matrix | `npm run test:e2e` | Local run blocked by WebKit executable permissions; active CI executes the full matrix on Linux, not waived |
 | Formatting / lint / type checks, as applicable | TBD | Not configured |
 | Production build | None required for native static files; verify deployed static site separately | GitHub Pages development preview active; not production/content-review approval |

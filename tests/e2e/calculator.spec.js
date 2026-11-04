@@ -32,6 +32,23 @@ test('Bulgarian first screen keeps optional inputs collapsed and has no English 
   await expect(page.locator('#remember')).not.toBeChecked();
 });
 
+test('original sidebar, input and output columns are restored with the LF hero artwork', async ({ page }) => {
+  await page.setViewportSize({ width: 1240, height: 900 });
+  await expect(page.locator('.sidebar nav a')).toHaveCount(3);
+  await expect(page.locator('.hero-art')).toBeVisible();
+  const sidebar = await page.locator('.sidebar').boundingBox();
+  const input = await page.locator('.profile-panel').boundingBox();
+  const output = await page.locator('#nutrition-panel').boundingBox();
+  expect(sidebar.x + sidebar.width).toBeLessThanOrEqual(input.x);
+  expect(input.x + input.width).toBeLessThan(output.x);
+  expect(input.y).toBe(output.y);
+  await page.setViewportSize({ width: 360, height: 800 });
+  const mobileInput = await page.locator('.profile-panel').boundingBox();
+  const mobileOutput = await page.locator('#nutrition-panel').boundingBox();
+  expect(mobileOutput.y).toBeGreaterThan(mobileInput.y + mobileInput.height);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+});
+
 test('mandatory measurements produce central RFM, fat mass and fat-free mass without invented calories', async ({ page }) => {
   await measurements(page);
   await page.locator('#analyze').click();
@@ -368,14 +385,15 @@ test('complete layout reflows at 320px and optional readings cause no remote req
   expect(requests).toEqual([]);
 });
 
-test('training action opens a separate honest placeholder and keeps the original analysis', async ({ page }) => {
+test('training action opens its separate page in the same tab without health data in the URL', async ({ page, context }) => {
   await measurements(page);
   await page.locator('#analyze').click();
-  const [popup] = await Promise.all([page.waitForEvent('popup'), page.locator('#training-link').click()]);
-  await popup.waitForLoadState();
-  await expect(popup).toHaveURL(/\/training\.html$/);
-  await expect(popup.locator('html')).toHaveAttribute('lang', 'bg');
-  await expect(popup.locator('main')).toContainText('все още не създава тренировъчна програма');
-  await expect(page.locator('#body-fat-calculated')).toHaveText('19,0%');
-  await popup.close();
+  await page.locator('#training-link').click();
+  await expect(page).toHaveURL('http://127.0.0.1:4173/training.html');
+  expect(context.pages()).toHaveLength(1);
+  await expect(page.locator('html')).toHaveAttribute('lang', 'bg');
+  await expect(page.locator('main')).toContainText('все още не създава тренировъчна програма');
+  await page.getByRole('link', { name: 'Обратно към анализа', exact: true }).click();
+  await expect(page).toHaveURL(/\/index\.html$/);
+  await expect(page.locator('#analyze')).toBeEnabled();
 });
