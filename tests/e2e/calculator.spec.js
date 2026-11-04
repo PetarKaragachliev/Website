@@ -20,7 +20,10 @@ async function nutrition(page, overrides = {}) {
   }
 }
 
-test.beforeEach(async ({ page }) => { await page.goto('/'); });
+test.beforeEach(async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('#analyze')).toBeEnabled();
+});
 
 test('Bulgarian first screen exposes nutrition controls and calorie/macro placeholders without invented targets', async ({ page }) => {
   await expect(page.locator('html')).toHaveAttribute('lang', 'bg');
@@ -367,11 +370,43 @@ test('failed deletion explicitly warns that saved health data remains', async ({
   expect(await page.evaluate(k => localStorage.getItem(k), key)).not.toBeNull();
 });
 
+test('a cached previous unversioned entry point cannot disable the current form', async ({ page }) => {
+  await page.route('**/js/app.js', route => route.fulfill({
+    contentType: 'text/javascript',
+    body: "document.querySelector('#clear-nutrition').addEventListener('click', () => {});"
+  }));
+  await page.reload();
+  await expect(page.locator('#analyze')).toBeEnabled();
+  await measurements(page);
+  await page.locator('#analyze').click();
+  expect((await page.getByTestId('calories').textContent()).replace(/\s/g, '')).toBe('2604');
+  await expect(page.locator('#body-fat-calculated')).toHaveText('19,0%');
+});
+
+for (const failure of ['network', 'initialization']) {
+  test(`${failure} startup failure explains the disabled button without exposing profile data`, async ({ page }) => {
+    await page.route('**/js/app.js*', route => failure === 'network'
+      ? route.abort()
+      : route.fulfill({ contentType: 'text/javascript', body: 'throw new Error("Startup failure");' }));
+    await page.reload();
+    await expect(page.locator('#app-status')).toContainText('Неуспешно зареждане');
+    await expect(page.locator('#reload-app')).toBeVisible();
+    await expect(page.locator('#analyze')).toBeDisabled();
+    await measurements(page);
+    await page.locator('#waistRfm').press('Enter');
+    await expect(page).toHaveURL('http://127.0.0.1:4173/');
+    await page.unroute('**/js/app.js*');
+    await page.locator('#reload-app').click();
+    await expect(page.locator('#analyze')).toBeEnabled();
+    await expect(page.locator('#app-status')).toBeHidden();
+  });
+}
+
 for (const mode of ['blocked-module', 'disabled-javascript']) {
   test(`${mode} cannot submit private measurements through a native form request`, async ({ page, browser }) => {
     let context;
     if (mode === 'blocked-module') {
-      await page.route('**/js/app.js', route => route.abort());
+      await page.route('**/js/app.js*', route => route.abort());
       await page.reload();
     } else {
       context = await browser.newContext({ javaScriptEnabled: false });

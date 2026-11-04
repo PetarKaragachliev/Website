@@ -87,6 +87,7 @@ Future updates: review changes, commit the intended files, and use **Push origin
 - `public/js/i18n.js`, `public/js/bg-models.js`, `public/js/bg-app.js`: local Bulgarian nutrition-model translations; static analyzer text is Bulgarian directly.
 - `public/training.html`: separate, clearly labeled future-feature page opened in the same browser tab from the completed analysis, with a return link; no workout generation or health data in URLs.
 - `public/js/app.js`: DOM rendering and consent-based local profile storage.
+- `public/js/start.js`: versioned application entry point and explicit startup-failure/reload feedback. Keep its HTML revision and imported application revision in sync when changing the startup contract; the submit button stays disabled until initialization completes.
 - `tests/unit/`, `tests/e2e/`: Independent numerical fixtures and real browser scenarios.
 
 No profile data is sent to an application backend. Device remembering is off by default. Consented successful shared-form calculation saves strict version-5 inputs at `liftfuel.profile.v1`, with separate RFM and midpoint waists; the schema is unchanged and legacy body-only saved records remain readable. Legacy records retain their original measurement origins without guessing missing values or nutrition choices. Eligibility and computed percentages/masses are never saved. Source links navigate externally only when activated.
