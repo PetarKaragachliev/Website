@@ -382,6 +382,13 @@ test('complete layout reflows at 320px and optional readings cause no remote req
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   await page.setViewportSize({ width: 320, height: 800 });
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
+  await page.addStyleTag({ content: ':root { --body: Arial, sans-serif; } .brand { font-family: Arial, sans-serif; }' });
+  const overflow = await page.evaluate(() => [...document.querySelectorAll('body *')].filter(node => {
+    const box = node.getBoundingClientRect();
+    return box.width > 0 && box.right > innerWidth;
+  }).map(node => ({ tag: node.tagName, id: node.id, className: node.className })));
+  expect(overflow).toEqual([]);
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
   expect(requests).toEqual([]);
 });
 
