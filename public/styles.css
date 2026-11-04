@@ -40,7 +40,16 @@ nav { display: grid; gap: 8px; }
 .status-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); margin-right: 8px; vertical-align: middle; }
 .sidebar-version { border-top: 1px solid var(--border); padding-top: 20px; color: var(--muted); font-size: 9px; letter-spacing: .1em; }
 main { min-width: 0; padding: 30px 48px 0; }
-.topline { display: flex; justify-content: space-between; gap: 16px; align-items: center; padding-bottom: 22px; border-bottom: 1px solid var(--border); }
+.topline { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 16px; align-items: center; padding-bottom: 22px; border-bottom: 1px solid var(--border); }
+.top-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 12px; min-width: 0; }
+.language-control { display: flex; align-items: center; gap: 8px; font-size: 11px; color: var(--muted); }
+.language-control select { width: auto; min-width: 118px; min-height: 44px; max-width: 155px; padding-top: 8px; padding-bottom: 8px; font-size: 12px; }
+.language-status { width: 100%; font-size: 10px; color: var(--muted); text-align: right; }
+.language-status:empty { display: none; }
+html[lang="bg"] h1, html[lang="bg"] h2 { font-family: 'Arial Narrow', 'Segoe UI', Arial, sans-serif; font-weight: 800; overflow-wrap: anywhere; }
+html[lang="bg"] .hero h1 { font-size: clamp(36px, 4.3vw, 64px); }
+html[lang="bg"] .section-heading h2 { font-size: 22px; }
+@media (max-width: 650px) { .top-actions { width: 100%; justify-content: space-between; } html[lang="bg"] .hero h1 { font-size: clamp(32px, 8.5vw, 48px); } html[lang="bg"] .section-heading h2 { font-size: 19px; } }
 .privacy-tag { font-size: 11px; color: var(--muted); }
 .preview-notice { margin-top: 18px; border-left: 2px solid var(--accent); padding: 8px 12px; color: var(--muted); font-size: 12px; background: #151c17; }
 .preview-notice strong { color: var(--text); }

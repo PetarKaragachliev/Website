@@ -62,6 +62,7 @@ Calculator/profile-storage items now have implementation evidence. They remain o
 | APP-009 | Nutrition Guidance | FR-006, FR-007 / AC-014 through AC-017 | Requested nutrient references/limits, age/category boundaries, flexible four-occasion meal example and even split implemented/tested; qualified nutrition/content review remains a release gate | Blocked |
 | APP-010 | Body Context | FR-008, FR-004 / AC-018 through AC-020 | Optional BMI/waist indicators, existing body-fat/method, self-description, independent assessment, and consent-based v3 storage implemented; qualified interpretation/content review remains a release gate | Blocked |
 | APP-011 | Waist Estimate / Development Hygiene | D-014, FR-008 / AC-018, AC-020 | Adult RFM, protocol-specific waist interpretation, v4 migration, and non-OneDrive development checkout/guards implemented; professional body-composition/content review remains a release gate | Blocked |
+| APP-012 | Localization | FR-009, FR-004 / AC-021 through AC-023 | Full English/Bulgarian UI and dynamic guidance, locale numbers, stable inputs/results, independent preference storage and truthful deletion failures implemented/tested; qualified clinical-language review remains a release gate | Blocked |
 
 ## Implementation Item Template
 

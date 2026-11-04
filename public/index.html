@@ -28,7 +28,7 @@
     </header>
 
     <main id="main">
-      <div class="topline"><span class="eyebrow">BUILT FOR YOUR NEXT REP</span><span class="privacy-tag"><span class="status-dot"></span> No account. Your device.</span></div>
+      <div class="topline"><span class="eyebrow">BUILT FOR YOUR NEXT REP</span><div class="top-actions"><span class="privacy-tag"><span class="status-dot"></span> No account. Your device.</span><label class="language-control" for="language"><span>Language</span><select id="language" data-no-translate aria-describedby="language-hint" disabled><option value="en" lang="en">English</option><option value="bg" lang="bg">Български</option></select></label><span id="language-hint" class="sr-only">Your language choice can be remembered independently of health-profile saving.</span><span id="language-status" class="language-status" role="status"></span></div></div>
       <p class="preview-notice" role="note"><strong>Development preview.</strong> Calculator available for feedback, not medical guidance. Workout generation and qualified content review are still pending.</p>
       <section class="hero" aria-labelledby="hero-title">
         <div class="hero-copy"><p class="eyebrow accent">A STRONGER START</p><h1 id="hero-title">FUEL THE WORK.<br><span>BUILD YOUR NEXT.</span></h1><p class="hero-description">Give your training a starting point. Find daily calorie and macro estimates that fit the goal you're working toward.</p></div>
@@ -36,7 +36,7 @@
       </section>
 
       <div class="section-heading" id="calculator"><h2><span class="section-number">01 /</span> SET YOUR FOUNDATION</h2><span class="small-label">METRIC UNITS / AGES 18-56</span></div>
-      <noscript><p class="notice">JavaScript is required to calculate targets and save a profile. Enable it to use this tool.</p></noscript>
+      <noscript><p class="notice">JavaScript is required to calculate targets and save a profile. Enable it to use this tool.<br><span lang="bg">За изчисляване, смяна на езика и запазване на профил е необходим JavaScript. Включете го, за да използвате инструмента.</span></p></noscript>
       <div class="calculator-layout">
         <section class="panel profile-panel" aria-labelledby="profile-title">
           <div class="panel-heading"><div><p class="eyebrow">THE INPUT</p><h3 id="profile-title">A little about you.</h3></div><span class="panel-index" aria-hidden="true">01</span></div>
@@ -83,7 +83,7 @@
             <button class="primary-button" type="submit" disabled>Calculate my targets <span aria-hidden="true">&#8599;</span></button>
             <p id="app-status" class="field-hint" role="status">Calculator loading. If this message remains, JavaScript could not load. Calculation is disabled to keep your profile out of server requests.</p>
             <p class="submit-note">A starting estimate. Not a prescription or a guarantee.</p>
-            <div class="saving-options"><label class="check-label"><input id="remember" type="checkbox" aria-describedby="remember-hint"><span>Remember on this device</span></label><p class="field-hint" id="remember-hint">Optional. Your profile, including any included waist/body-fat details, saves after Calculate my targets in this browser only. Anyone sharing this browser may see it. Clearing browser data removes it. No account or cross-device sync; eligibility confirmation is never saved.</p><p id="storage-status" class="storage-status" role="status">Nothing is saved unless you opt in.</p><button id="delete-data" class="text-button" type="button">Delete my saved data</button></div>
+            <div class="saving-options"><label class="check-label"><input id="remember" type="checkbox" aria-describedby="remember-hint"><span>Remember on this device</span></label><p class="field-hint" id="remember-hint">Optional. Your profile, including any included waist/body-fat details, saves after Calculate my targets in this browser only. Anyone sharing this browser may see it. Clearing browser data removes it. No account or cross-device sync; eligibility confirmation is never saved.</p><p id="storage-status" class="storage-status" role="status">Your health profile is not saved unless you opt in.</p><button id="delete-data" class="text-button" type="button">Delete my saved data</button></div>
           </form>
         </section>
 

@@ -1,6 +1,6 @@
 # Development Status
 
-Last updated: 2026-11-03.
+Last updated: 2026-11-04.
 
 ## Snapshot
 
@@ -12,8 +12,8 @@ Last updated: 2026-11-03.
 | Stack and hosting | Native HTML/CSS/JavaScript; public PetarKaragachliev/Website repository and GitHub Pages preview verified; test-gated publishing on main pushes |
 | Name and design | LiftFuel (temporary); dark/green direction agreed; supplied fitness mockup reviewed |
 | Active implementation sprint | Nutrition slice; profile-only saving delivered early with calculator |
-| Application code | Calculator/reference guidance, local saving, optional RFM body-fat estimate with measurement-site controls, and approximate waist/BMI profile; no workout generator or food-intake tracking |
-| Automated tests and CI | 163 unit tests; 45 browser scenarios per project; no capture; non-OneDrive dev/test guards; Linux CI includes WebKit and gates deployment |
+| Application code | English/Bulgarian calculator/reference/body/meal interface; local profile saving and independent language preference; no workout generator or food-intake tracking |
+| Automated tests and CI | 167 unit tests; 57 browser scenarios per project; no capture; non-OneDrive guards; Linux CI includes WebKit and gates deployment |
 | Active local checkout | C:\Users\Petar\Projects\LiftFuel; independent clone, Git origin unchanged; old OneDrive copy left untouched and no longer used for development |
 | Release readiness | Development preview active; qualified content review, manual accessibility/device checks, and workout features remain incomplete; local WebKit installation still blocked |
 
@@ -70,6 +70,10 @@ Use one entry per verification run. Preserve the initial red result and later gr
 | 2026-11-03 | OneDrive follow-up audit / migration | Workspace fix | Capture settings checked; counted ignored dependency files and Git objects; created owner-approved independent checkout outside OneDrive and installed dependencies there | No further assistant Git/npm/test writes into the synced copy | Found 918 dependency files plus Git metadata in old synced project; exact 831-item notification origin is unconfirmed. New checkout at Projects/LiftFuel created with no object hardlinks; all subsequent tooling runs there | .gitignore does not prevent OneDrive sync. Owner must switch OpenCode/Desktop to the new path and remove the old Desktop entry without deleting files; no old files restored/deleted by this migration |
 | 2026-11-03 | APP-011 | Red / Green | Published RFM unit fixtures and browser journey, then workspace-alias regression | Compute estimate only for eligible category/age/site; refuse aliased synced roots | Missing RFM output and UI failed before implementation; alias regression reproduced the lexical-path gap before realpath fix; all 163 unit tests passed afterward | Male 180/80 fixture =19%; female =31%; no auto calorie changes or guessed old measurement sites |
 | 2026-11-03 | APP-011 available browser verification | Green | Full Chromium desktop/mobile/tablet and Firefox matrix from C:\Users\Petar\Projects\LiftFuel | Old/new journeys pass without any capture or workspace artifacts | All 180 cases passed, exit 0 | Includes default computed percentage, protocol clearing, under-20 explanation, v3 midpoint migration and malformed v4 rejection; no screenshots/traces/video generated |
+| 2026-11-04 | APP-012 | Red | Initial Bulgarian switch browser test before language control existed | User can select Bulgarian | Failed waiting for missing language selector | Intended missing-interface red; no images/traces/video generated |
+| 2026-11-04 | APP-012 privacy regression | Red / Fix | Blocked profile/language deletion scenario | Retained health-profile data must remain explicitly reported | Language-only warning initially masked failed profile removal; test reproduced before fix | Warning now preserves actual profile failure; separate language-only failure case also asserted |
+| 2026-11-04 | APP-012 test corrections | Test verification | Focus-preservation scenario and translated-text audit | Tests model actual keyboard selection and allow only scientific/brand names | Added explicit focus before programmatic selectOption; audit allowed JavaScript/NHS names in otherwise Bulgarian sentences | No product assertions removed; no untranslated interface sentences waived |
+| 2026-11-04 | APP-012 local verification | Green | All unit tests and full available-browser matrix; translation/code review | Preserve formulas, inputs/consent/results/errors while translating all owned interface text; handle persistence/deletion failures | 167 unit tests and 228 browser cases passed; review finding fixed and follow-up reported no findings | Bulgarian numeric commas, labels/options, title/ARIA, nutrient/body/meal guidance and 320px reflow tested; no translation-service requests or captures |
 | 2026-11-03 | APP-007 visual / preview | Review | Reran target/pace browser journey on desktop/mobile, inspected weight-plan.png screenshots, restarted static preview, and fetched current HTML/module | Target, pace, and new results visible without broken layout; current assets served | Two targeted browser checks passed; screenshots reviewed; HTML/module HTTP 200 and new field/function markers found | Preview restarted at http://127.0.0.1:4173 (PID 10764); earlier preview PID 3596 stopped for tests |
 | 2026-11-03 | Local preview | HTTP smoke check | Started local static server; fetched `/` and `/js/nutrition.js` with Node and asserted status/content | Calculator HTML and module served successfully | Both HTTP 200 at http://127.0.0.1:4173; HTML title and calculation action found | Preview left running (PID 3596); initial inline smoke command needed ESM syntax correction, then passed; stop this preview before running Playwright on the same port |
 
@@ -100,6 +104,7 @@ Include environment or revision details when needed to reproduce a run. Record f
 - Disabled all future test screenshots, traces, and video at the owner's request; removed explicit captures and moved text artifacts out of OneDrive. No display/camera capture exists in the deployed application.
 - Moved active development into an independent non-OneDrive checkout with the owner's approval, including dependencies and Git objects; added dev/test hooks and alias-aware sync-root checks. The previous copy remains untouched and is not the active workspace.
 - Added calculated RFM body fat for supported age/category and hipbone-level waist, kept NICE midpoint screening separate, and saved explicit protocols in version 4. Existing measurements are not silently relabeled and no estimate drives calorie/exercise changes.
+- Added English/Bulgarian switching with locally bundled translations, reversible static text/attributes and dynamic rendering, localized numeric display, stable current results/errors and consent. Language preference is separate from health storage; deletion failure messages truthfully distinguish retained profile data from a language-only failure.
 - Added optional current BMI/waist interpretation, an existing body-fat estimate with method, and self-reported build description. It guides discussion without inferring muscle or altering calories/exercises, and works independently of unavailable nutrition targets. Version 3 saves validated body inputs only with consent; old records do not acquire invented measurements.
 - Product approval and test passes are not clinical validation; full browser/release checks remain incomplete.
 
