@@ -1,19 +1,17 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { resolveLanguage, translate, hasBulgarianTranslation } from '../../public/js/i18n.js';
+import { translate, hasBulgarianTranslation } from '../../public/js/i18n.js';
 import { calculateNutrition } from '../../public/js/nutrition.js';
 
 test('Bulgarian translation preserves whitespace and interpolates text as data', () => {
-  assert.equal(translate(' Age ', 'bg'), ' Възраст ');
+  assert.equal(translate(' mg ', 'bg'), ' мг ');
   assert.equal(translate('About {percent}% (RFM)', 'bg', { percent: 19 }), 'Около 19% (RFM)');
   assert.equal(translate('About {percent}% (RFM)', 'en', { percent: 19 }), 'About 19% (RFM)');
 });
 
-test('unknown language settings safely fall back to English', () => {
-  assert.equal(resolveLanguage('bg'), 'bg');
-  assert.equal(resolveLanguage('en'), 'en');
-  assert.equal(resolveLanguage('<script>'), 'en');
-  assert.equal(translate('Age', 'unknown'), 'Age');
+test('Bulgarian model text remains unchanged and source messages are translated by default', () => {
+  assert.equal(translate('Оценката е приблизителна.'), 'Оценката е приблизителна.');
+  assert.equal(translate('mg'), 'мг');
 });
 
 test('missing template values fail explicitly instead of exposing placeholders', () => {

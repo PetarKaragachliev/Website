@@ -146,7 +146,7 @@ Workout guidance should also explain that sharp pain, dizziness, or chest pain i
 - AC-007 through AC-009: V-009 opt-in, restoration requiring the single eligibility confirmation, deletion, and malformed/unavailable-storage cases.
 - All affected result journeys: V-008 stale-result invalidation and accessible error feedback.
 - AC-011/AC-012: V-010 through V-012 target and weekly-pace validation, calculation effects, maintenance behavior, and unsupported-choice guidance.
-- AC-013/AC-020: Keep key `liftfuel.profile.v1`; record version 4 retains target/pace/body inputs with an explicit waist site. Version 3 waists are restored as midpoint-only, not guessed as hipbone measurements. Earlier versions do not acquire invented fields. Nothing is rewritten until the consented Calculate action; derived RFM, eligibility, and interpretations are never restored. See BODY_ASSESSMENT.md.
+- AC-013/AC-020: Keep key `liftfuel.profile.v1`; strict version 5 stores required body inputs, independent RFM/midpoint waists and optional circumferences, plus explicitly completed nutrition choices if supplied. Version 3 waists restore only as midpoint; version 4 retains its recorded site. No missing measurements, eligibility, or calculated results are invented/restored. Consented analysis saves; incomplete optional diet fields are reported rather than persisted as a valid plan. See BODY_ASSESSMENT.md.
 
 The nutrition/profile-saving portions are exercised by tests/unit/nutrition.test.js and tests/e2e/calculator.spec.js. Workout-specific parts remain planned, not implemented; no saved workout plan exists yet. JavaScript-disabled or failed-module visits cannot submit profile inputs because the submit control remains disabled until the application initializes.
 
@@ -154,7 +154,7 @@ The nutrition/profile-saving portions are exercised by tests/unit/nutrition.test
 
 Daily nutrient reference values, limits, and the optional meal-count/spacing example are specified in [NUTRIENT_REFERENCES.md](NUTRIENT_REFERENCES.md). They do not change the macro calculation or imply actual nutrient consumption. They appear only with eligible supported results and are not stored as observed intake.
 
-The optional [body assessment](BODY_ASSESSMENT.md) has independent eligibility/input validation. It may be available while nutrition is withheld or its fields are incomplete. Its measurement-based profile, self-description, and existing body-fat estimate do not alter selected goals, macros, or exercises.
+The central [body analyzer](BODY_ASSESSMENT.md) works independently of optional nutrition activity/goals. Its provisional composition profile, two-waist interpretation and training self-report do not alter the selected dietary goal or the calorie/macro formulas. Missing diet choices produce no calorie values. Users can clear nutrition only without losing measurements. Derived fat/fat-free mass uses only RFM; reported percentages and circumference-based muscle estimates are not used.
 
 - Retained approved baseline: Mifflin-St Jeor with activity-based maintenance estimation; protein 2.0 g/kg current weight, fat 25% of target calories, carbohydrate from remaining calories. The owner's new target/pace requirement replaces fixed goal multipliers with the documented pace-sensitive policy.
 - Activity descriptions, full-precision arithmetic, whole-number display, and parsing bounds are implemented and tested as the calculator baseline.

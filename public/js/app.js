@@ -1,151 +1,143 @@
-import { calculateNutrition, getWeeklyPaces, validateProfile } from './nutrition.js';
+import { calculateNutrition, getWeeklyPaces } from './nutrition.js';
 import { calculateBodyAssessment } from './body-assessment.js';
-import { captureStaticTranslations, resolveLanguage, translate } from './i18n.js';
+import { translate } from './i18n.js';
+import { PROFILE_STORAGE_KEY, decodeProfile, encodeProfile } from './profile-storage.js';
 
-const storageKey = 'liftfuel.profile.v1';
-const languageKey = 'liftfuel.language';
-const form = document.querySelector('#profile-form');
-const remember = document.querySelector('#remember');
-const storageStatus = document.querySelector('#storage-status');
-const summary = document.querySelector('#error-summary');
-const errorList = document.querySelector('#error-list');
-const resultRegion = document.querySelector('#nutrition-result');
-const limitation = document.querySelector('#limitation');
-const emptyResult = document.querySelector('#empty-result');
-const resultState = document.querySelector('#result-state');
-const guidanceRegion = document.querySelector('#daily-guidance');
-const guidanceLink = document.querySelector('#guidance-link');
-const bodyRegion = document.querySelector('#body-assessment');
-const bodyLink = document.querySelector('#body-link');
-const bodyChoice = document.querySelector('#includeAssessment');
-const bodyFields = document.querySelector('#body-fields');
-const languageControl = document.querySelector('#language');
-const languageStatus = document.querySelector('#language-status');
-const translateStatic = captureStaticTranslations(document.documentElement);
-let language = 'en';
-try { language = resolveLanguage(localStorage.getItem(languageKey)); } catch { /* An unavailable preference must not block the calculator. */ }
-const t = (message, values) => translate(message, language, values);
-const goalLabels = { lose: 'Lose fat / gradual weight reduction', maintain: 'Maintain weight / estimated maintenance', muscle: 'Build muscle / minimize excess fat gain', gain: 'Gain weight / accept some fat gain' };
-const factors = { sedentary: '1.2', light: '1.375', moderate: '1.55', very: '1.725' };
-let number, weightNumber, paceNumber, referenceNumber, ratioNumber, percentNumber;
-let unavailablePaceReason = null;
-let currentNutrition = null;
-let currentAssessment = null;
-let currentLimitation = null;
+const t = (message, values) => translate(message, 'bg', values);
+const $ = selector => document.querySelector(selector);
+const form = $('#profile-form');
+const remember = $('#remember');
+const number = new Intl.NumberFormat('bg-BG', { maximumFractionDigits: 0 });
+const decimal = new Intl.NumberFormat('bg-BG', { maximumFractionDigits: 1 });
+const percentNumber = new Intl.NumberFormat('bg-BG', { maximumFractionDigits: 2 });
+const rfmNumber = new Intl.NumberFormat('bg-BG', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+const paceNumber = new Intl.NumberFormat('bg-BG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const ratioNumber = new Intl.NumberFormat('bg-BG', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+const goalLabels = { lose: 'Намаляване на теглото', maintain: 'Поддържане на теглото', muscle: 'Покачване с фокус върху мускулите', gain: 'Покачване на теглото' };
+const factors = { sedentary: '1,2', light: '1,375', moderate: '1,55', very: '1,725' };
 let displayedErrors = {};
-let storageMessage = storageStatus.textContent;
-let outputMessage = 'YOUR STARTING POINT';
-
-function updateFormatters() {
-  const locale = language === 'bg' ? 'bg-BG' : 'en-US';
-  number = new Intl.NumberFormat(locale, { maximumFractionDigits: 0 });
-  weightNumber = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
-  paceNumber = new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-  referenceNumber = new Intl.NumberFormat(locale, { maximumFractionDigits: 1 });
-  ratioNumber = new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 4 });
-  percentNumber = new Intl.NumberFormat(locale, { maximumFractionDigits: 2 });
-}
+let unavailablePace = null;
+let profileDeletionFailed = false;
 
 function setStorageStatus(message) {
-  storageMessage = message;
-  storageStatus.textContent = t(message);
-}
-
-function setOutputStatus(message) {
-  outputMessage = message;
-  resultState.textContent = t(message);
+  $('#storage-status').textContent = profileDeletionFailed
+    ? `Запазеният профил не можа да бъде изтрит. Изчисти данните за този сайт от настройките на браузъра. ${message}`
+    : message;
 }
 
 function readInputs() {
-  return { ...Object.fromEntries(new FormData(form)), eligible: form.elements.eligible.checked, includeAssessment: bodyChoice.checked };
-}
-
-function updateAssessmentFields() {
-  bodyFields.disabled = !bodyChoice.checked;
-  bodyFields.hidden = !bodyChoice.checked;
-  const hasEstimate = form.elements.bodyFat.value.trim() !== '';
-  form.elements.bodyFatMethod.disabled = !bodyChoice.checked || !hasEstimate;
-  form.elements.bodyFatMethod.required = bodyChoice.checked && hasEstimate;
-  if (!hasEstimate) form.elements.bodyFatMethod.value = '';
-  document.querySelector('#waist-hint').textContent = t(form.elements.waistSite.value === 'iliac'
-    ? 'For RFM, measure around the bare trunk at the uppermost border of the right hipbone, tape horizontal, standing and breathing out naturally. Supported entry: 35-200 cm, not a healthy range.'
-    : 'Measure midway between your lowest ribs and the top of your hips, breathing out naturally. Do not use trouser size. This midpoint measurement supports NICE waist interpretation, not RFM. Supported entry: 35-200 cm, not a healthy range.');
+  return {
+    ...Object.fromEntries(new FormData(form)),
+    eligible: form.elements.eligible.checked,
+    regularTraining: form.elements.regularTraining.checked,
+    includeAssessment: true
+  };
 }
 
 function updatePlanFields(reset = false) {
   const goal = form.elements.goal.value;
   const target = form.elements.targetWeight;
   const weekly = form.elements.weeklyRate;
-  const previousRate = reset ? '' : weekly.value;
+  const previous = reset ? '' : weekly.value;
   target.disabled = !goal;
   target.readOnly = goal === 'maintain';
   target.required = Boolean(goal) && goal !== 'maintain';
-  if (reset) target.value = '';
-  if (goal === 'maintain') target.value = form.elements.weight.value.trim();
-  weekly.replaceChildren(new Option(t('Choose a weekly pace'), ''));
-  unavailablePaceReason = null;
-  const blockedPaces = [];
+  if (reset || !goal) target.value = '';
+  if (goal === 'maintain') target.value = form.elements.weight.value;
+  weekly.replaceChildren(new Option('Избери седмично темпо', ''));
+  unavailablePace = null;
   const paces = getWeeklyPaces(goal, form.elements.weight.value);
+  const blocked = [];
   for (const pace of paces) {
-    const label = goal === 'maintain' ? t('No planned weekly change') : t('{direction} about {kg} kg/week ({percent}% of current weight)', { direction: t(goal === 'lose' ? 'Lose' : 'Gain'), kg: paceNumber.format(pace.kg), percent: percentNumber.format(pace.percent) });
+    const label = goal === 'maintain' ? 'Без планирана седмична промяна' : `${goal === 'lose' ? 'Намаляване' : 'Покачване'} с около ${paceNumber.format(pace.kg)} кг/седмица (${percentNumber.format(pace.percent)}% от текущото тегло)`;
     const option = new Option(label, pace.value);
-    // Preview availability only; actual results still require explicit eligibility confirmation.
-    const candidate = calculateNutrition({ ...readInputs(), eligible: true, weeklyRate: pace.value });
+    const candidate = calculateNutrition({ ...readInputs(), eligible: true, includeAssessment: false, weeklyRate: pace.value });
     if (['calories-range', 'pace-range'].includes(candidate.limitation)) {
-      blockedPaces.push(candidate.limitation);
       option.disabled = true;
-      option.textContent += t(' - outside calculator limits');
+      option.textContent += ' - извън ограниченията на калкулатора';
+      blocked.push({ reason: candidate.limitation, value: pace.value });
     }
     weekly.append(option);
   }
-  if (goal !== 'maintain' && paces.length > 0 && blockedPaces.length === paces.length) unavailablePaceReason = blockedPaces[0];
-  const availability = document.querySelector('#pace-availability');
-  availability.hidden = !unavailablePaceReason;
-  availability.textContent = unavailablePaceReason ? t('No weekly pace is available for these inputs within the calculator\'s calorie/deficit limits. Confirm eligibility and calculate for an explanation, or seek individual guidance.') : '';
-  weekly.disabled = !goal || goal === 'maintain' || paces.length === 0 || Boolean(unavailablePaceReason);
+  if (goal !== 'maintain' && paces.length && blocked.length === paces.length) unavailablePace = blocked[0];
+  $('#pace-availability').hidden = !unavailablePace;
+  $('#pace-availability').textContent = unavailablePace ? 'Няма налично темпо в калорийните ограничения на калкулатора. Анализирай за обяснение или потърси индивидуални насоки. Не е избрано невъзможно темпо.' : '';
+  weekly.disabled = !goal || goal === 'maintain' || !paces.length || Boolean(unavailablePace);
   weekly.required = Boolean(goal) && goal !== 'maintain';
-  const selected = Array.from(weekly.options).find(option => option.value === previousRate && !option.disabled);
-  weekly.value = goal === 'maintain' ? '0' : selected?.value ?? '';
+  weekly.value = goal === 'maintain' ? '0' : Array.from(weekly.options).find(option => option.value === previous && !option.disabled)?.value ?? '';
 }
 
-function clearErrors() {
-  displayedErrors = {};
-  summary.hidden = true;
-  errorList.replaceChildren();
+function invalidateResults() {
+  for (const id of ['body-assessment', 'nutrition-result', 'limitation']) $(`#${id}`).hidden = true;
+  $('#empty-result').hidden = false;
+  $('#result-state').textContent = '';
+}
+
+function showErrors(errors, focus = false) {
   for (const field of form.querySelectorAll('[aria-invalid]')) field.removeAttribute('aria-invalid');
   for (const error of form.querySelectorAll('.field-error')) {
     error.hidden = true;
     error.textContent = '';
   }
-}
-
-function invalidateResults() {
-  currentNutrition = null;
-  currentAssessment = null;
-  currentLimitation = null;
-  resultRegion.hidden = true;
-  guidanceRegion.hidden = true;
-  guidanceLink.hidden = true;
-  bodyRegion.hidden = true;
-  bodyLink.hidden = true;
-  limitation.hidden = true;
-  emptyResult.hidden = false;
-  setOutputStatus('YOUR STARTING POINT');
+  displayedErrors = { ...errors };
+  $('#error-list').replaceChildren();
+  for (const [field, message] of Object.entries(errors)) {
+    const control = document.getElementById(field);
+    const error = document.getElementById(`${field}-error`);
+    if (!control || !error) continue;
+    control.setAttribute('aria-invalid', 'true');
+    error.hidden = false;
+    error.textContent = t(message);
+    const item = document.createElement('li');
+    const link = document.createElement('a');
+    link.href = `#${field}`;
+    link.textContent = t(message);
+    link.addEventListener('click', event => {
+      event.preventDefault();
+      const details = control.closest('details');
+      if (details) details.open = true;
+      control.focus();
+    });
+    item.append(link);
+    $('#error-list').append(item);
+    const details = control.closest('details');
+    if (details) details.open = true;
+  }
+  $('#error-summary').hidden = !Object.keys(errors).length;
+  if (focus && Object.keys(errors).length) $('#error-summary').focus();
 }
 
 function renderBodyAssessment(assessment) {
-  currentAssessment = assessment;
-  document.querySelector('#body-summary').textContent = t(assessment.summary);
-  document.querySelector('#body-bmi').textContent = referenceNumber.format(assessment.bmi);
-  document.querySelector('#body-waist-ratio').textContent = ratioNumber.format(assessment.waistRatio);
-  document.querySelector('#body-fat-estimate').textContent = assessment.bodyFat ? t('{percent}% (user-provided; {method})', { percent: referenceNumber.format(assessment.bodyFat.percent), method: t(assessment.bodyFat.methodLabel) }) : t('Not provided; separate from RFM');
-  document.querySelector('#body-fat-calculated').textContent = assessment.rfm.percent === null ? t('Estimate unavailable') : t('About {percent}% (RFM)', { percent: number.format(assessment.rfm.percent) });
-  document.querySelector('#body-rfm-note').textContent = t(assessment.rfm.reason ?? 'RFM is a rough population-model estimate, not a direct measurement. Individual errors can be substantial, particularly with unusual proportions, high muscle mass, or leanness. It does not confirm a body type or automatically change your calorie or workout plan.');
-  document.querySelector('#body-self-description').textContent = t(assessment.selfDescription ?? 'Not provided');
-  document.querySelector('#body-waist-note').textContent = t(assessment.waistNote);
-  document.querySelector('#body-goal-context').textContent = t(assessment.goalContext);
-  bodyRegion.hidden = false;
-  bodyLink.hidden = false;
+  $('#body-summary').textContent = assessment.summary;
+  $('#body-explanation').textContent = assessment.explanation;
+  $('#body-bmi').textContent = decimal.format(assessment.bmi);
+  $('#body-bmi-category').textContent = assessment.bmiCategory.label;
+  $('#body-bmi-note').textContent = assessment.bmiCategory.note;
+  $('#body-fat-calculated').textContent = assessment.rfm.percent === null ? 'Оценката не е налична' : `${rfmNumber.format(assessment.rfm.percent)}%`;
+  $('#body-fat-mass').textContent = assessment.fatMass === null ? 'Оценката не е налична' : `${decimal.format(assessment.fatMass)} кг`;
+  $('#body-fat-free-mass').textContent = assessment.fatFreeMass === null ? 'Оценката не е налична' : `${decimal.format(assessment.fatFreeMass)} кг`;
+  $('#body-waist-ratio').textContent = assessment.whtr.value === null ? 'Няма отделно измерване по NICE' : `${ratioNumber.format(assessment.whtr.value)}${assessment.whtr.source === 'rfm-fallback' ? ' (описателно, талия за RFM; не по NICE)' : ''}`;
+  $('#body-rfm-note').textContent = assessment.rfm.reason ?? 'RFM е приблизителна оценка по популационен модел, не пряко измерване. Индивидуалната грешка може да е значителна. Безмастната маса включва вода, кости, органи и други тъкани, не само мускули.';
+  $('#body-reference-note').textContent = assessment.reference ? `${assessment.reference.label} ${assessment.reference.note}` : 'Няма приложима референтна категория за тази оценка.';
+  $('#body-reference-summary').textContent = assessment.reference ? `${assessment.reference.label}. Условен ориентир за сравнение: от ${decimal.format(assessment.reference.low)} до под ${decimal.format(assessment.reference.high)}%. Не е универсална норма за RFM.` : 'Референтно сравнение на мазнините не е налично за този профил.';
+  $('#body-waist-note').textContent = assessment.whtr.note;
+  $('#body-goal-context').textContent = assessment.recommendation;
+  $('#body-analysis-list').replaceChildren(...assessment.analysis.map(text => {
+    const item = document.createElement('li');
+    item.textContent = text;
+    return item;
+  }));
+  const proportions = document.createDocumentFragment();
+  for (const proportion of assessment.proportions) {
+    const term = document.createElement('dt');
+    const value = document.createElement('dd');
+    term.textContent = proportion.label;
+    value.textContent = `${proportion.value === null ? 'Няма измерване' : ratioNumber.format(proportion.value)}. ${proportion.description}`;
+    proportions.append(term, value);
+  }
+  $('#body-proportions').replaceChildren(proportions);
+  $('#proportion-note').textContent = assessment.proportionNote;
+  $('#body-assessment').hidden = false;
 }
 
 function renderDailyGuidance(profile, guidance) {
@@ -156,283 +148,207 @@ function renderDailyGuidance(profile, guidance) {
     row.dataset.kind = nutrient.kind;
     const name = document.createElement('th');
     name.scope = 'row';
+    const label = document.createElement('span');
+    label.textContent = nutrient.id === 'fiber' ? 'Фибри / хранителни влакнини' : t(nutrient.name);
+    const details = document.createElement('details');
+    const summary = document.createElement('summary');
+    summary.textContent = 'Информация и източник';
+    const note = document.createElement('p');
+    note.className = 'nutrient-note';
+    note.textContent = t(nutrient.note);
     const source = document.createElement('a');
     source.href = nutrient.source;
     source.target = '_blank';
     source.rel = 'noopener noreferrer';
-    source.textContent = t(nutrient.name);
-    source.setAttribute('aria-label', t('{name} source (opens in a new tab)', { name: t(nutrient.name) }));
-    const note = document.createElement('span');
-    note.className = 'nutrient-note';
-    note.textContent = t(nutrient.note);
-    name.append(source, note);
+    source.textContent = 'Оригинален източник (нов раздел)';
+    details.append(summary, note, source);
+    name.append(label, details);
     const reference = document.createElement('td');
     const value = document.createElement('span');
     value.className = 'reference-value';
-    const prefix = nutrient.kind === 'limit' ? (nutrient.id === 'sodium' ? 'Less than ' : 'Less than about ') : (nutrient.id === 'fiber' ? 'About ' : '');
-    value.textContent = nutrient.value === null ? t(nutrient.advice) : `${t(prefix)}${t('{value} {unit}/day', { value: referenceNumber.format(nutrient.value), unit: t(nutrient.unit) })}`;
+    const prefix = nutrient.kind === 'limit' ? (nutrient.id === 'sodium' ? 'По-малко от ' : 'По-малко от около ') : nutrient.id === 'fiber' ? 'Около ' : '';
+    value.textContent = nutrient.value === null ? t(nutrient.advice) : `${prefix}${decimal.format(nutrient.value)} ${t(nutrient.unit)}/ден`;
     const basis = document.createElement('span');
     basis.className = 'reference-basis';
-    basis.textContent = `${t(nutrient.basis)}${nutrient.kind === 'limit' ? t(' / ceiling, not target') : ''}`;
+    basis.textContent = `${t(nutrient.basis)}${nutrient.kind === 'limit' ? ' / горна граница, не цел' : ''}`;
     reference.append(value, basis);
     row.append(name, reference);
     rows.append(row);
   }
-  document.querySelector('#nutrient-rows').replaceChildren(rows);
-  document.querySelector('#reference-profile').textContent = t('Baseline US dietary reference tables use age {age} and the selected {sex} category. This reuses the equation-category selection; it is not a complete account of physiology or individual needs. Food-first guidance for generally healthy, nonpregnant/nonlactating users, not personalized medical advice.', { age: number.format(profile.age), sex: t(profile.sex) });
-  document.querySelector('#meal-count').textContent = guidance.meals.count;
-  const times = guidance.meals.exampleTimes.map((time, index) => {
+  $('#nutrient-rows').replaceChildren(rows);
+  $('#reference-profile').textContent = t('Baseline US dietary reference tables use age {age} and the selected {sex} category. This reuses the equation-category selection; it is not a complete account of physiology or individual needs. Food-first guidance for generally healthy, nonpregnant/nonlactating users, not personalized medical advice.', { age: number.format(profile.age), sex: t(profile.sex) });
+  $('#meal-count').textContent = number.format(guidance.meals.count);
+  $('#meal-times').replaceChildren(...guidance.meals.exampleTimes.map((time, index) => {
     const item = document.createElement('li');
     const clock = document.createElement('time');
     clock.dateTime = time;
     clock.textContent = time;
     const label = document.createElement('span');
-    label.textContent = t('Eating occasion {index}', { index: index + 1 });
+    label.textContent = `Хранене ${index + 1}`;
     item.append(clock, label);
     return item;
-  });
-  document.querySelector('#meal-times').replaceChildren(...times);
-  document.querySelector('#meal-summary').textContent = t('If divided evenly: about {calories} kcal and {protein} g protein per occasion. This divides your existing daily totals; it adds no extra calories and need not be followed exactly.', { calories: number.format(guidance.meals.caloriesPerMeal), protein: referenceNumber.format(guidance.meals.proteinPerMeal) });
-  guidanceRegion.hidden = false;
-  guidanceLink.hidden = false;
+  }));
+  $('#meal-summary').textContent = t('If divided evenly: about {calories} kcal and {protein} g protein per occasion. This divides your existing daily totals; it adds no extra calories and need not be followed exactly.', { calories: number.format(guidance.meals.caloriesPerMeal), protein: decimal.format(guidance.meals.proteinPerMeal) });
 }
 
-function showErrors(errors, focus = true) {
-  errorList.replaceChildren();
-  displayedErrors = { ...errors };
-  for (const [field, message] of Object.entries(errors)) {
-    document.getElementById(field).setAttribute('aria-invalid', 'true');
-    const error = document.getElementById(`${field}-error`);
-    error.textContent = t(message);
-    error.hidden = false;
-    const item = document.createElement('li');
-    item.dataset.field = field;
-    const link = document.createElement('a');
-    link.href = `#${field}`;
-    link.textContent = t(message);
-    link.addEventListener('click', event => {
-      event.preventDefault();
-      document.getElementById(field).focus();
-    });
-    item.append(link);
-    errorList.append(item);
+function renderNutrition(output) {
+  for (const key of ['calories', 'protein', 'fat', 'carbs']) $(`[data-testid="${key}"]`).textContent = number.format(output.result[key]);
+  $('#goal-description').textContent = goalLabels[output.profile.goal];
+  $('[data-testid="target-weight"]').textContent = `${decimal.format(output.profile.targetWeight)} кг`;
+  $('[data-testid="weekly-pace"]').textContent = output.profile.goal === 'maintain' ? 'Поддържане / без планирана седмична промяна' : `${output.profile.goal === 'lose' ? 'Намаляване' : 'Покачване'} с около ${paceNumber.format(output.result.weeklyKg)} кг/седмица (${percentNumber.format(Number(output.profile.weeklyRate))}%)`;
+  $('#calculation-detail').textContent = t('Mifflin-St Jeor ({sex} equation): {rmr} kcal resting estimate. Activity factor {factor} gives estimated maintenance of {maintenance} kcal/day. Selected starting adjustment: {sign}{adjustment} kcal/day.', { sex: t(output.profile.sex), rmr: number.format(output.result.rmr), factor: factors[output.profile.activity], maintenance: number.format(output.result.maintenance), sign: output.result.adjustment >= 0 ? '+' : '-', adjustment: number.format(Math.abs(output.result.adjustment)) });
+  $('#pace-assumptions').textContent = t(output.profile.goal === 'lose' ? 'Loss uses a rough 7,700 kcal/kg energy heuristic to choose an initial deficit, limited to 20% of estimated maintenance. Metabolic adaptation and tissue/water changes mean actual progress will differ.' : output.profile.goal === 'maintain' ? 'Maintenance keeps your current weight as the target. Reassess using multiweek trends, not a single weigh-in.' : 'Gain uses a modest starting surplus: muscle-focused paces map to 5% or 10%; overall-gain paces map to 10% or 15%. This is not a calorie-per-kilogram prediction or a promise of the selected pace. The faster gain option may not suit advanced trainees.');
+  renderDailyGuidance(output.profile, output.result.guidance);
+  $('#empty-result').hidden = true;
+  $('#nutrition-result').hidden = false;
+  $('#result-state').textContent = 'Ориентири, не предписание';
+}
+
+function showLimitation(reason) {
+  const explanations = {
+    'bmi-low': 'Измерванията са под поддържания диапазон на ИТМ за автоматични хранителни цели. Анализът на телосложението остава отделен ориентир.',
+    'bmi-high': 'Измерванията са над поддържания диапазон на ИТМ за автоматични хранителни цели. ИТМ не различава мускули от мазнини; потърси индивидуална оценка.',
+    'calories-range': 'Калорийният ориентир е извън продуктовия диапазон 1500-4500 ккал/ден. Целта не е променена и калориите не са ограничени изкуствено. Този диапазон не е гаранция за безопасен прием.',
+    'pace-range': 'Избраното темпо изисква дефицит над ограничението от 20% от изчисленото поддържане. Избери по-бавно темпо или потърси индивидуални насоки. Резултатът не е коригиран скрито.',
+    'macro-allocation': 'Правилата не дават подходящо положително разпределение на макронутриентите. Не се показва частично или коригирано предписание.'
+  };
+  $('#limitation-detail').textContent = explanations[reason];
+  $('#empty-result').hidden = true;
+  $('#limitation').hidden = false;
+  $('#result-state').textContent = 'Необходими са индивидуални насоки';
+}
+
+function evaluate(input) {
+  const body = calculateBodyAssessment(input);
+  const wantsNutrition = Boolean(input.activity || input.goal);
+  // A blocked candidate explains the product limit; it is never a selected/saved pace.
+  const nutrition = wantsNutrition ? calculateNutrition({ ...input, includeAssessment: false, weeklyRate: unavailablePace?.value ?? input.weeklyRate }) : null;
+  return { body, nutrition, errors: { ...nutrition?.errors, ...body.errors } };
+}
+
+function saveProfile(body, nutrition) {
+  if (!remember.checked) return;
+  if (nutrition && (Object.keys(nutrition.errors).length || unavailablePace)) {
+    setStorageStatus('Данните не са запазени: коригирай хранителните полета. Валидният анализ на телосложението остава достъпен. Предишните запазени данни не са променени.');
+    return;
   }
-  summary.hidden = false;
-  if (focus) summary.focus();
+  const profile = {
+    ...body.measurements,
+    activity: nutrition?.profile.activity ?? '',
+    goal: nutrition?.profile.goal ?? '',
+    targetWeight: nutrition?.profile.targetWeight ?? null,
+    weeklyRate: nutrition?.profile.weeklyRate ?? ''
+  };
+  try {
+    localStorage.setItem(PROFILE_STORAGE_KEY, encodeProfile(profile));
+    setStorageStatus('Данните са запазени на това устройство. Потвърждението за допустимост не се запазва.');
+  } catch {
+    setStorageStatus('Данните не са запазени: записът е невалиден или браузърното хранилище е недостъпно. Анализът работи и без запазване.');
+  }
 }
 
 function removeSavedProfile() {
   try {
-    localStorage.removeItem(storageKey);
+    localStorage.removeItem(PROFILE_STORAGE_KEY);
+    profileDeletionFailed = false;
     return true;
   } catch {
-    setStorageStatus('Browser storage is unavailable. Saved data could not be removed; clear this site\'s data in browser settings.');
+    profileDeletionFailed = true;
+    setStorageStatus('');
     return false;
   }
 }
 
 function restoreProfile() {
+  remember.checked = false;
+  form.elements.eligible.checked = false;
   try {
-    const raw = localStorage.getItem(storageKey);
+    const raw = localStorage.getItem(PROFILE_STORAGE_KEY);
     if (raw === null) return;
-    const saved = JSON.parse(raw);
-    if (![1, 2, 3, 4].includes(saved?.version) || saved?.remember !== true || !saved.profile || typeof saved.profile !== 'object' || Array.isArray(saved.profile)) throw new Error('Invalid saved record');
-    const legacy = saved.version === 1;
-    if (legacy && (typeof saved.profile.goal !== 'string' || !Object.hasOwn(goalLabels, saved.profile.goal))) throw new Error('Invalid saved goal');
-    const storedBody = saved.version >= 3 ? saved.profile.body : null;
-    if (storedBody !== null && (!storedBody || typeof storedBody !== 'object' || Array.isArray(storedBody))) throw new Error('Invalid saved measurements');
-    if (saved.version === 4 && storedBody !== null && !['midpoint', 'iliac'].includes(storedBody.waistSite)) throw new Error('Missing saved waist protocol');
-    const restoredInput = {
-      ...saved.profile,
-      includeAssessment: storedBody !== null,
-      waist: storedBody?.waist,
-      waistSite: saved.version === 3 ? 'midpoint' : storedBody?.waistSite,
-      bodyFat: storedBody?.bodyFat,
-      bodyFatMethod: storedBody?.bodyFatMethod,
-      bodyDescription: storedBody?.bodyDescription
-    };
-    const { errors, profile } = validateProfile(legacy ? { ...restoredInput, goal: 'maintain', targetWeight: undefined, weeklyRate: undefined } : restoredInput);
-    if (Object.keys(errors).length) throw new Error('Invalid saved profile');
-    if (legacy) {
-      profile.goal = saved.profile.goal;
-      if (profile.goal !== 'maintain') {
-        profile.targetWeight = '';
-        profile.weeklyRate = '';
-      }
+    const profile = decodeProfile(raw);
+    for (const field of ['age', 'sex', 'height', 'weight', 'activity', 'targetWeight']) form.elements.namedItem(field).value = profile[field] ?? '';
+    for (const radio of form.querySelectorAll('[name="goal"]')) radio.checked = radio.value === profile.goal;
+    for (const [field, value] of Object.entries(profile.body)) {
+      if (field === 'regularTraining') form.elements.regularTraining.checked = value;
+      else form.elements.namedItem(field).value = value ?? '';
     }
-    for (const [field, value] of Object.entries(profile)) {
-      if (field === 'goal') form.querySelector(`input[name="goal"][value="${value}"]`).checked = true;
-      else if (field !== 'weeklyRate' && field !== 'body') form.elements.namedItem(field).value = value;
-    }
-    bodyChoice.checked = profile.body !== null;
-    if (profile.body) for (const [field, value] of Object.entries(profile.body)) form.elements.namedItem(field).value = value ?? '';
-    updateAssessmentFields();
     updatePlanFields();
-    const restoredPace = Array.from(form.elements.weeklyRate.options).find(option => option.value === profile.weeklyRate && !option.disabled);
-    if (restoredPace) form.elements.weeklyRate.value = restoredPace.value;
+    if (Array.from(form.elements.weeklyRate.options).some(option => option.value === profile.weeklyRate && !option.disabled)) form.elements.weeklyRate.value = profile.weeklyRate;
     remember.checked = true;
-    setStorageStatus(legacy && profile.goal !== 'maintain' ? 'Saved inputs restored. Choose a target weight and weekly pace, then confirm eligibility and calculate.' : 'Saved inputs restored. Confirm eligibility and calculate to see current targets.');
+    setStorageStatus('Запазените данни са възстановени без резултати. Провери измерванията, потвърди допустимостта и анализирай отново.');
   } catch {
-    setStorageStatus('Saved inputs could not be restored or storage is unavailable. You can still calculate without saving.');
+    setStorageStatus('Запазените данни не могат да бъдат възстановени или хранилището е недостъпно. Можеш да анализираш без запазване.');
   }
-}
-
-function saveProfile(profile) {
-  if (!remember.checked) return;
-  try {
-    localStorage.setItem(storageKey, JSON.stringify({ version: 4, remember: true, profile }));
-    setStorageStatus('Saved on this device. Your eligibility confirmation is not saved.');
-  } catch {
-    setStorageStatus('Your inputs were not saved because browser storage is unavailable. Your calculation still works.');
-  }
-}
-
-function showLimitation(reason, focus = true) {
-  currentLimitation = reason;
-  const explanations = {
-    'bmi-low': 'Your measurements are below this calculator\'s supported BMI range. Automated calorie and macro targets are not provided for underweight profiles in this MVP. General nutrition information remains available below.',
-    'bmi-high': 'Your measurements are above this calculator\'s supported BMI range. Because BMI does not distinguish muscle from fat and the macro rules have not been reviewed for this range, automatic targets are withheld.',
-    'calories-range': 'The calculated calorie estimate falls outside this MVP\'s 1,500-4,500 kcal/day support range. We have not changed your goal or clamped your calories. This range is a product limit, not a safe-intake guarantee.',
-    'pace-range': 'The selected loss pace would require more than this calculator\'s 20% deficit limit. Choose a slower pace or seek individual guidance. The result has not been silently clamped.',
-    'macro-allocation': 'The current rules cannot produce a suitable positive macro allocation for these inputs. No partial or adjusted prescription is shown.'
-  };
-  document.querySelector('#limitation-detail').textContent = t(explanations[reason]);
-  emptyResult.hidden = true;
-  limitation.hidden = false;
-  setOutputStatus('INDIVIDUAL GUIDANCE');
-  if (focus) limitation.focus();
-}
-
-function renderNutrition(output) {
-  currentNutrition = output;
-  for (const key of ['calories', 'protein', 'fat', 'carbs']) document.querySelector(`[data-testid="${key}"]`).textContent = number.format(output.result[key]);
-  document.querySelector('#goal-description').textContent = t(goalLabels[output.profile.goal]);
-  document.querySelector('[data-testid="target-weight"]').textContent = t('{weight} kg', { weight: weightNumber.format(output.profile.targetWeight) });
-  document.querySelector('[data-testid="weekly-pace"]').textContent = output.profile.goal === 'maintain' ? t('Maintain / no planned weekly change') : t('{direction} about {kg} kg/week ({percent}% of current weight)', { direction: t(output.profile.goal === 'lose' ? 'Lose' : 'Gain'), kg: paceNumber.format(output.result.weeklyKg), percent: percentNumber.format(Number(output.profile.weeklyRate)) });
-  document.querySelector('#calculation-detail').textContent = t('Mifflin-St Jeor ({sex} equation): {rmr} kcal resting estimate. Activity factor {factor} gives estimated maintenance of {maintenance} kcal/day. Selected starting adjustment: {sign}{adjustment} kcal/day.', { sex: t(output.profile.sex), rmr: number.format(output.result.rmr), factor: language === 'bg' ? factors[output.profile.activity].replace('.', ',') : factors[output.profile.activity], maintenance: number.format(output.result.maintenance), sign: output.result.adjustment >= 0 ? '+' : '-', adjustment: number.format(Math.abs(output.result.adjustment)) });
-  document.querySelector('#pace-assumptions').textContent = t(output.profile.goal === 'lose' ? 'Loss uses a rough 7,700 kcal/kg energy heuristic to choose an initial deficit, limited to 20% of estimated maintenance. Metabolic adaptation and tissue/water changes mean actual progress will differ.' : output.profile.goal === 'maintain' ? 'Maintenance keeps your current weight as the target. Reassess using multiweek trends, not a single weigh-in.' : 'Gain uses a modest starting surplus: muscle-focused paces map to 5% or 10%; overall-gain paces map to 10% or 15%. This is not a calorie-per-kilogram prediction or a promise of the selected pace. The faster gain option may not suit advanced trainees.');
-  renderDailyGuidance(output.profile, output.result.guidance);
-  emptyResult.hidden = true;
-  resultRegion.hidden = false;
-  setOutputStatus('ESTIMATES, NOT LIMITS');
 }
 
 form.addEventListener('submit', event => {
   event.preventDefault();
-  clearErrors();
   invalidateResults();
-  const input = readInputs();
-  const output = calculateNutrition(input);
-  if (unavailablePaceReason) delete output.errors.weeklyRate;
-  if (Object.keys(output.errors).length) {
-    showErrors(output.errors);
-    return;
+  const { body, nutrition, errors } = evaluate(readInputs());
+  if (body.assessment) renderBodyAssessment(body.assessment);
+  if (body.assessment && nutrition && !Object.keys(nutrition.errors).length) {
+    if (nutrition.limitation) showLimitation(nutrition.limitation);
+    else renderNutrition(nutrition);
   }
-  if (output.assessment) renderBodyAssessment(output.assessment);
-  if (unavailablePaceReason) {
-    showLimitation(unavailablePaceReason);
-    return;
-  }
-  saveProfile(output.profile);
-  if (output.limitation) {
-    showLimitation(output.limitation);
-    return;
-  }
-  renderNutrition(output);
-  resultRegion.focus();
+  showErrors(errors, !body.assessment);
+  if (body.assessment) {
+    saveProfile(body, nutrition);
+    $('#body-assessment').focus();
+  } else if (remember.checked) setStorageStatus('Невалидните данни не са запазени. Коригирай посочените полета и анализирай отново.');
 });
 
 form.addEventListener('input', event => {
   if (event.target === remember) return;
-  if (event.target.name === 'waistSite') form.elements.waist.value = '';
-  updateAssessmentFields();
-  updatePlanFields(event.target.name === 'goal');
-  const input = readInputs();
-  const { errors } = calculateNutrition(input);
-  if (unavailablePaceReason) delete errors.weeklyRate;
-  for (const control of form.querySelectorAll('[aria-invalid]')) {
-    const field = control.id;
-    if (!errors[field]) {
-      delete displayedErrors[field];
-      control.removeAttribute('aria-invalid');
-      document.getElementById(`${field}-error`).hidden = true;
-      document.getElementById(`${field}-error`).textContent = '';
-      errorList.querySelector(`[data-field="${field}"]`)?.remove();
-      summary.hidden = errorList.childElementCount === 0;
-    } else {
-      displayedErrors[field] = errors[field];
-      document.getElementById(`${field}-error`).textContent = t(errors[field]);
-      const link = errorList.querySelector(`[data-field="${field}"] a`);
-      if (link) link.textContent = t(errors[field]);
-    }
+  if (['goal', 'weight', 'targetWeight', 'activity', 'sex', 'age', 'height'].includes(event.target.name)) updatePlanFields(event.target.name === 'goal');
+  if (Object.keys(displayedErrors).length) {
+    const { errors } = evaluate(readInputs());
+    showErrors(Object.fromEntries(Object.keys(displayedErrors).filter(field => errors[field]).map(field => [field, errors[field]])));
   }
   invalidateResults();
-  if (remember.checked) setStorageStatus('Changes are not saved until you calculate again.');
+  if (remember.checked) setStorageStatus('Промените не са запазени. Анализирай отново, за да ги запазиш.');
 });
 
-document.querySelector('#assess-body').addEventListener('click', () => {
-  if (!bodyChoice.checked) return;
-  clearErrors();
-  invalidateResults();
-  const output = calculateBodyAssessment(readInputs());
-  if (Object.keys(output.errors).length) {
-    showErrors(output.errors);
-    return;
-  }
-  renderBodyAssessment(output.assessment);
-  bodyRegion.focus();
+$('#clear-nutrition').addEventListener('click', () => {
+  form.elements.activity.value = '';
+  for (const radio of form.querySelectorAll('[name="goal"]')) radio.checked = false;
+  updatePlanFields(true);
+  const errors = calculateBodyAssessment(readInputs()).errors;
+  showErrors(Object.fromEntries(Object.keys(displayedErrors).filter(field => errors[field]).map(field => [field, errors[field]])));
+  $('#nutrition-result').hidden = true;
+  $('#limitation').hidden = true;
+  $('#empty-result').hidden = false;
+  $('#result-state').textContent = '';
+  if (remember.checked) setStorageStatus('Хранителната цел е изчистена само на страницата. Анализирай отново, за да запазиш промяната; измерванията са запазени в полетата.');
 });
 
 remember.addEventListener('change', () => {
-  if (remember.checked) {
-    setStorageStatus('Your inputs will be saved when you calculate. Only use this on a browser you trust.');
-    return;
-  }
-  if (removeSavedProfile()) setStorageStatus('Remembering is off. Saved inputs have been removed; current inputs stay on this page only.');
+  if (remember.checked) setStorageStatus('Данните ще се запазят след валиден анализ. Използвай само браузър, на който имаш доверие.');
+  else if (removeSavedProfile()) setStorageStatus('Запомнянето е изключено. Запазеният профил е изтрит; текущите полета остават само на страницата.');
 });
 
-document.querySelector('#delete-data').addEventListener('click', () => {
-  let removed = removeSavedProfile();
-  languageStatus.textContent = '';
-  try { localStorage.removeItem(languageKey); } catch {
-    if (removed) setStorageStatus('Language preference could not be deleted; clear this site\'s data in browser settings.');
-    removed = false;
-  }
+$('#delete-data').addEventListener('click', () => {
+  const profileRemoved = removeSavedProfile();
+  let languageRemoved = true;
+  try { localStorage.removeItem('liftfuel.language'); } catch { languageRemoved = false; }
   form.reset();
-  updateAssessmentFields();
-  updatePlanFields();
-  clearErrors();
+  remember.checked = false;
+  form.elements.eligible.checked = false;
+  form.elements.regularTraining.checked = false;
+  for (const details of document.querySelectorAll('details')) details.open = false;
+  updatePlanFields(true);
+  showErrors({});
   invalidateResults();
-  if (removed) setStorageStatus('Your saved profile and language preference have been deleted. Your health profile is not saved unless you opt in.');
+  if (profileRemoved && languageRemoved) setStorageStatus('Запазеният профил и старото езиково предпочитание са изтрити. Данни няма да се запазват без ново съгласие.');
+  else if (profileRemoved) setStorageStatus('Профилът е изтрит, но старото езиково предпочитание не можа да бъде изтрито. Изчисти данните за сайта от настройките на браузъра.');
+  else setStorageStatus(languageRemoved ? 'Старото езиково предпочитание е изтрито.' : 'Старото езиково предпочитание също не можа да бъде изтрито.');
 });
 
-function applyLanguage() {
-  document.documentElement.lang = language;
-  languageControl.value = language;
-  updateFormatters();
-  translateStatic(language);
-  updateAssessmentFields();
-  updatePlanFields();
-  if (currentNutrition) renderNutrition(currentNutrition);
-  if (currentAssessment) renderBodyAssessment(currentAssessment);
-  if (currentLimitation) showLimitation(currentLimitation, false);
-  if (Object.keys(displayedErrors).length) showErrors(displayedErrors, false);
-  setOutputStatus(outputMessage);
-  setStorageStatus(storageMessage);
-}
-
-languageControl.addEventListener('change', () => {
-  language = resolveLanguage(languageControl.value);
-  applyLanguage();
-  languageStatus.textContent = '';
-  try { localStorage.setItem(languageKey, language); } catch {
-    languageStatus.textContent = t('Language changed for this visit; browser storage could not save your language preference.');
-  }
-});
-
-applyLanguage();
-updateAssessmentFields();
+updatePlanFields();
 restoreProfile();
-document.querySelector('#app-status').hidden = true;
-form.querySelector('[type="submit"]').disabled = false;
-languageControl.disabled = false;
+invalidateResults();
+$('#measurements-details').open = false;
+$('#nutrition-details').open = false;
+$('#app-status').hidden = true;
+$('#result-state').setAttribute('role', 'status');
+$('#analyze').textContent = 'Анализирай телосложението ми';
+$('#analyze').disabled = false;

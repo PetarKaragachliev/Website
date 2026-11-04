@@ -1,143 +1,129 @@
 <!doctype html>
-<html lang="en">
+<html lang="bg">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0b0f0c">
-  <meta name="description" content="Find a starting calorie and macro target for your training goals. A private, browser-based calculator for generally healthy adults aged 18-56.">
-  <title>LiftFuel | Fuel the Work</title>
-  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23c4f542'/%3E%3Cpath d='M10 7v18h14v-5h-9V7z' fill='%2310150b'/%3E%3C/svg%3E">
+  <meta name="description" content="Ориентировъчен анализ на телосложението чрез телесни измервания. Незадължителни хранителни ориентири за пълнолетни, без регистрация.">
+  <title>LiftFuel | Анализ на телосложението</title>
   <link rel="stylesheet" href="./styles.css">
   <script type="module" src="./js/app.js"></script>
 </head>
 <body>
-  <a class="skip-link" href="#main">Skip to content</a>
+  <a class="skip-link" href="#main">Към съдържанието</a>
   <div class="app-shell">
-    <header class="sidebar">
-      <a class="brand" href="#main" aria-label="LiftFuel home"><span class="brand-icon" aria-hidden="true">LF</span> LIFT<span>FUEL</span><span class="brand-dot" aria-hidden="true">.</span></a>
-      <div class="sidebar-body">
-        <p class="eyebrow nav-caption">YOUR TRAINING TOOLKIT</p>
-        <nav aria-label="Main navigation">
-          <a class="nav-link active" href="#calculator"><span aria-hidden="true">01</span> Nutrition calculator</a>
-          <a class="nav-link" href="#method"><span aria-hidden="true">02</span> The method</a>
-          <a class="nav-link" href="#next"><span aria-hidden="true">03</span> What's next</a>
-        </nav>
-        <div class="sidebar-note"><span class="small-label">LESS GUESSWORK.</span><p>More intention.<br>One session at a time.</p><span class="status-dot"></span><span class="muted">Private by design</span></div>
-      </div>
-      <span class="sidebar-version">NUTRITION / FIRST RELEASE</span>
+    <header class="site-header">
+      <a class="brand" href="./index.html" aria-label="LiftFuel, начало"><span class="brand-icon" aria-hidden="true">LF</span> LIFT<span>FUEL.</span></a>
+      <nav aria-label="Основна навигация"><a href="#calculator" aria-current="page">Телосложение</a><a href="#method">Методика</a></nav>
+      <span class="privacy-tag">Без регистрация. На твоето устройство.</span>
     </header>
-
     <main id="main">
-      <div class="topline"><span class="eyebrow">BUILT FOR YOUR NEXT REP</span><div class="top-actions"><span class="privacy-tag"><span class="status-dot"></span> No account. Your device.</span><label class="language-control" for="language"><span>Language</span><select id="language" data-no-translate aria-describedby="language-hint" disabled><option value="en" lang="en">English</option><option value="bg" lang="bg">Български</option></select></label><span id="language-hint" class="sr-only">Your language choice can be remembered independently of health-profile saving.</span><span id="language-status" class="language-status" role="status"></span></div></div>
-      <p class="preview-notice" role="note"><strong>Development preview.</strong> Calculator available for feedback, not medical guidance. Workout generation and qualified content review are still pending.</p>
       <section class="hero" aria-labelledby="hero-title">
-        <div class="hero-copy"><p class="eyebrow accent">A STRONGER START</p><h1 id="hero-title">FUEL THE WORK.<br><span>BUILD YOUR NEXT.</span></h1><p class="hero-description">Give your training a starting point. Find daily calorie and macro estimates that fit the goal you're working toward.</p></div>
-        <div class="hero-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="orbit orbit-three"></div><div class="art-mark">LF<span>+</span></div><div class="art-caption">INTENTION IN.<br>PROGRESS AHEAD.</div></div>
+        <p class="eyebrow accent">ПОЗНАЙ ОТПРАВНАТА СИ ТОЧКА</p>
+        <h1 id="hero-title">Твоето тяло.<br><span>По-ясна посока.</span></h1>
+        <p class="hero-description">Измери, разбери, продължи. Ориентировъчен анализ на телосложението, без етикети и без обещания за идеална форма.</p>
+        <p class="preview-notice"><strong>В процес на разработка.</strong> Инструментът не заменя медицинска оценка. Генераторът на тренировки предстои.</p>
       </section>
+      <noscript><p class="notice">За анализа е необходим JavaScript. Бутонът остава неактивен, за да не бъдат изпратени данните от формуляра към сървъра.</p></noscript>
+      <div class="calculator-layout" id="calculator">
+        <div class="main-stack">
+          <section class="panel profile-panel" aria-labelledby="profile-title">
+            <div class="panel-heading"><div><p class="eyebrow accent">01 / ТВОИТЕ ДАННИ</p><h2 id="profile-title">Основата на анализа</h2></div><span class="panel-index" aria-hidden="true">01</span></div>
+            <p class="section-intro">Попълни основните измервания. Хранителна цел и ниво на активност не са необходими за анализа на телосложението.</p>
+            <form id="profile-form" novalidate>
+              <div id="error-summary" class="notice error-summary" hidden tabindex="-1" role="alert"><strong>Провери посочените полета.</strong><ul id="error-list"></ul></div>
+              <div class="measurement-grid">
+                <div class="field"><label for="sex">Пол</label><select id="sex" name="sex" required aria-describedby="sex-hint sex-error"><option value="">Избери</option><option value="male">Мъж</option><option value="female">Жена</option></select><small id="sex-hint">Категория за формулите, не определение за идентичност. Ако не е подходяща, потърси индивидуална оценка.</small><p id="sex-error" class="field-error" hidden></p></div>
+                <div class="field"><label for="age">Възраст</label><div class="input-wrap"><input id="age" name="age" type="text" inputmode="numeric" maxlength="3" autocomplete="off" required aria-describedby="age-hint age-error"><span aria-hidden="true">г.</span></div><small id="age-hint">Поддържана възраст 18-56 г. RFM и категориите за ИТМ на възрастни са само за 20+ години.</small><p id="age-error" class="field-error" hidden></p></div>
+                <div class="field"><label for="height">Ръст</label><div class="input-wrap"><input id="height" name="height" type="text" inputmode="decimal" maxlength="8" autocomplete="off" required aria-describedby="height-hint height-error"><span aria-hidden="true">см</span></div><small id="height-hint">Без обувки, изправен до стена.</small><p id="height-error" class="field-error" hidden></p></div>
+                <div class="field"><label for="weight">Тегло</label><div class="input-wrap"><input id="weight" name="weight" type="text" inputmode="decimal" maxlength="8" autocomplete="off" required aria-describedby="weight-hint weight-error"><span aria-hidden="true">кг</span></div><small id="weight-hint">На равна повърхност, с леко облекло.</small><p id="weight-error" class="field-error" hidden></p></div>
+              </div>
+              <div class="field waist-field"><label for="waistRfm">Талия за RFM при горния ръб на тазовата кост</label><div class="input-wrap"><input id="waistRfm" name="waistRfm" type="text" inputmode="decimal" maxlength="8" autocomplete="off" required aria-describedby="waistRfm-hint waistRfm-error"><span aria-hidden="true">см</span></div><small id="waistRfm-hint">За RFM: измери върху гола кожа на нивото на най-горния ръб на дясната тазова кост. Лентата е хоризонтална, без притискане, след нормално издишване. Не използвай автоматично най-тясната част на талията.</small><p id="waistRfm-error" class="field-error" hidden></p></div>
 
-      <div class="section-heading" id="calculator"><h2><span class="section-number">01 /</span> SET YOUR FOUNDATION</h2><span class="small-label">METRIC UNITS / AGES 18-56</span></div>
-      <noscript><p class="notice">JavaScript is required to calculate targets and save a profile. Enable it to use this tool.<br><span lang="bg">За изчисляване, смяна на езика и запазване на профил е необходим JavaScript. Включете го, за да използвате инструмента.</span></p></noscript>
-      <div class="calculator-layout">
-        <section class="panel profile-panel" aria-labelledby="profile-title">
-          <div class="panel-heading"><div><p class="eyebrow">THE INPUT</p><h3 id="profile-title">A little about you.</h3></div><span class="panel-index" aria-hidden="true">01</span></div>
-          <form id="profile-form" novalidate>
-            <div id="error-summary" class="notice error-summary" tabindex="-1" role="alert" hidden><strong>Let's check a few things.</strong><ul id="error-list"></ul></div>
-            <div class="measurement-grid">
-              <div class="field"><label for="age">Age</label><div class="input-wrap"><input id="age" name="age" type="text" inputmode="numeric" autocomplete="off" maxlength="3" required aria-describedby="age-hint age-error"><span aria-hidden="true">years</span></div><small id="age-hint">18-56 years</small><p class="field-error" id="age-error" hidden></p></div>
-              <div class="field"><label for="weight">Weight (kg)</label><div class="input-wrap"><input id="weight" name="weight" type="text" inputmode="decimal" autocomplete="off" maxlength="8" required aria-describedby="weight-hint weight-error"><span aria-hidden="true">kg</span></div><small id="weight-hint">35-250 kg</small><p class="field-error" id="weight-error" hidden></p></div>
-              <div class="field"><label for="height">Height (cm)</label><div class="input-wrap"><input id="height" name="height" type="text" inputmode="decimal" autocomplete="off" maxlength="8" required aria-describedby="height-hint height-error"><span aria-hidden="true">cm</span></div><small id="height-hint">130-230 cm</small><p class="field-error" id="height-error" hidden></p></div>
-            </div>
-            <div class="field"><label for="sex">Equation category</label><select id="sex" name="sex" required aria-describedby="sex-hint sex-error"><option value="">Choose a formula category</option><option value="male">Male equation</option><option value="female">Female equation</option></select><small id="sex-hint">Mifflin-St Jeor uses these two categories to estimate resting energy, not to define gender. If neither is suitable for you, seek an individual estimate.</small><p class="field-error" id="sex-error" hidden></p></div>
-            <div class="field"><label for="activity">Daily activity</label><select id="activity" name="activity" required aria-describedby="activity-hint activity-error"><option value="">Think about your whole day</option><option value="sedentary">Mostly sedentary - mainly seated, little exercise</option><option value="light">Lightly active - some walking and light exercise</option><option value="moderate">Moderately active - regular movement and training</option><option value="very">Very active - high daily movement and training</option></select><small id="activity-hint">Include work, walking, and training. Workout days alone don't determine activity. Exercise calories are already included.</small><p class="field-error" id="activity-error" hidden></p></div>
+              <details id="measurements-details" class="disclosure">
+                <summary>Допълнителни измервания <span>Незадължително</span></summary>
+              <p class="field-hint">За допълнителен контекст и пропорции, не за измерване на мускулна маса. Средната талия е нужна за NICE и съотношенията талия/ханш и гърди/талия. Всички обиколки са в сантиметри.</p>
+                <div class="measurement-grid details-content">
+                  <div class="field full-width"><label for="waistWhtr">Талия по средата между ребрата и таза</label><div class="input-wrap"><input id="waistWhtr" name="waistWhtr" type="text" inputmode="decimal" maxlength="8" autocomplete="off" aria-describedby="waistWhtr-hint waistWhtr-error"><span aria-hidden="true">см</span></div><small id="waistWhtr-hint">За NICE: намери средата между долното ребро и горния ръб на таза. Измери хоризонтално след нормално издишване. Това е отделно измерване от талията за RFM.</small><p id="waistWhtr-error" class="field-error" hidden></p></div>
+                  <div class="field"><label for="hip">Ханш</label><div class="input-wrap"><input id="hip" name="hip" type="text" inputmode="decimal" maxlength="8" autocomplete="off" aria-describedby="hip-hint hip-error"><span aria-hidden="true">см</span></div><small id="hip-hint">Около най-широката част на седалището, със събрани стъпала.</small><p id="hip-error" class="field-error" hidden></p></div>
+                  <div class="field"><label for="chest">Гръдна обиколка</label><div class="input-wrap"><input id="chest" name="chest" type="text" inputmode="decimal" maxlength="8" autocomplete="off" aria-describedby="chest-hint chest-error"><span aria-hidden="true">см</span></div><small id="chest-hint">Около най-широката част на гръдния кош, с отпуснати ръце, след нормално издишване.</small><p id="chest-error" class="field-error" hidden></p></div>
+                  <div class="field"><label for="arm">Мишница</label><div class="input-wrap"><input id="arm" name="arm" type="text" inputmode="decimal" maxlength="8" autocomplete="off" aria-describedby="arm-hint arm-error"><span aria-hidden="true">см</span></div><small id="arm-hint">По средата между рамото и лакътя, с отпусната, ненапрегната ръка.</small><p id="arm-error" class="field-error" hidden></p></div>
+                  <div class="field"><label for="thigh">Бедро</label><div class="input-wrap"><input id="thigh" name="thigh" type="text" inputmode="decimal" maxlength="8" autocomplete="off" aria-describedby="thigh-hint thigh-error"><span aria-hidden="true">см</span></div><small id="thigh-hint">По средата между слабинната гънка и горния ръб на коляното, без стягане.</small><p id="thigh-error" class="field-error" hidden></p></div>
+                  <div class="field"><label for="wrist">Китка</label><div class="input-wrap"><input id="wrist" name="wrist" type="text" inputmode="decimal" maxlength="8" autocomplete="off" aria-describedby="wrist-hint wrist-error"><span aria-hidden="true">см</span></div><small id="wrist-hint">В най-тясната част, непосредствено под костните издатини към дланта.</small><p id="wrist-error" class="field-error" hidden></p></div>
+                </div>
+              </details>
+              <div class="training-context"><label class="check-label"><input id="regularTraining" name="regularTraining" type="checkbox" aria-describedby="regularTraining-hint regularTraining-error"><span>Тренирам редовно със силово натоварване</span></label><p id="regularTraining-hint" class="field-hint">Незадължителна, самоотчетена информация. Не потвърждава количество мускули или тип телосложение.</p><p id="regularTraining-error" class="field-error" hidden></p></div>
 
-            <fieldset class="goal-fieldset" id="goal" tabindex="-1" aria-describedby="goal-hint goal-error"><legend>What are you working toward?</legend><p class="field-hint" id="goal-hint">Choose the priority, not a promise. Both gaining options can add fat as well as muscle.</p><div class="goal-grid">
-              <label class="goal-option"><input type="radio" name="goal" value="lose" required><span><strong>Lose fat</strong><small>Conservative weekly loss</small></span><span class="goal-adjustment">LOSS</span></label>
-              <label class="goal-option"><input type="radio" name="goal" value="maintain"><span><strong>Maintain weight</strong><small>Weight stability</small></span><span class="goal-adjustment">BASE</span></label>
-              <label class="goal-option"><input type="radio" name="goal" value="muscle"><span><strong>Build muscle</strong><small>Minimize excess fat gain</small></span><span class="goal-adjustment">SLOW</span></label>
-              <label class="goal-option"><input type="radio" name="goal" value="gain"><span><strong>Gain weight</strong><small>Accept some fat gain</small></span><span class="goal-adjustment">GAIN</span></label>
-            </div><p class="field-error" id="goal-error" hidden></p></fieldset>
+              <details id="nutrition-details" class="disclosure">
+                <summary>Хранителни ориентири <span>Незадължително</span></summary>
+                <p class="field-hint">Отвори само ако искаш и хранителни ориентири в дясната колона. Избери активност и цел изрично; анализът на тялото не ги изисква.</p>
+                <button id="clear-nutrition" class="text-button" type="button">Само анализ на тялото: изчисти хранителната цел</button>
+                <div class="field details-content"><label for="activity">Ежедневна активност</label><select id="activity" name="activity" aria-describedby="activity-hint activity-error"><option value="">Избери активност</option><option value="sedentary">Предимно седящо ежедневие</option><option value="light">Лека активност</option><option value="moderate">Умерена активност</option><option value="very">Висока активност</option></select><small id="activity-hint">Включи работата, ходенето и тренировките за целия ден, не само времето в залата.</small><p id="activity-error" class="field-error" hidden></p></div>
+                <fieldset id="goal" class="goal-fieldset" tabindex="-1" aria-describedby="goal-hint goal-error"><legend>Хранителна цел</legend><p id="goal-hint" class="field-hint">Няма предварително избрана цел. Покачването може да включва и мазнини; мускулен растеж не е гарантиран.</p><div class="goal-grid">
+                  <label class="goal-option"><input type="radio" name="goal" value="lose"><span>Намаляване на теглото</span></label>
+                  <label class="goal-option"><input type="radio" name="goal" value="maintain"><span>Поддържане на теглото</span></label>
+                  <label class="goal-option"><input type="radio" name="goal" value="muscle"><span>Покачване с фокус върху мускулите</span></label>
+                  <label class="goal-option"><input type="radio" name="goal" value="gain"><span>Покачване на теглото</span></label>
+                </div><p id="goal-error" class="field-error" hidden></p></fieldset>
+                <div class="field"><label for="targetWeight">Целево тегло</label><div class="input-wrap"><input id="targetWeight" name="targetWeight" type="text" inputmode="decimal" maxlength="8" autocomplete="off" disabled aria-describedby="targetWeight-hint targetWeight-error"><span aria-hidden="true">кг</span></div><small id="targetWeight-hint">Първо избери цел. При поддържане се използва текущото тегло.</small><p id="targetWeight-error" class="field-error" hidden></p></div>
+                <div class="field"><label for="weeklyRate">Желано седмично темпо</label><select id="weeklyRate" name="weeklyRate" disabled aria-describedby="weeklyRate-hint pace-availability weeklyRate-error"><option value="">Първо избери цел и въведи тегло</option></select><small id="weeklyRate-hint">Наличните темпове зависят от теглото и ограниченията на изчислението. Това е предпочитание, не прогноза или гаранция за безопасност.</small><p id="pace-availability" class="field-hint" role="status" hidden></p><p id="weeklyRate-error" class="field-error" hidden></p></div>
+              </details>
 
-            <div class="weight-plan">
-              <p class="eyebrow">THE DIRECTION</p>
-              <div class="field"><label for="targetWeight">Target weight (kg)</label><div class="input-wrap"><input id="targetWeight" name="targetWeight" type="text" inputmode="decimal" autocomplete="off" maxlength="8" disabled aria-describedby="targetWeight-hint targetWeight-error"><span aria-hidden="true">kg</span></div><small id="targetWeight-hint">Choose a goal first. Weight-change targets must stay within the calculator's BMI support range. Maintenance keeps your current weight.</small><p class="field-error" id="targetWeight-error" hidden></p></div>
-              <div class="field"><label for="weeklyRate">Weekly pace</label><select id="weeklyRate" name="weeklyRate" disabled aria-describedby="weeklyRate-hint pace-availability weeklyRate-error"><option value="">Choose a goal and enter your weight first</option></select><small id="weeklyRate-hint">Restricted, conservative options scale with current bodyweight. Paces outside calorie/deficit limits are disabled. These are desired averages, not guaranteed or universally healthy rates.</small><p class="field-hint" id="pace-availability" role="status" hidden></p><p class="field-error" id="weeklyRate-error" hidden></p></div>
-            </div>
+              <div class="consent-block"><label class="check-label"><input id="eligible" name="eligible" type="checkbox" required aria-describedby="eligible-hint eligible-error"><span>Разбирам, че инструментът е за общо здрави пълнолетни и не е предназначен за бременност, кърмене, възстановяване след травми или състояния, изискващи индивидуални хранителни или двигателни насоки.</span></label><p id="eligible-hint" class="field-hint">При притеснения за хранително разстройство или внезапно, необяснимо отслабване потърси квалифицирана помощ вместо автоматични цели.</p><p id="eligible-error" class="field-error" hidden></p></div>
+              <button id="analyze" class="primary-button" type="submit" disabled>Анализирай телосложението ми</button>
+              <p id="app-status" class="field-hint" role="status">Инструментът се зарежда. Ако това съобщение остане, JavaScript не е зареден. Анализът е изключен, за да не бъдат изпратени личните данни към сървъра.</p>
+              <div class="saving-options"><label class="check-label"><input id="remember" name="remember" type="checkbox" aria-describedby="remember-hint"><span>Запомни данните на това устройство</span></label><p id="remember-hint" class="field-hint">Изключено по подразбиране. Няма автоматично запазване без съгласие. При включване данните и измерванията се запазват след анализ само в този браузър и могат да бъдат видени от други негови потребители. Няма синхронизация; потвърждението за допустимост не се запазва.</p><p id="storage-status" class="storage-status" role="status">Данните не се запазват без твоето съгласие.</p><button id="delete-data" class="text-button" type="button">Изтрий запазените ми данни</button></div>
+            </form>
+          </section>
 
-            <div class="body-options">
-              <label class="check-label"><input id="includeAssessment" name="includeAssessment" type="checkbox" aria-describedby="assessment-hint includeAssessment-error"><span>Include an optional body assessment</span></label>
-              <p class="field-hint" id="assessment-hint">Combine waist measurements with an existing body-fat estimate and self-description if available. These measurements cannot establish muscle mass or diagnose a body type.</p>
-              <p class="field-error" id="includeAssessment-error" hidden></p>
-              <fieldset id="body-fields" class="body-fields" hidden disabled>
-                <legend>Body measurements / optional context</legend>
-                <div class="field"><label for="waistSite">Waist measurement site</label><select id="waistSite" name="waistSite" required aria-describedby="waistSite-hint waistSite-error"><option value="iliac">Top of hipbone - RFM body-fat estimate</option><option value="midpoint">Midway between ribs and hips - NICE waist profile</option></select><small id="waistSite-hint">Different measurement sites are not interchangeable. Changing this choice clears the waist entry so you can remeasure. RFM needs the selected formula category and age 20+.</small><p class="field-error" id="waistSite-error" hidden></p></div>
-                <div class="field"><label for="waist">Waist circumference (cm)</label><div class="input-wrap"><input id="waist" name="waist" type="text" inputmode="decimal" maxlength="8" required aria-describedby="waist-hint waist-error"><span aria-hidden="true">cm</span></div><small id="waist-hint">For RFM, measure around the bare trunk at the uppermost border of the right hipbone, tape horizontal, standing and breathing out naturally. Supported entry: 35-200 cm, not a healthy range.</small><p class="field-error" id="waist-error" hidden></p></div>
-                <div class="field"><label for="bodyFat">Optional existing body-fat result (%)</label><div class="input-wrap"><input id="bodyFat" name="bodyFat" type="text" inputmode="decimal" maxlength="8" aria-describedby="bodyFat-hint bodyFat-error"><span aria-hidden="true">%</span></div><small id="bodyFat-hint">Optional comparison from another measurement or model, 3-60% with one decimal place. The RFM calculation does not need this field. This input range does not define health.</small><p class="field-error" id="bodyFat-error" hidden></p></div>
-                <div class="field"><label for="bodyFatMethod">Estimate method</label><select id="bodyFatMethod" name="bodyFatMethod" disabled aria-describedby="bodyFatMethod-hint bodyFatMethod-error"><option value="">Choose if you entered an estimate</option><option value="dxa">DXA scan</option><option value="bia">Bioimpedance / body-fat scale</option><option value="calipers">Skinfold calipers</option><option value="other">Other / unknown method</option></select><small id="bodyFatMethod-hint">Methods have different limitations; an estimate does not measure muscle mass or prove health.</small><p class="field-error" id="bodyFatMethod-error" hidden></p></div>
-                <div class="field"><label for="bodyDescription">How would you describe your build?</label><select id="bodyDescription" name="bodyDescription" aria-describedby="bodyDescription-hint bodyDescription-error"><option value="">Optional self-description</option><option value="slim">Slim</option><option value="muscular">Muscular</option><option value="higher-fat">Higher body fat</option><option value="low-muscle-higher-fat">Lower muscle / higher body fat</option><option value="unsure">Unsure</option><option value="private">Prefer not to say</option></select><small id="bodyDescription-hint">Always shown as self-reported, never confirmed by the calculator. No photos are collected.</small><p class="field-error" id="bodyDescription-error" hidden></p></div>
-                <button id="assess-body" class="secondary-button" type="button">Assess my measurements</button>
-                <p class="field-hint">Confirm eligibility below first. This button needs age, current height/weight, and waist, but no nutrition goal or formula category. It does not save inputs or change your plan.</p>
-              </fieldset>
-            </div>
+          <section id="body-assessment" class="panel body-assessment" hidden tabindex="-1" aria-labelledby="body-summary">
+            <p class="eyebrow accent">02 / ТВОЯТ АНАЛИЗ</p>
+            <h2 id="body-summary"></h2>
+            <p id="body-explanation"></p>
+            <p class="body-caveat">Приблизителна оценка, не медицинска диагноза. Няма универсална идеална форма. Тези измервания не установяват със сигурност мускулна маса или „мускулест“ тип тяло.</p>
+            <section class="result-section" aria-labelledby="body-metrics-title"><h3 id="body-metrics-title">Основни показатели</h3><dl class="body-metrics">
+              <div><dt>Индекс на телесна маса (ИТМ)</dt><dd id="body-bmi"></dd></div>
+              <div><dt>Категория по ИТМ</dt><dd id="body-bmi-category"></dd></div>
+              <div class="rfm-metric"><dt>Ориентировъчни телесни мазнини по RFM</dt><dd id="body-fat-calculated"></dd></div>
+              <div><dt>Ориентировъчна мастна маса</dt><dd id="body-fat-mass"></dd></div>
+              <div><dt>Безмастна маса (не е мускулна маса)</dt><dd id="body-fat-free-mass"></dd></div>
+              <div class="full-width"><dt>Съотношение талия / ръст (WHtR)</dt><dd id="body-waist-ratio"></dd></div>
+            </dl><p id="body-rfm-note"></p><p id="body-reference-summary"></p><p id="body-waist-note"></p></section>
+            <section class="result-section" aria-labelledby="body-analysis-title"><h3 id="body-analysis-title">Как да разчетеш резултата</h3><ul id="body-analysis-list"></ul></section>
+            <details class="disclosure"><summary>Допълнителни пропорции</summary><dl id="body-proportions" class="proportion-list"></dl><p id="proportion-note"></p></details>
+            <details class="disclosure"><summary>Методика и референтни стойности</summary><p id="body-bmi-note"></p><p id="body-reference-note"></p><a href="https://omronhealthcare.com/storage/pdfs/1665708-0f_hbf-514c-z_e_m_web_alt_text_acc.pdf" target="_blank" rel="noopener noreferrer">Таблица на Omron по Gallagher (PDF, нов раздел)</a></details>
+            <section class="result-section" aria-labelledby="body-direction-title"><h3 id="body-direction-title">Обща посока</h3><p id="body-goal-context"></p></section>
+            <a id="training-link" class="training-link" href="./training.html" target="_blank" rel="noopener noreferrer">Генериране на тренировъчен план<span class="sr-only"> (отваря се в нов раздел)</span></a>
+          </section>
+          <details id="method" class="method-section disclosure"><summary>Как работи анализът</summary><p>Всички входни измервания са метрични: сантиметри и килограми. ИТМ е ориентир за пълнолетни и не различава мазнини от мускули. RFM оценява само процента мазнини за възраст 20+ чрез ръст, пол и талия при горния ръб на тазовата кост; не измерва мускули.</p><p>Оценката по NICE използва отделна талия по средата между ребрата и таза и се прилага само при ИТМ под 35. Двете места за измерване на талията не са взаимозаменяеми. Хранителните изчисления са незадължителни начални ориентири, не предписание.</p><div class="source-links"><a href="https://www.nature.com/articles/s41598-018-29362-1" target="_blank" rel="noopener noreferrer">Оригинално изследване за RFM<span class="sr-only"> (нов раздел)</span></a><a href="https://www.nice.org.uk/guidance/ng246/chapter/Identifying-and-assessing-overweight-obesity-and-central-adiposity" target="_blank" rel="noopener noreferrer">Насоки на NICE за измерване<span class="sr-only"> (нов раздел)</span></a></div></details>
+        </div>
 
-            <div class="consent-block"><label class="check-label"><input id="eligible" name="eligible" type="checkbox" required aria-describedby="eligible-hint eligible-error"><span>I understand this tool is for generally healthy adults and is not intended for pregnancy/breastfeeding, injury rehabilitation, or conditions requiring individualized nutrition or exercise guidance.</span></label><p class="field-hint" id="eligible-hint">For eating-disorder concerns or sudden/unexplained weight loss, seek qualified guidance rather than using automated targets.</p><p class="field-error" id="eligible-error" hidden></p></div>
-            <button class="primary-button" type="submit" disabled>Calculate my targets <span aria-hidden="true">&#8599;</span></button>
-            <p id="app-status" class="field-hint" role="status">Calculator loading. If this message remains, JavaScript could not load. Calculation is disabled to keep your profile out of server requests.</p>
-            <p class="submit-note">A starting estimate. Not a prescription or a guarantee.</p>
-            <div class="saving-options"><label class="check-label"><input id="remember" type="checkbox" aria-describedby="remember-hint"><span>Remember on this device</span></label><p class="field-hint" id="remember-hint">Optional. Your profile, including any included waist/body-fat details, saves after Calculate my targets in this browser only. Anyone sharing this browser may see it. Clearing browser data removes it. No account or cross-device sync; eligibility confirmation is never saved.</p><p id="storage-status" class="storage-status" role="status">Your health profile is not saved unless you opt in.</p><button id="delete-data" class="text-button" type="button">Delete my saved data</button></div>
-          </form>
-        </section>
-
-        <aside class="result-column" aria-label="Nutrition output">
-          <div class="panel result-panel"><div class="result-topline"><p class="eyebrow">THE OUTPUT</p><span id="result-state" class="output-state">YOUR STARTING POINT</span></div>
-            <div id="empty-result" class="empty-result"><div class="target-symbol" aria-hidden="true"><span></span></div><h3>YOUR GOAL.<br>YOUR DAILY FUEL.</h3><p>Enter your profile and choose a goal. Your estimated daily calories and macros will appear here.</p><div class="empty-macros"><span>PROTEIN</span><span>CARBS</span><span>FAT</span></div></div>
-            <section id="nutrition-result" tabindex="-1" aria-labelledby="result-title" hidden><h3 id="result-title">Your daily starting target.</h3><p id="goal-description" class="result-goal"></p><div class="plan-summary"><div><span class="small-label">TARGET WEIGHT</span><strong data-testid="target-weight"></strong></div><div><span class="small-label">DESIRED WEEKLY PACE</span><strong data-testid="weekly-pace"></strong></div></div><div class="calorie-display"><span data-testid="calories"></span><span>kcal / day</span></div><p class="calorie-caption">Estimated daily energy intake</p><dl class="macro-list"><div><dt><span class="macro-dot protein-dot"></span>Protein</dt><dd><span data-testid="protein"></span><small>g / day</small></dd></div><div><dt><span class="macro-dot carbs-dot"></span>Carbohydrates</dt><dd><span data-testid="carbs"></span><small>g / day</small></dd></div><div><dt><span class="macro-dot fat-dot"></span>Fat</dt><dd><span data-testid="fat"></span><small>g / day</small></dd></div></dl><div class="result-assumptions"><p class="eyebrow">BEHIND YOUR NUMBERS</p><p id="calculation-detail"></p><p id="pace-assumptions"></p><p>Protein: 2.0 g/kg of current weight. Fat: 25% of target energy. Carbohydrates: remaining energy. Whole-gram rounding can cause a small calorie difference.</p></div><p class="result-footnote">Use this as an initial estimate, not a measurement of your needs. Weekly pace is a preference, not a prediction or completion-date promise. Reassess over several weeks using weight trends, training, and recovery. No calculator can promise muscle-only gain.</p></section>
-            <a id="guidance-link" class="guidance-jump" href="#daily-guidance" hidden>Daily nutrients and meal structure <span aria-hidden="true">&#8595;</span></a>
-            <a id="body-link" class="guidance-jump" href="#body-assessment" hidden>Your approximate body profile <span aria-hidden="true">&#8595;</span></a>
-            <section id="limitation" class="limitation" tabindex="-1" aria-labelledby="limitation-title" hidden><span class="small-label">A MORE INDIVIDUAL APPROACH</span><h3 id="limitation-title">One size doesn't fit every body.</h3><p id="limitation-detail"></p><p>This does not diagnose a condition or mean you cannot exercise. A qualified dietitian or clinician can help establish appropriate nutrition targets.</p><a href="#method" class="inline-link">Understand the limits <span aria-hidden="true">&#8599;</span></a></section>
-          </div>
-          <div class="next-card" id="next"><div><span class="small-label">NEXT IN THE TOOLKIT</span><h3>Your training.<br>With a plan.</h3><p>Gym and home workout generation is next. Exercise selection and progression rules are still being defined; no workout plan is available yet.</p></div><span class="next-card-number" aria-hidden="true">02</span></div>
+        <aside id="nutrition-panel" class="panel result-panel" aria-labelledby="nutrition-title">
+          <p class="eyebrow accent">ДОПЪЛНИТЕЛНА ПОСОКА</p><h2 id="nutrition-title">Хранене</h2>
+          <div id="empty-result" class="empty-result"><span class="target-symbol" aria-hidden="true"></span><h3>Първо тялото.<br>После целта.</h3><p>За хранителни ориентири отвори „Хранителни ориентири“ във формуляра и избери активност и цел. Те не са необходими за анализа на телосложението.</p></div>
+          <section id="nutrition-result" hidden tabindex="-1" aria-labelledby="result-title">
+            <span id="result-state" class="output-state"></span><h3 id="result-title">Дневни хранителни ориентири</h3><p id="goal-description"></p>
+            <dl class="macro-list">
+              <div class="calorie-row"><dt>Енергия <small>ккал / ден</small></dt><dd data-testid="calories"></dd></div>
+              <div><dt>Белтъчини <small>г / ден</small></dt><dd data-testid="protein"></dd></div>
+              <div><dt>Въглехидрати <small>г / ден</small></dt><dd data-testid="carbs"></dd></div>
+              <div><dt>Мазнини <small>г / ден</small></dt><dd data-testid="fat"></dd></div>
+            </dl>
+            <section id="daily-guidance" class="daily-guidance" aria-labelledby="reference-title">
+              <h3 id="reference-title">Дневни хранителни референции</h3>
+              <p id="reference-intro">Референтни стойности, не измерен прием. Без хранителен дневник не знаем колко приемаш. Горните граници не са цели за консумация и не са препоръчителни дози за добавки.</p>
+              <p id="reference-profile"></p>
+              <table class="reference-table"><caption class="sr-only">Дневни ориентири за 12 хранителни вещества и техният контекст</caption><thead><tr><th scope="col">Хранително вещество</th><th scope="col">Дневен ориентир</th></tr></thead><tbody id="nutrient-rows"></tbody></table>
+              <p id="reference-scope" class="reference-disclaimer">RDA: препоръчителен дневен прием. AI: адекватен прием. UL: горна допустима граница, не цел. Това не са дози за добавки или диагноза за недостиг. Индивидуалните нужди зависят от здравето и други фактори. Не добавяй тези стойности като допълнителни калории или мазнини към общите количества.</p>
+              <details id="meal-guidance" class="disclosure"><summary>Примерно разпределение на храненията</summary><p>Брой хранения в примера: <strong id="meal-count"></strong>. Това е незадължителна организация на същия дневен прием.</p><ol id="meal-times" class="meal-times"></ol><p id="meal-summary"></p><p id="meal-spacing-note">Около 4 часа между храненията е възможен ритъм, не доказано най-здравословният за всеки. Съобрази го с глада, съня и тренировките; не насилвай късни хранения.</p></details>
+            </section>
+            <dl class="plan-summary"><div><dt>Целево тегло</dt><dd data-testid="target-weight"></dd></div><div><dt>Желано седмично темпо</dt><dd data-testid="weekly-pace"></dd></div></dl>
+            <details class="disclosure"><summary>Допускания и ограничения</summary><p id="calculation-detail"></p><p id="pace-assumptions"></p><p>Начална оценка, не измерване на нуждите. Темпото не обещава срок или покачване само на мускули. Проследявай тенденциите, възстановяването и тренировките през няколко седмици.</p></details>
+          </section>
+          <section id="limitation" class="limitation" hidden tabindex="-1" aria-labelledby="limitation-title"><h3 id="limitation-title">Необходим е индивидуален подход</h3><p id="limitation-detail"></p><p>Това не е диагноза и не означава, че не можеш да тренираш. Квалифициран диетолог или лекар може да помогне с подходящи хранителни цели.</p></section>
         </aside>
       </div>
-
-      <section id="body-assessment" class="body-assessment panel" tabindex="-1" aria-labelledby="body-summary" hidden>
-        <p class="eyebrow accent">APPROXIMATE BODY PROFILE / NOT A DIAGNOSIS</p>
-        <h2 id="body-summary"></h2>
-        <p class="body-caveat">These measurements guide discussion about your goals. They do not measure muscle, diagnose health conditions, or automatically change calories or exercises. A muscular or lower-muscle/higher-fat description cannot be established from BMI and waist alone.</p>
-        <dl class="body-metrics"><div class="rfm-metric"><dt>Estimated body fat (RFM), not a direct measurement</dt><dd id="body-fat-calculated"></dd></div><div><dt>BMI</dt><dd id="body-bmi"></dd></div><div><dt>Waist / height</dt><dd id="body-waist-ratio"></dd></div><div><dt>Separate user-provided body-fat result</dt><dd id="body-fat-estimate"></dd></div></dl>
-        <p id="body-rfm-note"></p>
-        <p class="body-self-label">Optional self-description: <strong id="body-self-description"></strong></p>
-        <p id="body-waist-note"></p>
-        <p id="body-goal-context"></p>
-        <details class="body-method"><summary>How this profile is described</summary><p>RFM estimates body fat as 64 - 20 x (height / hipbone-level waist), plus 12 for the female formula category. The original adult study covered ages 20+, so this app withholds RFM at 18-19 while retaining other measurements. It is a population-based estimate, not a measurement of muscle or a validated muscular/skinny-fat classifier. No invented age correction or guaranteed error margin is used.</p><p>The separate NICE midpoint-waist option uses waist-to-height screening bands only below BMI 35. Those bands are not applied to hipbone-level measurements. BMI follows the NHS adult-from-18 convention. Old saved waists retain their original midpoint protocol and must be remeasured before RFM. Unrounded inputs decide categories; displayed numbers are rounded. Your optional existing body-fat result remains separate and unverified.</p><a href="https://www.nature.com/articles/s41598-018-29362-1" target="_blank" rel="noopener noreferrer">Original RFM study <span class="sr-only">(opens in a new tab)</span></a><br><a href="https://www.nice.org.uk/guidance/ng246/chapter/Identifying-and-assessing-overweight-obesity-and-central-adiposity" target="_blank" rel="noopener noreferrer">NICE measurement guidance <span class="sr-only">(opens in a new tab)</span></a></details>
-      </section>
-
-      <section id="daily-guidance" class="daily-guidance" tabindex="-1" aria-labelledby="guidance-title" hidden>
-        <div class="section-heading"><h2 id="guidance-title">BEYOND THE MACROS</h2><span class="small-label">DAILY REFERENCES / PRACTICAL ROUTINES</span></div>
-        <div class="guidance-grid">
-          <article class="panel reference-panel" aria-labelledby="reference-title">
-            <p class="eyebrow accent">CONTEXT, NOT A SCORECARD</p>
-            <h3 id="reference-title">Daily nutrient references.</h3>
-            <p id="reference-intro">These are intake references and limits, not measured intake. Without a food diary or menu, we cannot calculate how much of each nutrient you actually eat. Limits are ceilings, not amounts to consume.</p>
-            <p id="reference-profile" class="reference-scope"></p>
-            <table class="reference-table"><caption class="sr-only">Daily nutrient references, their meaning, and linked sources</caption><thead><tr><th scope="col">Nutrient &amp; context</th><th scope="col">Daily reference</th></tr></thead><tbody id="nutrient-rows"></tbody></table>
-            <div id="reference-scope" class="reference-disclaimer">RDA = Recommended Dietary Allowance; AI = Adequate Intake. These are baseline references, not supplement doses or deficiency diagnoses. Food choices, menstrual status, smoking, medications, and health conditions can change individual needs. Kidney conditions in particular need qualified advice. These nutrients overlap with your macro totals; do not add them as extra calories or fat.</div>
-          </article>
-          <aside id="meal-guidance" class="panel meal-panel" aria-labelledby="meal-title">
-            <p class="eyebrow accent">A PRACTICAL STARTING STRUCTURE</p>
-            <h3 id="meal-title"><span id="meal-count"></span> eating occasions.</h3>
-            <p>Three or four meals can work. Four is an optional starting structure for spreading your existing energy and protein across the day, not a requirement for your goal.</p>
-            <p class="small-label meal-example">EXAMPLE ONLY / ADJUST TO YOUR DAY</p>
-            <ol id="meal-times" class="meal-times"></ol>
-            <p id="meal-summary" class="meal-summary"></p>
-            <p id="meal-spacing-note">About four hours between meals is one possible routine, not established as healthiest for everyone. Adjust around hunger, waking hours, training, and medical guidance; do not force late meals to follow this example.</p>
-            <p>Sports-nutrition guidance discusses distributing protein every 3-4 hours, but this does not prove an optimal meal interval for general health. Total intake, food quality, and consistency matter. This is not a food-by-food meal plan.</p>
-            <a class="inline-link" href="https://pmc.ncbi.nlm.nih.gov/articles/PMC5477153/" target="_blank" rel="noopener noreferrer">Protein distribution research <span class="sr-only">(opens in a new tab)</span><span aria-hidden="true">&#8599;</span></a>
-          </aside>
-        </div>
-      </section>
-
-      <section class="method-section" id="method" aria-labelledby="method-title"><div class="section-heading"><h2 id="method-title"><span class="section-number">02 /</span> KNOW YOUR NUMBERS</h2><span class="small-label">TRANSPARENCY OVER PROMISES</span></div><div class="method-grid"><article><span class="method-index">01.</span><h3>Estimate, don't guess.</h3><p>Mifflin-St Jeor and activity estimate maintenance. Loss uses a rough 7,700 kcal/kg starting heuristic; gain uses modest surpluses linked to your chosen pace. Neither predicts actual weight change. Targets and pace don't guarantee health, muscle gain, or a completion date.</p><a href="https://pmc.ncbi.nlm.nih.gov/articles/PMC3880593/" target="_blank" rel="noopener noreferrer">Why weight-change estimates vary <span class="sr-only">(opens in a new tab)</span><span aria-hidden="true">&#8599;</span></a></article><article><span class="method-index">02.</span><h3>Understand the limits.</h3><p>Automated nutrition targets are limited to ages 18-56, current and target BMI 18.5 to below 30, and computed targets of 1,500-4,500 kcal/day. Loss deficits above 20% of estimated maintenance are blocked. These are product limits, not a diagnosis or safe-intake guarantee. BMI doesn't distinguish fat from muscle; age 18 is outside the original equation sample.</p></article><article><span class="method-index">03.</span><h3>Keep the bigger picture.</h3><p>Macros are not a complete eating plan. Food quality, fibre, micronutrients, rest, and consistent training matter too. For weight extremes, medical needs, or unexplained changes, get individual guidance.</p><a href="https://www.nhs.uk/live-well/healthy-weight/managing-your-weight/healthy-ways-to-gain-weight/" target="_blank" rel="noopener noreferrer">General weight-gain guidance <span class="sr-only">(opens in a new tab)</span><span aria-hidden="true">&#8599;</span></a></article></div></section>
-      <footer><a class="footer-brand" href="#main">LIFTFUEL.</a><p>Built for intention. Not perfection.</p><span>LOCAL-FIRST / NO ACCOUNT</span></footer>
+      <footer><a class="brand footer-brand" href="./index.html">LIFT<span>FUEL.</span></a><p>Повече яснота. Без обещания за съвършенство.</p></footer>
     </main>
   </div>
 </body>

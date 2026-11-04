@@ -8,7 +8,7 @@ Website preview: https://petarkaragachliev.github.io/Website/ . Source: https://
 
 [![Test and Publish Preview](https://github.com/PetarKaragachliev/Website/actions/workflows/pages.yml/badge.svg)](https://github.com/PetarKaragachliev/Website/actions/workflows/pages.yml)
 
-Use the **Language** selector at the top of the website to switch between **English** and **Български**. Interface text, errors, calculations, nutrient/body/meal explanations, and numbers switch without losing your inputs. The language preference can be remembered independently; health-profile saving still requires its own consent. Translation is local, with no third-party translation requests.
+The site now opens directly in Bulgarian, with no English selector. Enter the five required measurements, confirm eligibility, and select **Анализирай телосложението ми**. Additional measurements are optional. For calories and the vertical right-hand nutrient list, expand **Хранителни ориентири** and choose activity and a goal explicitly; no dietary values are invented when those choices are missing.
 
 A browser-based nutrition calculator and workout planner for generally healthy adults aged 18-56. The agreed MVP supports metric inputs, fat loss, maintenance, muscle building, conservative weight gain, gym/home plans, and device-local saving.
 
@@ -26,7 +26,7 @@ The calculator includes target weight and restricted desired weekly gain/loss, r
 | [NUTRITION_POLICY.md](NUTRITION_POLICY.md) | Approved starting calculations, sourced rationale, arithmetic fixtures, and remaining safety gates |
 | [NUTRIENT_REFERENCES.md](NUTRIENT_REFERENCES.md) | Daily nutrient reference tables, limits, sources, and flexible meal guidance; not a food diary or supplement plan |
 | [BODY_ASSESSMENT.md](BODY_ASSESSMENT.md) | Optional waist/BMI assessment, self-reported context, interpretation limits, and storage/consent behavior |
-| [LOCALIZATION.md](LOCALIZATION.md) | English/Bulgarian behavior, translation coverage, data stability, and preference/deletion rules |
+| [LOCALIZATION.md](LOCALIZATION.md) | Bulgarian-only interface, retained local nutrition translations, and cleanup of old language preferences |
 | [STATUS.md](STATUS.md) | Current state, blockers, and recorded results |
 
 ## Start Here
@@ -79,12 +79,14 @@ Future updates: review changes, commit the intended files, and use **Push origin
 - `public/index.html`, `public/styles.css`: Accessible form and dark/green responsive interface.
 - `public/js/nutrition.js`: Input validation and nutrition calculations, shared by browser and unit tests.
 - `public/js/guidance.js`: Sourced age/category nutrient references and optional four-occasion meal structure. Values are references/limits, not actual intake or supplement doses. Four-hour spacing is an example, not a universal health rule.
-- `public/js/body-assessment.js`: Optional RFM body-fat estimate from hipbone-level waist/height/category for ages 20-56; separate midpoint-waist screening, user-provided results, and approximate profile context. No automatic calorie/exercise changes or inferred muscle diagnosis.
+- `public/js/body-assessment.js`: RFM, BMI weight category, estimated fat/fat-free masses, two distinct waist measurements, descriptive proportions and provisional age/category reference comparison. No muscle-mass diagnosis or automatic calorie/exercise changes.
+- `public/js/profile-storage.js`: strict normalized v5 profile records and protocol-preserving v1-v4 restoration, without saved eligibility or calculated results.
 - `public/js/measurements.js`: Strict metric parsing shared by nutrition and body assessment.
-- `public/js/i18n.js`, `public/js/bg-*.js`: Local English/Bulgarian rendering, templates, and translated copy; core model values stay language-independent.
+- `public/js/i18n.js`, `public/js/bg-models.js`, `public/js/bg-app.js`: local Bulgarian nutrition-model translations; static analyzer text is Bulgarian directly.
+- `public/training.html`: separate, clearly labeled future-feature page opened from the completed analysis; no workout generation or health data in URLs.
 - `public/js/app.js`: DOM rendering and consent-based local profile storage.
 - `tests/unit/`, `tests/e2e/`: Independent numerical fixtures and real browser scenarios.
 
-No profile data is sent to an application backend. Saving keeps key `liftfuel.profile.v1`, now at record version 4 with an explicit waist measurement site. Version-3 waist data retains its original midpoint protocol; it is not silently reused for RFM. Earlier versions restore without invented fields. Eligibility and calculated results are never persisted. Body details are included only with explicit assessment/remembering choices; Calculate saves, the standalone assessment button does not. Source links navigate externally only when activated.
+No profile data is sent to an application backend. Device remembering is off by default. Consented analysis saves strict version-5 inputs at `liftfuel.profile.v1`, with separate RFM and midpoint waists; legacy records retain their original measurement origins without guessing missing values. Eligibility and computed percentages/masses are never saved. Source links navigate externally only when activated.
 
-The separate `liftfuel.language` key contains only a chosen language code, not health inputs. Delete my saved data also removes that preference. Browser-storage failures are reported without claiming a retained profile was deleted.
+The old `liftfuel.language` preference is no longer read or written; Delete still removes it if present. Browser-storage failures do not stop unsaved analysis and do not falsely claim retained data was deleted.
