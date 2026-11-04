@@ -8,7 +8,9 @@ Website preview: https://petarkaragachliev.github.io/Website/ . Source: https://
 
 [![Test and Publish Preview](https://github.com/PetarKaragachliev/Website/actions/workflows/pages.yml/badge.svg)](https://github.com/PetarKaragachliev/Website/actions/workflows/pages.yml)
 
-The site opens directly in Bulgarian, with no English selector. The original sidebar, central input panel, right-hand results panel and LF hero artwork are restored. Enter the five required measurements, confirm eligibility, and select **Анализирай телосложението ми**. Additional measurements are optional. **Хранителни ориентири** is expanded by default: choose activity and a goal for calories and the vertical nutrient list below fats. The right panel shows calorie/protein/carbohydrate/fat placeholders before calculation, not invented targets; body-only analysis remains available.
+The site opens directly in Bulgarian, with no English selector. The original sidebar, central input panel, right-hand results panel and LF hero artwork are retained. Nutrition is primary in one shared form: explicitly choose activity and goal (neither has a default), enter the five required measurements (formula category, age, height, current weight and `waistRfm`), confirm eligibility, and select **Изчисли моите резултати**. Additional measurements are optional. **Хранителна цел** (`section#nutrition-details`) is an ordinary noncollapsible section before waist. One click computes nutrition and bonus body analysis, focusing the nutrition output on success. The right panel shows calorie/protein/carbohydrate/fat placeholders before calculation, not invented targets, with the remaining nutrients vertically below fats.
+
+Body analysis retains its existing formulas and limits and can still provide a valid bonus when nutrition reaches support limits or a goal is missing. Missing required nutrition choices produces a focused error summary with linked field errors and does not save the submission. There is no body-only UI or nutrition-only reset.
 
 A browser-based nutrition calculator and workout planner for generally healthy adults aged 18-56. The agreed MVP supports metric inputs, fat loss, maintenance, muscle building, conservative weight gain, gym/home plans, and device-local saving.
 
@@ -25,7 +27,7 @@ The calculator includes target weight and restricted desired weekly gain/loss, r
 | [TEST_PLAN.md](TEST_PLAN.md) | Test strategy, TDD workflow, and verification evidence |
 | [NUTRITION_POLICY.md](NUTRITION_POLICY.md) | Approved starting calculations, sourced rationale, arithmetic fixtures, and remaining safety gates |
 | [NUTRIENT_REFERENCES.md](NUTRIENT_REFERENCES.md) | Daily nutrient reference tables, limits, sources, and flexible meal guidance; not a food diary or supplement plan |
-| [BODY_ASSESSMENT.md](BODY_ASSESSMENT.md) | Optional waist/BMI assessment, self-reported context, interpretation limits, and storage/consent behavior |
+| [BODY_ASSESSMENT.md](BODY_ASSESSMENT.md) | Bonus body assessment, required RFM waist, optional measurements, interpretation limits, and storage/consent behavior |
 | [LOCALIZATION.md](LOCALIZATION.md) | Bulgarian-only interface, retained local nutrition translations, and cleanup of old language preferences |
 | [STATUS.md](STATUS.md) | Current state, blockers, and recorded results |
 
@@ -87,6 +89,6 @@ Future updates: review changes, commit the intended files, and use **Push origin
 - `public/js/app.js`: DOM rendering and consent-based local profile storage.
 - `tests/unit/`, `tests/e2e/`: Independent numerical fixtures and real browser scenarios.
 
-No profile data is sent to an application backend. Device remembering is off by default. Consented analysis saves strict version-5 inputs at `liftfuel.profile.v1`, with separate RFM and midpoint waists; legacy records retain their original measurement origins without guessing missing values. Eligibility and computed percentages/masses are never saved. Source links navigate externally only when activated.
+No profile data is sent to an application backend. Device remembering is off by default. Consented successful shared-form calculation saves strict version-5 inputs at `liftfuel.profile.v1`, with separate RFM and midpoint waists; the schema is unchanged and legacy body-only saved records remain readable. Legacy records retain their original measurement origins without guessing missing values or nutrition choices. Eligibility and computed percentages/masses are never saved. Source links navigate externally only when activated.
 
 The old `liftfuel.language` preference is no longer read or written; Delete still removes it if present. Browser-storage failures do not stop unsaved analysis and do not falsely claim retained data was deleted.

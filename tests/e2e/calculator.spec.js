@@ -7,11 +7,11 @@ async function measurements(page, overrides = {}) {
   await page.locator('#sex').selectOption(input.sex);
   for (const field of ['age', 'height', 'weight', 'waistRfm']) await page.locator(`#${field}`).fill(input[field]);
   await page.locator('#eligible').check();
+  await nutrition(page);
 }
 
 async function nutrition(page, overrides = {}) {
   const input = { activity: 'moderate', goal: 'maintain', ...overrides };
-  await page.locator('#nutrition-details').evaluate(node => { node.open = true; });
   await page.locator('#activity').selectOption(input.activity);
   await page.locator(`input[name="goal"][value="${input.goal}"]`).check();
   if (input.goal !== 'maintain') {
@@ -24,10 +24,12 @@ test.beforeEach(async ({ page }) => { await page.goto('/'); });
 
 test('Bulgarian first screen exposes nutrition controls and calorie/macro placeholders without invented targets', async ({ page }) => {
   await expect(page.locator('html')).toHaveAttribute('lang', 'bg');
-  await expect(page.getByRole('button', { name: 'Анализирай телосложението ми' })).toBeEnabled();
+  await expect(page.getByRole('button', { name: 'Изчисли моите резултати' })).toBeEnabled();
   await expect(page.locator('#language')).toHaveCount(0);
   await expect(page.locator('#measurements-details')).not.toHaveAttribute('open');
-  await expect(page.locator('#nutrition-details')).toHaveAttribute('open');
+  await expect(page.locator('details#nutrition-details')).toHaveCount(0);
+  await expect(page.locator('#nutrition-details summary')).toHaveCount(0);
+  await expect(page.locator('#clear-nutrition')).toHaveCount(0);
   await expect(page.locator('#activity')).toBeVisible();
   await expect(page.locator('#empty-result')).toContainText('Калории');
   await expect(page.locator('#empty-result .macro-list dt')).toHaveText(['Белтъчини', 'Въглехидрати', 'Мазнини']);
@@ -53,10 +55,10 @@ test('original sidebar, input and output columns are restored with the LF hero a
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= innerWidth)).toBe(true);
 });
 
-test('mandatory measurements produce central RFM, fat mass and fat-free mass without invented calories', async ({ page }) => {
+test('one submission calculates nutrition first and adds the body analysis from the same measurements', async ({ page }) => {
   await measurements(page);
   await page.locator('#analyze').click();
-  await expect(page.locator('#body-assessment')).toBeFocused();
+  await expect(page.locator('#nutrition-result')).toBeFocused();
   await expect(page.locator('#body-summary')).toContainText('Балансиран');
   await expect(page.locator('#body-bmi')).toHaveText('21,6');
   await expect(page.locator('#body-bmi-category')).toContainText('Нормално тегло');
@@ -64,8 +66,11 @@ test('mandatory measurements produce central RFM, fat mass and fat-free mass wit
   await expect(page.locator('#body-fat-mass')).toHaveText('13,3 кг');
   await expect(page.locator('#body-fat-free-mass')).toHaveText('56,7 кг');
   await expect(page.locator('#body-waist-ratio')).toContainText('описателно');
-  await expect(page.locator('#nutrition-result')).toBeHidden();
-  await expect(page.locator('#empty-result')).toBeVisible();
+  await expect(page.locator('#nutrition-result')).toBeVisible();
+  expect((await page.getByTestId('calories').textContent()).replace(/\s/g, '')).toBe('2604');
+  await expect(page.getByTestId('protein')).toHaveText('140');
+  await expect(page.locator('#nutrient-rows tr')).toHaveCount(12);
+  await expect(page.locator('#empty-result')).toBeHidden();
   expect(await page.evaluate(k => localStorage.getItem(k), key)).toBeNull();
 });
 
@@ -113,7 +118,7 @@ test('possible Skinny Fat is conditional and recommends recomposition rather tha
   await expect(page.locator('#body-explanation')).toContainText('не потвърждава ниска мускулна');
   await expect(page.locator('#body-goal-context')).toContainText('рекомпозиция');
   await expect(page.locator('#body-goal-context')).toContainText('не автоматично отслабване');
-  await expect(page.locator('input[name="goal"]:checked')).toHaveCount(0);
+  await expect(page.locator('input[name="goal"][value="maintain"]')).toBeChecked();
 });
 
 test('age-specific fat reference changes at 40 without changing RFM itself', async ({ page }) => {
@@ -195,14 +200,14 @@ test('implausible RFM has warnings and missing masses rather than fabricated val
 
 test('correcting one field preserves errors on other fields', async ({ page }) => {
   await page.locator('#analyze').click();
-  await expect(page.locator('#error-list li')).toHaveCount(6);
+  await expect(page.locator('#error-list li')).toHaveCount(8);
   await page.locator('#age').fill('30');
   await expect(page.locator('#age-error')).toBeHidden();
   await expect(page.locator('#waistRfm-error')).toBeVisible();
-  await expect(page.locator('#error-list li')).toHaveCount(5);
+  await expect(page.locator('#error-list li')).toHaveCount(7);
 });
 
-test('nutrition is optional and all additional nutrients are vertical after fats in the right panel', async ({ page }) => {
+test('all additional nutrients are vertical after fats in the right panel', async ({ page }) => {
   await measurements(page);
   await nutrition(page);
   await page.locator('#analyze').click();
@@ -245,31 +250,35 @@ test('all-disabled nutrition pace shows a limit while valid body analysis still 
   await expect(page.locator('#nutrition-result')).toBeHidden();
 });
 
-test('incomplete optional nutrition opens its fields without hiding the completed body analysis', async ({ page }) => {
+test('missing nutrition goal prompts a focused error instead of silently choosing a diet', async ({ page }) => {
   await measurements(page);
-  await page.locator('#nutrition-details').evaluate(node => { node.open = true; });
-  await page.locator('#activity').selectOption('moderate');
+  await page.locator('#remember').check();
+  await page.locator('input[name="goal"]:checked').evaluate(node => { node.checked = false; node.dispatchEvent(new Event('input', { bubbles: true })); });
   await page.locator('#analyze').click();
   await expect(page.locator('#body-assessment')).toBeVisible();
   await expect(page.locator('#nutrition-result')).toBeHidden();
   await expect(page.locator('#goal-error')).toBeVisible();
+  await expect(page.locator('#error-summary')).toBeFocused();
+  expect(await page.evaluate(k => localStorage.getItem(k), key)).toBeNull();
 });
 
-test('nutrition can be turned off without clearing body measurements or saved data', async ({ page }) => {
+test('activity and goal are required for the shared calculation and correcting them reuses entered measurements', async ({ page }) => {
   await measurements(page);
-  await nutrition(page);
+  await page.locator('#activity').selectOption('');
+  await page.locator('input[name="goal"]:checked').evaluate(node => { node.checked = false; node.dispatchEvent(new Event('input', { bubbles: true })); });
   await page.locator('#analyze').click();
-  await expect(page.locator('#nutrition-result')).toBeVisible();
-  await page.locator('#clear-nutrition').click();
   await expect(page.locator('#weight')).toHaveValue('70');
   await expect(page.locator('#waistRfm')).toHaveValue('80');
   await expect(page.locator('input[name="goal"]:checked')).toHaveCount(0);
   await expect(page.locator('#activity')).toHaveValue('');
   await expect(page.locator('#nutrition-result')).toBeHidden();
-  await expect(page.locator('#body-assessment')).toBeVisible();
+  await expect(page.locator('#activity-error')).toBeVisible();
+  await expect(page.locator('#goal-error')).toBeVisible();
+  await nutrition(page);
   await page.locator('#analyze').click();
   await expect(page.locator('#error-summary')).toBeHidden();
   await expect(page.locator('#body-fat-calculated')).toHaveText('19,0%');
+  await expect(page.locator('#nutrition-result')).toBeVisible();
 });
 
 test('eligibility withdrawal invalidates both panels and prevents new results', async ({ page }) => {
@@ -283,7 +292,7 @@ test('eligibility withdrawal invalidates both panels and prevents new results', 
   await expect(page.locator('#eligible-error')).toBeVisible();
 });
 
-test('body-only saving restores validated inputs, not eligibility or prior results', async ({ page }) => {
+test('combined calculation saves shared inputs, not eligibility or prior results', async ({ page }) => {
   await measurements(page);
   await page.locator('#remember').check();
   await page.locator('#analyze').click();
@@ -291,7 +300,7 @@ test('body-only saving restores validated inputs, not eligibility or prior resul
   expect(saved.version).toBe(5);
   expect(saved.profile.body.waistRfm).toBe(80);
   expect(saved.profile.body.waistWhtr).toBeNull();
-  expect(saved.profile.goal).toBe('');
+  expect(saved.profile.goal).toBe('maintain');
   expect(saved.profile).not.toHaveProperty('eligible');
   expect(saved).not.toHaveProperty('assessment');
   await page.reload();

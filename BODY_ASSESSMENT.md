@@ -1,6 +1,6 @@
 # Body Analyzer
 
-Status: Bulgarian development-preview analyzer; professional content/body-composition review remains a release gate. All inputs are metric. Software support is ages 18-56, height 130-230 cm, weight 35-250 kg; entry bounds are not healthy ranges.
+Status: Bonus body analysis in the Bulgarian nutrition-first development preview; professional content/body-composition review remains a release gate. All inputs are metric. Software support is ages 18-56, height 130-230 cm, weight 35-250 kg; entry bounds are not healthy ranges. Existing body formulas and limits are unchanged.
 
 ## Inputs and Waist Protocols
 
@@ -48,9 +48,11 @@ Additional ratios are midpoint waist/hip, chest/midpoint waist, arm/height, thig
 
 ## Interface and Persistence
 
-The central analyzer requires no nutrition goal/activity. Optional measurements are collapsed; nutrition choices are expanded by default. The right pane always shows calorie and macro labels, with dashes until calculation. Dietary output is calculated only after explicit activity and goal choices; all macro and nutrient rows sit vertically in the right pane. Fiber/dietary fiber is one row. Users can clear only nutrition choices without resetting body inputs. The original sidebar/central-input/right-output design is retained in Bulgarian. The bottom action opens the separate `training.html` page in the same browser tab, with a return link: it is an honest placeholder, not a workout generator or a channel for health data in URLs.
+Nutrition is primary in a single shared form. Activity and goal are explicitly required without defaults, alongside the five required body measurements and eligibility confirmation. `section#nutrition-details` is an ordinary noncollapsible section before waist; optional measurements remain collapsed. **Изчисли моите резултати** computes both outputs with one click and focuses nutrition output on success. The right pane always shows calorie and macro labels, with dashes until calculation; all macro and nutrient rows sit vertically there. Fiber/dietary fiber is one row. There is no body-only UI or nutrition-only reset.
 
-Device remembering remains off by default. The unchanged key `liftfuel.profile.v1` now stores strict version-5 normalized inputs, with two distinct waists and optional circumferences. No eligibility, interpretation, calculated percentage or mass is persisted. Version 3's old waist restores only as midpoint; version 4's recorded site determines the correct new field. Versions 1/2 do not acquire invented waists. Previously reported fat percentages or muscular self-descriptions do not become RFM measurements or reported training. Recalculation requires fresh eligibility confirmation. Data is not rewritten until consented analysis.
+The body model remains independent: a valid bonus can still be shown when nutrition hits support limits or a goal is missing. Missing required nutrition choices produces a focused error summary with linked field errors and does not save the submission; a body bonus is not a successful nutrition submission. The original sidebar/central-input/right-output design is retained in Bulgarian. The bottom action opens the separate `training.html` page in the same browser tab, with a return link: it is an honest placeholder, not a workout generator or a channel for health data in URLs.
+
+Device remembering remains off by default. The unchanged key `liftfuel.profile.v1` stores the unchanged strict version-5 normalized inputs, with two distinct waists and optional circumferences. Legacy body-only saved records remain readable; missing nutrition choices are not invented. No eligibility, interpretation, calculated percentage or mass is persisted. Version 3's old waist restores only as midpoint; version 4's recorded site determines the correct new field. Versions 1/2 do not acquire invented waists. Previously reported fat percentages or muscular self-descriptions do not become RFM measurements or reported training. Recalculation requires fresh eligibility confirmation. Data is not rewritten until a consented successful shared-form calculation.
 
 ## Sources
 

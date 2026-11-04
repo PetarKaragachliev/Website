@@ -220,24 +220,23 @@ function showLimitation(reason) {
 
 function evaluate(input) {
   const body = calculateBodyAssessment(input);
-  const wantsNutrition = Boolean(input.activity || input.goal);
   // A blocked candidate explains the product limit; it is never a selected/saved pace.
-  const nutrition = wantsNutrition ? calculateNutrition({ ...input, includeAssessment: false, weeklyRate: unavailablePace?.value ?? input.weeklyRate }) : null;
-  return { body, nutrition, errors: { ...nutrition?.errors, ...body.errors } };
+  const nutrition = calculateNutrition({ ...input, includeAssessment: false, weeklyRate: unavailablePace?.value ?? input.weeklyRate });
+  return { body, nutrition, errors: { ...nutrition.errors, ...body.errors } };
 }
 
 function saveProfile(body, nutrition) {
   if (!remember.checked) return;
-  if (nutrition && (Object.keys(nutrition.errors).length || unavailablePace)) {
+  if (Object.keys(nutrition.errors).length || unavailablePace) {
     setStorageStatus('Данните не са запазени: коригирай хранителните полета. Валидният анализ на телосложението остава достъпен. Предишните запазени данни не са променени.');
     return;
   }
   const profile = {
     ...body.measurements,
-    activity: nutrition?.profile.activity ?? '',
-    goal: nutrition?.profile.goal ?? '',
-    targetWeight: nutrition?.profile.targetWeight ?? null,
-    weeklyRate: nutrition?.profile.weeklyRate ?? ''
+    activity: nutrition.profile.activity,
+    goal: nutrition.profile.goal,
+    targetWeight: nutrition.profile.targetWeight,
+    weeklyRate: nutrition.profile.weeklyRate
   };
   try {
     localStorage.setItem(PROFILE_STORAGE_KEY, encodeProfile(profile));
@@ -286,14 +285,15 @@ form.addEventListener('submit', event => {
   invalidateResults();
   const { body, nutrition, errors } = evaluate(readInputs());
   if (body.assessment) renderBodyAssessment(body.assessment);
-  if (body.assessment && nutrition && !Object.keys(nutrition.errors).length) {
+  if (body.assessment && !Object.keys(nutrition.errors).length) {
     if (nutrition.limitation) showLimitation(nutrition.limitation);
     else renderNutrition(nutrition);
   }
-  showErrors(errors, !body.assessment);
+  const hasErrors = Object.keys(errors).length > 0;
+  showErrors(errors, hasErrors);
   if (body.assessment) {
     saveProfile(body, nutrition);
-    $('#body-assessment').focus();
+    if (!hasErrors) $(nutrition.limitation ? '#limitation' : '#nutrition-result').focus();
   } else if (remember.checked) setStorageStatus('Невалидните данни не са запазени. Коригирай посочените полета и анализирай отново.');
 });
 
@@ -306,19 +306,6 @@ form.addEventListener('input', event => {
   }
   invalidateResults();
   if (remember.checked) setStorageStatus('Промените не са запазени. Анализирай отново, за да ги запазиш.');
-});
-
-$('#clear-nutrition').addEventListener('click', () => {
-  form.elements.activity.value = '';
-  for (const radio of form.querySelectorAll('[name="goal"]')) radio.checked = false;
-  updatePlanFields(true);
-  const errors = calculateBodyAssessment(readInputs()).errors;
-  showErrors(Object.fromEntries(Object.keys(displayedErrors).filter(field => errors[field]).map(field => [field, errors[field]])));
-  $('#nutrition-result').hidden = true;
-  $('#limitation').hidden = true;
-  $('#empty-result').hidden = false;
-  $('#result-state').textContent = '';
-  if (remember.checked) setStorageStatus('Хранителната цел е изчистена само на страницата. Анализирай отново, за да запазиш промяната; измерванията са запазени в полетата.');
 });
 
 remember.addEventListener('change', () => {
@@ -335,7 +322,6 @@ $('#delete-data').addEventListener('click', () => {
   form.elements.eligible.checked = false;
   form.elements.regularTraining.checked = false;
   for (const details of document.querySelectorAll('details')) details.open = false;
-  $('#nutrition-details').open = true;
   updatePlanFields(true);
   showErrors({});
   invalidateResults();
@@ -348,8 +334,6 @@ updatePlanFields();
 restoreProfile();
 invalidateResults();
 $('#measurements-details').open = false;
-$('#nutrition-details').open = true;
 $('#app-status').hidden = true;
 $('#result-state').setAttribute('role', 'status');
-$('#analyze').textContent = 'Анализирай телосложението ми';
 $('#analyze').disabled = false;

@@ -4,8 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0b0f0c">
-  <meta name="description" content="Ориентировъчен анализ на телосложението чрез телесни измервания. Незадължителни хранителни ориентири за пълнолетни, без регистрация.">
-  <title>LiftFuel | Анализ на телосложението</title>
+  <meta name="description" content="Дневни калорийни и хранителни ориентири за пълнолетни с бонус анализ на телосложението от същите данни и с едно изчисление. Без регистрация.">
+  <title>LiftFuel | Хранителни ориентири и бонус анализ на телосложението</title>
   <link rel="stylesheet" href="./styles.css">
   <script type="module" src="./js/app.js"></script>
 </head>
@@ -30,7 +30,7 @@
       <section class="hero" aria-labelledby="hero-title">
         <div class="hero-copy"><p class="eyebrow accent">ПО-СИЛНО НАЧАЛО</p>
         <h1 id="hero-title">ЗАРЕДИ УСИЛИЕТО.<br><span>НАДГРАДИ СЕБЕ СИ.</span></h1>
-        <p class="hero-description">Дай отправна точка на тренировките си. Открий дневни калорийни и хранителни ориентири и разбери по-добре телосложението си.</p></div>
+        <p class="hero-description">Дай отправна точка на храненето си. Изчисли дневни калорийни и хранителни ориентири и получи бонус анализ на телосложението от същите данни с едно натискане.</p></div>
         <div class="hero-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="orbit orbit-three"></div><div class="art-mark">LF<span>+</span></div><div class="art-caption">ЯСНА ПОСОКА.<br>НАПРЕДЪК ПРЕД ТЕБ.</div></div>
       </section>
       <div class="section-heading" id="calculator"><h2><span class="section-number">01 /</span> ПОСТАВИ ОСНОВАТА</h2><span class="small-label">МЕТРИЧНИ ЕДИНИЦИ / 18-56 Г.</span></div>
@@ -39,7 +39,7 @@
         <div class="main-stack">
           <section class="panel profile-panel" aria-labelledby="profile-title">
             <div class="panel-heading"><div><p class="eyebrow">ТВОИТЕ ДАННИ</p><h2 id="profile-title">Малко повече за теб.</h2></div><span class="panel-index" aria-hidden="true">01</span></div>
-            <p class="section-intro">Попълни измерванията, активността и целта си за дневни калории, макроси и анализ на телосложението. Можеш да направиш и само анализ, без хранителна цел.</p>
+            <p class="section-intro">Попълни данните, активността, хранителната цел и измерванията си. С едно изчисление получаваш дневни калории и макроси, плюс бонус анализ на телосложението от същите данни.</p>
             <form id="profile-form" novalidate>
               <div id="error-summary" class="notice error-summary" hidden tabindex="-1" role="alert"><strong>Провери посочените полета.</strong><ul id="error-list"></ul></div>
               <div class="measurement-grid basic-measurements">
@@ -48,6 +48,19 @@
                 <div class="field"><label for="height">Ръст</label><div class="input-wrap"><input id="height" name="height" type="text" inputmode="decimal" maxlength="8" autocomplete="off" required aria-describedby="height-hint height-error"><span aria-hidden="true">см</span></div><small id="height-hint">Без обувки, изправен до стена.</small><p id="height-error" class="field-error" hidden></p></div>
               </div>
               <div class="field"><label for="sex">Пол</label><select id="sex" name="sex" required aria-describedby="sex-hint sex-error"><option value="">Избери</option><option value="male">Мъж</option><option value="female">Жена</option></select><small id="sex-hint">Категория за формулите, не определение за идентичност. Ако не е подходяща, потърси индивидуална оценка.</small><p id="sex-error" class="field-error" hidden></p></div>
+              <section id="nutrition-details" class="disclosure">
+                <h3>Хранителна цел</h3>
+                <p class="field-hint">Избери активност и цел, за да изчислиш дневните калории и хранителните показатели вдясно.</p>
+                <div class="field details-content"><label for="activity">Ежедневна активност</label><select id="activity" name="activity" required aria-describedby="activity-hint activity-error"><option value="">Избери активност</option><option value="sedentary">Предимно седящо ежедневие</option><option value="light">Лека активност</option><option value="moderate">Умерена активност</option><option value="very">Висока активност</option></select><small id="activity-hint">Включи работата, ходенето и тренировките за целия ден, не само времето в залата.</small><p id="activity-error" class="field-error" hidden></p></div>
+                <fieldset id="goal" class="goal-fieldset" tabindex="-1" aria-describedby="goal-hint goal-error"><legend>Хранителна цел</legend><p id="goal-hint" class="field-hint">Няма предварително избрана цел. Покачването може да включва и мазнини; мускулен растеж не е гарантиран.</p><div class="goal-grid">
+                  <label class="goal-option"><input type="radio" name="goal" value="lose" required><span>Намаляване на теглото</span></label>
+                  <label class="goal-option"><input type="radio" name="goal" value="maintain"><span>Поддържане на теглото</span></label>
+                  <label class="goal-option"><input type="radio" name="goal" value="muscle"><span>Покачване с фокус върху мускулите</span></label>
+                  <label class="goal-option"><input type="radio" name="goal" value="gain"><span>Покачване на теглото</span></label>
+                </div><p id="goal-error" class="field-error" hidden></p></fieldset>
+                <div class="field"><label for="targetWeight">Целево тегло</label><div class="input-wrap"><input id="targetWeight" name="targetWeight" type="text" inputmode="decimal" maxlength="8" autocomplete="off" disabled aria-describedby="targetWeight-hint targetWeight-error"><span aria-hidden="true">кг</span></div><small id="targetWeight-hint">Първо избери цел. При поддържане се използва текущото тегло.</small><p id="targetWeight-error" class="field-error" hidden></p></div>
+                <div class="field"><label for="weeklyRate">Желано седмично темпо</label><select id="weeklyRate" name="weeklyRate" disabled aria-describedby="weeklyRate-hint pace-availability weeklyRate-error"><option value="">Първо избери цел и въведи тегло</option></select><small id="weeklyRate-hint">Наличните темпове зависят от теглото и ограниченията на изчислението. Това е предпочитание, не прогноза или гаранция за безопасност.</small><p id="pace-availability" class="field-hint" role="status" hidden></p><p id="weeklyRate-error" class="field-error" hidden></p></div>
+              </section>
               <div class="field waist-field"><label for="waistRfm">Талия за RFM при горния ръб на тазовата кост</label><div class="input-wrap"><input id="waistRfm" name="waistRfm" type="text" inputmode="decimal" maxlength="8" autocomplete="off" required aria-describedby="waistRfm-hint waistRfm-error"><span aria-hidden="true">см</span></div><small id="waistRfm-hint">За RFM: измери върху гола кожа на нивото на най-горния ръб на дясната тазова кост. Лентата е хоризонтална, без притискане, след нормално издишване. Не използвай автоматично най-тясната част на талията.</small><p id="waistRfm-error" class="field-error" hidden></p></div>
 
               <details id="measurements-details" class="disclosure">
@@ -64,30 +77,15 @@
               </details>
               <div class="training-context"><label class="check-label"><input id="regularTraining" name="regularTraining" type="checkbox" aria-describedby="regularTraining-hint regularTraining-error"><span>Тренирам редовно със силово натоварване</span></label><p id="regularTraining-hint" class="field-hint">Незадължителна, самоотчетена информация. Не потвърждава количество мускули или тип телосложение.</p><p id="regularTraining-error" class="field-error" hidden></p></div>
 
-              <details id="nutrition-details" class="disclosure" open>
-                <summary>Хранителни ориентири <span>Незадължително</span></summary>
-                <p class="field-hint">Избери активност и цел, за да изчислиш калориите и хранителните показатели вдясно. За анализ само на телосложението можеш да оставиш тези полета празни.</p>
-                <button id="clear-nutrition" class="text-button" type="button">Само анализ на тялото: изчисти хранителната цел</button>
-                <div class="field details-content"><label for="activity">Ежедневна активност</label><select id="activity" name="activity" aria-describedby="activity-hint activity-error"><option value="">Избери активност</option><option value="sedentary">Предимно седящо ежедневие</option><option value="light">Лека активност</option><option value="moderate">Умерена активност</option><option value="very">Висока активност</option></select><small id="activity-hint">Включи работата, ходенето и тренировките за целия ден, не само времето в залата.</small><p id="activity-error" class="field-error" hidden></p></div>
-                <fieldset id="goal" class="goal-fieldset" tabindex="-1" aria-describedby="goal-hint goal-error"><legend>Хранителна цел</legend><p id="goal-hint" class="field-hint">Няма предварително избрана цел. Покачването може да включва и мазнини; мускулен растеж не е гарантиран.</p><div class="goal-grid">
-                  <label class="goal-option"><input type="radio" name="goal" value="lose"><span>Намаляване на теглото</span></label>
-                  <label class="goal-option"><input type="radio" name="goal" value="maintain"><span>Поддържане на теглото</span></label>
-                  <label class="goal-option"><input type="radio" name="goal" value="muscle"><span>Покачване с фокус върху мускулите</span></label>
-                  <label class="goal-option"><input type="radio" name="goal" value="gain"><span>Покачване на теглото</span></label>
-                </div><p id="goal-error" class="field-error" hidden></p></fieldset>
-                <div class="field"><label for="targetWeight">Целево тегло</label><div class="input-wrap"><input id="targetWeight" name="targetWeight" type="text" inputmode="decimal" maxlength="8" autocomplete="off" disabled aria-describedby="targetWeight-hint targetWeight-error"><span aria-hidden="true">кг</span></div><small id="targetWeight-hint">Първо избери цел. При поддържане се използва текущото тегло.</small><p id="targetWeight-error" class="field-error" hidden></p></div>
-                <div class="field"><label for="weeklyRate">Желано седмично темпо</label><select id="weeklyRate" name="weeklyRate" disabled aria-describedby="weeklyRate-hint pace-availability weeklyRate-error"><option value="">Първо избери цел и въведи тегло</option></select><small id="weeklyRate-hint">Наличните темпове зависят от теглото и ограниченията на изчислението. Това е предпочитание, не прогноза или гаранция за безопасност.</small><p id="pace-availability" class="field-hint" role="status" hidden></p><p id="weeklyRate-error" class="field-error" hidden></p></div>
-              </details>
-
               <div class="consent-block"><label class="check-label"><input id="eligible" name="eligible" type="checkbox" required aria-describedby="eligible-hint eligible-error"><span>Разбирам, че инструментът е за общо здрави пълнолетни и не е предназначен за бременност, кърмене, възстановяване след травми или състояния, изискващи индивидуални хранителни или двигателни насоки.</span></label><p id="eligible-hint" class="field-hint">При притеснения за хранително разстройство или внезапно, необяснимо отслабване потърси квалифицирана помощ вместо автоматични цели.</p><p id="eligible-error" class="field-error" hidden></p></div>
-              <button id="analyze" class="primary-button" type="submit" disabled>Анализирай телосложението ми</button>
+              <button id="analyze" class="primary-button" type="submit" disabled>Изчисли моите резултати</button>
               <p id="app-status" class="field-hint" role="status">Инструментът се зарежда. Ако това съобщение остане, JavaScript не е зареден. Анализът е изключен, за да не бъдат изпратени личните данни към сървъра.</p>
               <div class="saving-options"><label class="check-label"><input id="remember" name="remember" type="checkbox" aria-describedby="remember-hint"><span>Запомни данните на това устройство</span></label><p id="remember-hint" class="field-hint">Изключено по подразбиране. Няма автоматично запазване без съгласие. При включване данните и измерванията се запазват след анализ само в този браузър и могат да бъдат видени от други негови потребители. Няма синхронизация; потвърждението за допустимост не се запазва.</p><p id="storage-status" class="storage-status" role="status">Данните не се запазват без твоето съгласие.</p><button id="delete-data" class="text-button" type="button">Изтрий запазените ми данни</button></div>
             </form>
           </section>
 
           <section id="body-assessment" class="panel body-assessment" hidden tabindex="-1" aria-labelledby="body-summary">
-            <p class="eyebrow accent">02 / ТВОЯТ АНАЛИЗ</p>
+            <p class="eyebrow accent">02 / БОНУС: АНАЛИЗ НА ТЕЛОСЛОЖЕНИЕТО</p>
             <h2 id="body-summary"></h2>
             <p id="body-explanation"></p>
             <p class="body-caveat">Приблизителна оценка, не медицинска диагноза. Няма универсална идеална форма. Тези измервания не установяват със сигурност мускулна маса или „мускулест“ тип тяло.</p>
@@ -105,7 +103,7 @@
             <section class="result-section" aria-labelledby="body-direction-title"><h3 id="body-direction-title">Обща посока</h3><p id="body-goal-context"></p></section>
             <a id="training-link" class="training-link" href="./training.html">Генериране на тренировъчен план</a>
           </section>
-          <details id="method" class="method-section disclosure"><summary>Как работи анализът</summary><p>Всички входни измервания са метрични: сантиметри и килограми. ИТМ е ориентир за пълнолетни и не различава мазнини от мускули. RFM оценява само процента мазнини за възраст 20+ чрез ръст, пол и талия при горния ръб на тазовата кост; не измерва мускули.</p><p>Оценката по NICE използва отделна талия по средата между ребрата и таза и се прилага само при ИТМ под 35. Двете места за измерване на талията не са взаимозаменяеми. Хранителните изчисления са незадължителни начални ориентири, не предписание.</p><div class="source-links"><a href="https://www.nature.com/articles/s41598-018-29362-1" target="_blank" rel="noopener noreferrer">Оригинално изследване за RFM<span class="sr-only"> (нов раздел)</span></a><a href="https://www.nice.org.uk/guidance/ng246/chapter/Identifying-and-assessing-overweight-obesity-and-central-adiposity" target="_blank" rel="noopener noreferrer">Насоки на NICE за измерване<span class="sr-only"> (нов раздел)</span></a></div></details>
+          <details id="method" class="method-section disclosure"><summary>Как работи анализът</summary><p>Всички входни измервания са метрични: сантиметри и килограми. ИТМ е ориентир за пълнолетни и не различава мазнини от мускули. RFM оценява само процента мазнини за възраст 20+ чрез ръст, пол и талия при горния ръб на тазовата кост; не измерва мускули.</p><p>Оценката по NICE използва отделна талия по средата между ребрата и таза и се прилага само при ИТМ под 35. Двете места за измерване на талията не са взаимозаменяеми. Хранителните изчисления са начални ориентири, не предписание.</p><div class="source-links"><a href="https://www.nature.com/articles/s41598-018-29362-1" target="_blank" rel="noopener noreferrer">Оригинално изследване за RFM<span class="sr-only"> (нов раздел)</span></a><a href="https://www.nice.org.uk/guidance/ng246/chapter/Identifying-and-assessing-overweight-obesity-and-central-adiposity" target="_blank" rel="noopener noreferrer">Насоки на NICE за измерване<span class="sr-only"> (нов раздел)</span></a></div></details>
         </div>
 
         <div class="result-column">
@@ -113,7 +111,7 @@
           <div class="result-topline"><h2 id="nutrition-title" class="eyebrow">ТВОИТЕ РЕЗУЛТАТИ</h2><span class="small-label accent">ОРИЕНТИРИ, НЕ ПРЕДПИСАНИЕ</span></div>
           <div id="empty-result" class="empty-result">
             <h3>Твоите дневни калории и макроси.</h3>
-            <p>Попълни данните, избери активност и хранителна цел и натисни „Анализирай телосложението ми“. Тук ще се покажат изчислените стойности, а под мазнините и останалите хранителни показатели.</p>
+            <p>Попълни данните, избери активност и хранителна цел и натисни „Изчисли моите резултати“. Тук ще се покажат калориите, макросите и останалите хранителни показатели. Бонус анализът на телосложението се изчислява от същите данни със същото натискане.</p>
             <div class="calorie-display"><span aria-label="Все още няма изчислена стойност">-</span><span>ккал / ден</span></div><p class="calorie-caption">Калории / очаква изчисление</p>
             <dl class="macro-list">
               <div><dt><span class="macro-dot protein-dot" aria-hidden="true"></span>Белтъчини</dt><dd><span>-</span> <small>г / ден</small></dd></div>
