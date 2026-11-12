@@ -6,8 +6,8 @@
   <meta name="theme-color" content="#0b0f0c">
   <meta name="description" content="Дневни калорийни и хранителни ориентири за пълнолетни с бонус анализ на телосложението от същите данни и с едно изчисление. Без регистрация.">
   <title>LiftFuel | Хранителни ориентири и бонус анализ на телосложението</title>
-  <link rel="stylesheet" href="./styles.css">
-  <script src="./js/start.js?v=shared-results-1" defer></script>
+  <link rel="stylesheet" href="./styles.css?v=workout-1">
+  <script src="./js/start.js?v=shared-results-5" defer></script>
 </head>
 <body>
   <a class="skip-link" href="#main">Към съдържанието</a>
@@ -17,9 +17,8 @@
       <div class="sidebar-body">
         <p class="eyebrow nav-caption">ТВОИТЕ ИНСТРУМЕНТИ ЗА ТРЕНИРОВКИ</p>
         <nav aria-label="Основна навигация">
-          <a class="nav-link active" href="#calculator"><span aria-hidden="true">01</span> Хранене и телосложение</a>
-          <a class="nav-link" href="#method"><span aria-hidden="true">02</span> Методиката</a>
-          <a class="nav-link" href="#next"><span aria-hidden="true">03</span> Какво предстои</a>
+          <a class="nav-link active" href="#calculator"><span aria-hidden="true">01</span> Хранителен режим</a>
+          <a class="nav-link" href="./training.html"><span aria-hidden="true">02</span> Тренировъчен план</a>
         </nav>
         <div class="sidebar-note"><span class="small-label">ПО-МАЛКО ГАДАЕНЕ.</span><p>Повече посока.<br>Тренировка след тренировка.</p><span class="status-dot"></span><span class="muted">Поверителност по замисъл</span></div>
       </div>
@@ -36,9 +35,8 @@
       <div class="section-heading" id="calculator"><h2><span class="section-number">01 /</span> ПОСТАВИ ОСНОВАТА</h2><span class="small-label">МЕТРИЧНИ ЕДИНИЦИ / 18-56 Г.</span></div>
       <noscript><p class="notice">За анализа е необходим JavaScript. Бутонът остава неактивен, за да не бъдат изпратени данните от формуляра към сървъра.</p></noscript>
       <div class="calculator-layout">
-        <div class="main-stack">
-          <section class="panel profile-panel" aria-labelledby="profile-title">
-            <div class="panel-heading"><div><p class="eyebrow">ТВОИТЕ ДАННИ</p><h2 id="profile-title">Малко повече за теб.</h2></div><span class="panel-index" aria-hidden="true">01</span></div>
+          <details id="profile-panel" class="panel profile-panel" open>
+            <summary>Твоите данни</summary>
             <p class="section-intro">Попълни данните, активността, хранителната цел и измерванията си. С едно изчисление получаваш дневни калории и макроси, плюс бонус анализ на телосложението от същите данни.</p>
             <form id="profile-form" novalidate>
               <div id="error-summary" class="notice error-summary" hidden tabindex="-1" role="alert"><strong>Провери посочените полета.</strong><ul id="error-list"></ul></div>
@@ -51,11 +49,11 @@
               <section id="nutrition-details" class="disclosure">
                 <h3>Хранителна цел</h3>
                 <p class="field-hint">Избери активност и цел, за да изчислиш дневните калории и хранителните показатели вдясно.</p>
-                <div class="field details-content"><label for="activity">Ежедневна активност</label><select id="activity" name="activity" required aria-describedby="activity-hint activity-error"><option value="">Избери активност</option><option value="sedentary">Предимно седящо ежедневие</option><option value="light">Лека активност</option><option value="moderate">Умерена активност</option><option value="very">Висока активност</option></select><small id="activity-hint">Включи работата, ходенето и тренировките за целия ден, не само времето в залата.</small><p id="activity-error" class="field-error" hidden></p></div>
+                <div class="field details-content"><label for="activity">Ежедневна активност извън тренировките</label><select id="activity" name="activity" required aria-describedby="activity-hint activity-error"><option value="">Избери активност</option><option value="sedentary">Предимно седящо ежедневие</option><option value="light">Лека активност</option><option value="moderate">Умерена активност</option><option value="very">Висока активност</option></select><small id="activity-hint">Включи работата и обичайното ходене, но изключи планираните тренировки. Тяхната добавка се изчислява отделно само за съответния ден.</small><p id="activity-error" class="field-error" hidden></p></div>
                 <fieldset id="goal" class="goal-fieldset" tabindex="-1" aria-describedby="goal-hint goal-error"><legend>Хранителна цел</legend><p id="goal-hint" class="field-hint">Няма предварително избрана цел. Покачването може да включва и мазнини; мускулен растеж не е гарантиран.</p><div class="goal-grid">
                   <label class="goal-option"><input type="radio" name="goal" value="lose" required><span>Намаляване на теглото</span></label>
                   <label class="goal-option"><input type="radio" name="goal" value="maintain"><span>Поддържане на теглото</span></label>
-                  <label class="goal-option"><input type="radio" name="goal" value="muscle"><span>Покачване с фокус върху мускулите</span></label>
+                  <label class="goal-option"><input type="radio" name="goal" value="muscle"><span>Покачване на мускулна маса</span></label>
                   <label class="goal-option"><input type="radio" name="goal" value="gain"><span>Покачване на теглото</span></label>
                 </div><p id="goal-error" class="field-error" hidden></p></fieldset>
                 <div class="field"><label for="targetWeight">Целево тегло</label><div class="input-wrap"><input id="targetWeight" name="targetWeight" type="text" inputmode="decimal" maxlength="8" autocomplete="off" disabled aria-describedby="targetWeight-hint targetWeight-error"><span aria-hidden="true">кг</span></div><small id="targetWeight-hint">Първо избери цел. При поддържане се използва текущото тегло.</small><p id="targetWeight-error" class="field-error" hidden></p></div>
@@ -81,10 +79,11 @@
               <button id="analyze" class="primary-button" type="submit" disabled>Изчисли моите резултати</button>
               <p id="app-status" class="field-hint" role="status">Инструментът се зарежда. Ако това съобщение остане, JavaScript не е зареден. Анализът е изключен, за да не бъдат изпратени личните данни към сървъра.</p>
               <button id="reload-app" class="text-button" type="button" hidden>Опитай зареждането отново</button>
-              <div class="saving-options"><label class="check-label"><input id="remember" name="remember" type="checkbox" aria-describedby="remember-hint"><span>Запомни данните на това устройство</span></label><p id="remember-hint" class="field-hint">Изключено по подразбиране. Няма автоматично запазване без съгласие. При включване данните и измерванията се запазват след анализ само в този браузър и могат да бъдат видени от други негови потребители. Няма синхронизация; потвърждението за допустимост не се запазва.</p><p id="storage-status" class="storage-status" role="status">Данните не се запазват без твоето съгласие.</p><button id="delete-data" class="text-button" type="button">Изтрий запазените ми данни</button></div>
+              <div class="saving-options"><label class="check-label"><input id="remember" name="remember" type="checkbox" aria-describedby="remember-hint"><span>Запомни данните на това устройство</span></label><p id="remember-hint" class="field-hint">Изключено по подразбиране. Валидните входни данни се споделят между храненето и тренировките в текущия раздел. Само при включване след успешен анализ профилът и тренировъчните настройки се запазват трайно в този браузър и могат да бъдат видени от други негови потребители. Няма синхронизация; потвърждението за допустимост не се запазва.</p><button id="delete-data" class="text-button" type="button">Изтрий запазените ми данни</button></div>
             </form>
-          </section>
+          </details>
 
+        <div class="main-stack">
           <section id="body-assessment" class="panel body-assessment" hidden tabindex="-1" aria-labelledby="body-summary">
             <p class="eyebrow accent">02 / БОНУС: АНАЛИЗ НА ТЕЛОСЛОЖЕНИЕТО</p>
             <h2 id="body-summary"></h2>
@@ -110,6 +109,7 @@
         <div class="result-column">
         <aside id="nutrition-panel" class="panel result-panel" aria-labelledby="nutrition-title">
           <div class="result-topline"><h2 id="nutrition-title" class="eyebrow">ТВОИТЕ РЕЗУЛТАТИ</h2><span class="small-label accent">ОРИЕНТИРИ, НЕ ПРЕДПИСАНИЕ</span></div>
+          <p id="storage-status" class="storage-status" role="status">Данните и черновите остават в текущия раздел. Трайно запазване има само при включено запомняне.</p>
           <div id="empty-result" class="empty-result">
             <h3>Твоите дневни калории и макроси.</h3>
             <p>Попълни данните, избери активност и хранителна цел и натисни „Изчисли моите резултати“. Тук ще се покажат калориите, макросите и останалите хранителни показатели. Бонус анализът на телосложението се изчислява от същите данни със същото натискане.</p>
@@ -123,12 +123,13 @@
           <section id="nutrition-result" hidden tabindex="-1" aria-labelledby="result-title">
             <span id="result-state" class="output-state"></span><h3 id="result-title">Твоята дневна отправна точка.</h3><p id="goal-description"></p>
             <dl class="plan-summary"><div><dt>Целево тегло</dt><dd data-testid="target-weight"></dd></div><div><dt>Желано седмично темпо</dt><dd data-testid="weekly-pace"></dd></div></dl>
-            <div class="calorie-display"><span data-testid="calories"></span><span>ккал / ден</span></div><p class="calorie-caption">Ориентировъчен дневен енергиен прием</p>
+            <div class="calorie-display"><span data-testid="calories"></span><span>ккал / ден</span></div><p class="calorie-caption">Почивен ден / без тренировъчна добавка</p>
             <dl class="macro-list">
               <div><dt><span class="macro-dot protein-dot" aria-hidden="true"></span>Белтъчини</dt><dd><span data-testid="protein"></span><small>г / ден</small></dd></div>
               <div><dt><span class="macro-dot carbs-dot" aria-hidden="true"></span>Въглехидрати</dt><dd><span data-testid="carbs"></span><small>г / ден</small></dd></div>
               <div><dt><span class="macro-dot fat-dot" aria-hidden="true"></span>Мазнини</dt><dd><span data-testid="fat"></span><small>г / ден</small></dd></div>
             </dl>
+            <section id="day-nutrition" hidden aria-label="Планирано хранене по дни"></section>
             <section id="daily-guidance" class="daily-guidance" aria-labelledby="reference-title">
               <h3 id="reference-title">Дневни хранителни референции</h3>
               <p id="reference-intro">Референтни стойности, не измерен прием. Без хранителен дневник не знаем колко приемаш. Горните граници не са цели за консумация и не са препоръчителни дози за добавки.</p>
@@ -141,10 +142,10 @@
           </section>
           <section id="limitation" class="limitation" hidden tabindex="-1" aria-labelledby="limitation-title"><h3 id="limitation-title">Необходим е индивидуален подход</h3><p id="limitation-detail"></p><p>Това не е диагноза и не означава, че не можеш да тренираш. Квалифициран диетолог или лекар може да помогне с подходящи хранителни цели.</p></section>
         </aside>
-        <section class="next-card" id="next" aria-labelledby="next-title"><span class="small-label accent">СЛЕДВАЩИЯТ ИНСТРУМЕНТ</span><h3 id="next-title">Твоята тренировка.<br>С ясен план.</h3><p>Генераторът на тренировки за зала и у дома предстои. Подборът на упражнения и правилата за напредък са в процес на разработка.</p><span class="next-card-number" aria-hidden="true">02</span></section>
+        <section class="next-card" id="next" aria-labelledby="next-title"><span class="small-label accent">СЛЕДВАЩАТА СТЪПКА</span><h3 id="next-title">Твоята тренировка.<br>С ясен план.</h3><p>Предварителна силова програма за зала или у дома. Генерираният план добавя ориентир за храненето само в тренировъчните дни; почивните остават на базовия прием.</p><a class="training-link" href="./training.html">Към тренировъчния план</a><span class="next-card-number" aria-hidden="true">02</span></section>
         </div>
       </div>
-      <p class="preview-notice"><strong>В процес на разработка.</strong> Инструментът не заменя медицинска оценка. Генераторът на тренировки предстои.</p>
+      <p class="preview-notice"><strong>В процес на разработка.</strong> Инструментът не заменя медицинска оценка. Тренировъчните правила и съдържанието изискват професионален преглед.</p>
       <footer><a class="brand footer-brand" href="./index.html">LIFT<span>FUEL.</span></a><p>Повече яснота. Без обещания за съвършенство.</p></footer>
     </main>
   </div>

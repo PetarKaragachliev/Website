@@ -2,6 +2,9 @@ import { calculateNutrition, getWeeklyPaces } from './nutrition.js';
 import { calculateBodyAssessment } from './body-assessment.js';
 import { translate } from './i18n.js';
 import { PROFILE_STORAGE_KEY, decodeProfile, encodeProfile } from './profile-storage.js';
+import { readSharedPlan, writeSharedPlan, clearSharedPlan, invalidateSharedPlan, normalizeSharedProfile, SHARED_SESSION_KEY, SHARED_LOCAL_KEY } from './shared-plan.js';
+import { buildTrainingNutrition } from './training-nutrition.js';
+import { renderDayNutrition } from './day-nutrition-view.js';
 
 const t = (message, values) => translate(message, 'bg', values);
 const $ = selector => document.querySelector(selector);
@@ -13,16 +16,43 @@ const percentNumber = new Intl.NumberFormat('bg-BG', { maximumFractionDigits: 2 
 const rfmNumber = new Intl.NumberFormat('bg-BG', { minimumFractionDigits: 1, maximumFractionDigits: 1 });
 const paceNumber = new Intl.NumberFormat('bg-BG', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const ratioNumber = new Intl.NumberFormat('bg-BG', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
-const goalLabels = { lose: 'Намаляване на теглото', maintain: 'Поддържане на теглото', muscle: 'Покачване с фокус върху мускулите', gain: 'Покачване на теглото' };
+const goalLabels = { lose: 'Намаляване на теглото', maintain: 'Поддържане на теглото', muscle: 'Покачване на мускулна маса', gain: 'Покачване на теглото' };
 const factors = { sedentary: '1,2', light: '1,375', moderate: '1,55', very: '1,725' };
 let displayedErrors = {};
 let unavailablePace = null;
 let profileDeletionFailed = false;
+let sharedDeletionFailed = false;
+let sharedInvalidationFailed = false;
+const draftKey = 'liftfuel.nutrition.draft.v1';
+const draftFields = ['age', 'sex', 'height', 'weight', 'activity', 'goal', 'targetWeight', 'weeklyRate', 'waistRfm', 'waistWhtr', 'hip', 'chest', 'arm', 'thigh', 'wrist'];
+let pendingDraft = false;
+let draftStorageFailed = false;
+
+function storeDraft() {
+  pendingDraft = true;
+  const input = readInputs();
+  const fields = Object.fromEntries(draftFields.map(field => [field, input[field] ?? '']));
+  try {
+    sessionStorage.setItem(draftKey, JSON.stringify({ version: 1, invalid: true, fields, regularTraining: input.regularTraining, remember: remember.checked }));
+    draftStorageFailed = false;
+  } catch { draftStorageFailed = true; }
+}
+
+function clearDraft() {
+  pendingDraft = false;
+  try {
+    sessionStorage.removeItem(draftKey);
+    draftStorageFailed = false;
+  } catch { draftStorageFailed = true; }
+}
 
 function setStorageStatus(message) {
   $('#storage-status').textContent = profileDeletionFailed
     ? `Запазеният профил не можа да бъде изтрит. Изчисти данните за този сайт от настройките на браузъра. ${message}`
     : message;
+  if (sharedDeletionFailed) $('#storage-status').textContent += ' Споделеният план не можа да бъде изтрит изцяло. Изчисти данните за този сайт от настройките на браузъра.';
+  if (sharedInvalidationFailed) $('#storage-status').textContent += ' Предишният споделен план не можа да бъде обезсилен в текущия раздел. Не го използвай преди нов валиден анализ.';
+  if (draftStorageFailed) $('#storage-status').textContent += ' Черновата в текущия раздел е недостъпна; промените може да се загубят при навигация. Изтриването на черновата също не може да се гарантира.';
 }
 
 function readInputs() {
@@ -68,6 +98,9 @@ function updatePlanFields(reset = false) {
 }
 
 function invalidateResults() {
+  $('#day-nutrition').replaceChildren();
+  $('#day-nutrition').hidden = true;
+  $('#profile-panel').open = true;
   for (const id of ['body-assessment', 'nutrition-result', 'limitation']) $(`#${id}`).hidden = true;
   $('#empty-result').hidden = false;
   $('#result-state').textContent = '';
@@ -226,9 +259,8 @@ function evaluate(input) {
 }
 
 function saveProfile(body, nutrition) {
-  if (!remember.checked) return;
-  if (Object.keys(nutrition.errors).length || unavailablePace) {
-    setStorageStatus('Данните не са запазени: коригирай хранителните полета. Валидният анализ на телосложението остава достъпен. Предишните запазени данни не са променени.');
+  if (Object.keys(nutrition.errors).length) {
+    if (remember.checked) setStorageStatus('Данните не са запазени: коригирай хранителните полета. Валидният анализ на телосложението остава достъпен.');
     return;
   }
   const profile = {
@@ -236,13 +268,35 @@ function saveProfile(body, nutrition) {
     activity: nutrition.profile.activity,
     goal: nutrition.profile.goal,
     targetWeight: nutrition.profile.targetWeight,
-    weeklyRate: nutrition.profile.weeklyRate
+    weeklyRate: unavailablePace ? form.elements.weeklyRate.value : nutrition.profile.weeklyRate
   };
+  const prior = readSharedPlan();
+  const canonical = normalizeSharedProfile(profile);
+  const workoutSetup = prior && JSON.stringify(prior.profile) === JSON.stringify(canonical) ? prior.workoutSetup : null;
+  const flags = writeSharedPlan({ profile, workoutSetup, remember: remember.checked });
+  if (flags.session || flags.persistent) clearDraft();
+  if (flags.session) sharedInvalidationFailed = false;
+  if (workoutSetup && nutrition.result) renderDayNutrition($('#day-nutrition'), buildTrainingNutrition(profile, workoutSetup));
+  if (unavailablePace) {
+    removeSavedProfile();
+    setStorageStatus(flags.persistent
+      ? 'Общият профил е запазен за тренировки без избрано седмично темпо. Калорийни цели не са налични.'
+      : flags.session
+        ? `Общият профил е споделен само за сесията без избрано седмично темпо. Калорийни цели не са налични.${remember.checked ? ' Трайното запазване е недостъпно.' : ''}`
+        : 'Общият профил не е споделен: браузърното хранилище е недостъпно. Не е запазено измислено темпо.');
+    return;
+  }
+  if (!remember.checked) {
+    setStorageStatus(flags.session ? 'Входните данни са споделени само в текущия раздел. Не се запазват след сесията.' : 'Споделянето в текущия раздел е недостъпно. Резултатите остават на тази страница.');
+    return;
+  }
   try {
     localStorage.setItem(PROFILE_STORAGE_KEY, encodeProfile(profile));
-    setStorageStatus('Данните са запазени на това устройство. Потвърждението за допустимост не се запазва.');
+    setStorageStatus(flags.persistent
+      ? `Данните са запазени на това устройство. Потвърждението за допустимост не се запазва.${flags.session ? '' : ' Споделянето в текущия раздел е недостъпно.'}`
+      : 'Профилът е запазен, но споделеният план не е запазен на устройството.');
   } catch {
-    setStorageStatus('Данните не са запазени: записът е невалиден или браузърното хранилище е недостъпно. Анализът работи и без запазване.');
+    setStorageStatus(flags.persistent ? 'Споделеният план е запазен, но отделният профил не е запазен.' : 'Данните не са запазени: браузърното хранилище е недостъпно. Анализът работи и без запазване.');
   }
 }
 
@@ -262,9 +316,35 @@ function restoreProfile() {
   remember.checked = false;
   form.elements.eligible.checked = false;
   try {
-    const raw = localStorage.getItem(PROFILE_STORAGE_KEY);
-    if (raw === null) return;
-    const profile = decodeProfile(raw);
+    const draftRaw = sessionStorage.getItem(draftKey);
+    if (draftRaw !== null) {
+      const draft = JSON.parse(draftRaw);
+      if (!draft || Object.keys(draft).sort().join() !== 'fields,invalid,regularTraining,remember,version' || draft.version !== 1 || draft.invalid !== true || typeof draft.remember !== 'boolean' || typeof draft.regularTraining !== 'boolean' || !draft.fields || Object.keys(draft.fields).sort().join() !== [...draftFields].sort().join() || draftFields.some(field => typeof draft.fields[field] !== 'string' || draft.fields[field].length > 32)) throw new Error('Invalid nutrition draft');
+      for (const field of draftFields.filter(field => !['goal', 'weeklyRate'].includes(field))) form.elements.namedItem(field).value = draft.fields[field];
+      for (const radio of form.querySelectorAll('[name="goal"]')) radio.checked = radio.value === draft.fields.goal;
+      form.elements.regularTraining.checked = draft.regularTraining;
+      remember.checked = false;
+      if (draft.remember) {
+        try {
+          const saved = JSON.parse(localStorage.getItem(SHARED_LOCAL_KEY));
+          if (saved?.version === 1 && saved.remember === true && saved.profile?.version === 6) {
+            normalizeSharedProfile(saved.profile.profile);
+            remember.checked = true;
+          }
+        } catch { /* A historical draft cannot grant persistence after consent is unavailable. */ }
+      }
+      updatePlanFields();
+      form.elements.weeklyRate.value = draft.fields.weeklyRate;
+      pendingDraft = true;
+      sharedInvalidationFailed = !invalidateSharedPlan();
+      invalidateResults();
+      setStorageStatus('Възстановена е непотвърдена чернова само за текущия раздел. Промените не са запазени трайно и не се използват за тренировки. Потвърди допустимостта и анализирай отново.');
+      return;
+    }
+    const shared = readSharedPlan();
+    const raw = shared ? null : localStorage.getItem(PROFILE_STORAGE_KEY);
+    if (!shared && raw === null) return;
+    const profile = shared ? normalizeSharedProfile(shared.profile) : decodeProfile(raw);
     for (const field of ['age', 'sex', 'height', 'weight', 'activity', 'targetWeight']) form.elements.namedItem(field).value = profile[field] ?? '';
     for (const radio of form.querySelectorAll('[name="goal"]')) radio.checked = radio.value === profile.goal;
     for (const [field, value] of Object.entries(profile.body)) {
@@ -273,8 +353,24 @@ function restoreProfile() {
     }
     updatePlanFields();
     if (Array.from(form.elements.weeklyRate.options).some(option => option.value === profile.weeklyRate && !option.disabled)) form.elements.weeklyRate.value = profile.weeklyRate;
-    remember.checked = true;
+    const legacy = !shared && JSON.parse(raw).version < 6;
+    if (legacy) form.elements.activity.value = '';
+    remember.checked = shared ? shared.remember : true;
     setStorageStatus('Запазените данни са възстановени без резултати. Провери измерванията, потвърди допустимостта и анализирай отново.');
+    if (legacy) setStorageStatus('Старите измервания са възстановени. Избери отново ежедневна активност само извън планираните тренировки.');
+    if (shared?.workoutSetup) {
+      // Recompute a prior committed snapshot, not a fresh submission or health affirmation.
+      const { body, nutrition, errors } = evaluate({ ...readInputs(), eligible: true });
+      if (!Object.keys(errors).length && body.assessment) {
+        renderBodyAssessment(body.assessment);
+        if (nutrition.limitation) showLimitation(nutrition.limitation);
+        else {
+          renderNutrition(nutrition);
+          renderDayNutrition($('#day-nutrition'), buildTrainingNutrition(shared.profile, shared.workoutSetup));
+        }
+        setStorageStatus('Показани са преизчислени предишни резултати със свързания тренировъчен план. За нов анализ провери данните и потвърди допустимостта отново.');
+      }
+    }
   } catch {
     setStorageStatus('Запазените данни не могат да бъдат възстановени или хранилището е недостъпно. Можеш да анализираш без запазване.');
   }
@@ -293,13 +389,23 @@ form.addEventListener('submit', event => {
   showErrors(errors, hasErrors);
   if (body.assessment) {
     saveProfile(body, nutrition);
-    if (!hasErrors) $(nutrition.limitation ? '#limitation' : '#nutrition-result').focus();
+    if (!hasErrors && !nutrition.limitation) {
+      $('#profile-panel').open = false;
+      $('#body-assessment').focus({ preventScroll: true });
+      $('#body-assessment').scrollIntoView({ block: 'start', behavior: 'instant' });
+    }
+    if (!hasErrors && nutrition.limitation) $('#limitation').focus();
   } else if (remember.checked) setStorageStatus('Невалидните данни не са запазени. Коригирай посочените полета и анализирай отново.');
 });
 
 form.addEventListener('input', event => {
   if (event.target === remember) return;
   if (['goal', 'weight', 'targetWeight', 'activity', 'sex', 'age', 'height'].includes(event.target.name)) updatePlanFields(event.target.name === 'goal');
+  if (event.target.name !== 'eligible') {
+    sharedInvalidationFailed = !invalidateSharedPlan();
+    storeDraft();
+    setStorageStatus('Промените не са запазени трайно. Черновата остава само в текущия раздел; анализирай отново, за да я потвърдиш.');
+  }
   if (Object.keys(displayedErrors).length) {
     const { errors } = evaluate(readInputs());
     showErrors(Object.fromEntries(Object.keys(displayedErrors).filter(field => errors[field]).map(field => [field, errors[field]])));
@@ -310,10 +416,21 @@ form.addEventListener('input', event => {
 
 remember.addEventListener('change', () => {
   if (remember.checked) setStorageStatus('Данните ще се запазят след валиден анализ. Използвай само браузър, на който имаш доверие.');
-  else if (removeSavedProfile()) setStorageStatus('Запомнянето е изключено. Запазеният профил е изтрит; текущите полета остават само на страницата.');
+  else {
+    const shared = readSharedPlan();
+    sharedDeletionFailed = !clearSharedPlan();
+    const removed = removeSavedProfile();
+    const flags = shared ? writeSharedPlan({ ...shared, remember: false }) : null;
+    if (removed) setStorageStatus(flags && !flags.session
+      ? 'Запомнянето е изключено. Споделянето в текущия раздел е недостъпно.'
+      : 'Запомнянето е изключено. Текущите валидни входни данни остават само за сесията.');
+  }
+  if (pendingDraft) storeDraft();
 });
 
 $('#delete-data').addEventListener('click', () => {
+  clearDraft();
+  sharedDeletionFailed = !clearSharedPlan();
   const profileRemoved = removeSavedProfile();
   let languageRemoved = true;
   try { localStorage.removeItem('liftfuel.language'); } catch { languageRemoved = false; }
@@ -330,9 +447,46 @@ $('#delete-data').addEventListener('click', () => {
   else setStorageStatus(languageRemoved ? 'Старото езиково предпочитание е изтрито.' : 'Старото езиково предпочитание също не можа да бъде изтрито.');
 });
 
+function storageSnapshot() {
+  try { return JSON.stringify([localStorage.getItem(SHARED_LOCAL_KEY), localStorage.getItem(PROFILE_STORAGE_KEY)]); }
+  catch { return null; }
+}
+
+let lastStorageSnapshot = storageSnapshot();
+function reconcileStorage(event) {
+  if (event.type === 'storage') {
+    try { if (event.storageArea !== localStorage || ![null, SHARED_LOCAL_KEY, PROFILE_STORAGE_KEY].includes(event.key)) return; }
+    catch { return; }
+  }
+  const latest = storageSnapshot();
+  if (latest === null || (event.type !== 'storage' && latest === lastStorageSnapshot)) return;
+  const previous = JSON.parse(lastStorageSnapshot ?? '[null,null]');
+  lastStorageSnapshot = latest;
+  const [sharedRaw, profileRaw] = JSON.parse(latest);
+  try { sessionStorage.removeItem(SHARED_SESSION_KEY); }
+  catch { sharedDeletionFailed = true; }
+  clearDraft();
+  form.reset();
+  remember.checked = false;
+  form.elements.eligible.checked = false;
+  updatePlanFields(true);
+  invalidateResults();
+  showErrors({});
+  const removed = event.type === 'storage' ? event.newValue === null : (previous[0] !== null && sharedRaw === null) || (previous[1] !== null && profileRaw === null);
+  if (!removed) restoreProfile();
+  remember.checked = false;
+  form.elements.eligible.checked = false;
+  // A tab-local invalid draft prevents fallback to an older standalone profile on navigation.
+  if (removed) storeDraft();
+  setStorageStatus('Запазените данни са променени в друг раздел. Запомнянето и допустимостта са изключени; провери данните преди нов анализ.');
+}
+window.addEventListener('storage', reconcileStorage);
+window.addEventListener('pageshow', reconcileStorage);
+window.addEventListener('pagehide', () => { lastStorageSnapshot = storageSnapshot(); });
+
 updatePlanFields();
-restoreProfile();
 invalidateResults();
+restoreProfile();
 $('#measurements-details').open = false;
 $('#app-status').hidden = true;
 $('#result-state').setAttribute('role', 'status');

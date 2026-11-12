@@ -8,7 +8,7 @@ const bodyFields = ['waistRfm', 'waistWhtr', 'hip', 'chest', 'arm', 'thigh', 'wr
 // Pure JSON boundary: throws on invalid records; returns inputs only, never eligibility/results.
 export function decodeProfile(raw) {
   const saved = JSON.parse(raw);
-  if (!saved || ![1, 2, 3, 4, 5].includes(saved.version) || saved.remember !== true) throw new Error('Invalid saved record');
+  if (!saved || ![1, 2, 3, 4, 5, 6].includes(saved.version) || saved.remember !== true) throw new Error('Invalid saved record');
   const source = saved.profile;
   if (!source || typeof source !== 'object' || Array.isArray(source)) throw new Error('Invalid saved profile');
   for (const [field, min, max, whole] of [['age', 18, 56, true], ['height', 130, 230, false], ['weight', 35, 250, false]]) {
@@ -17,7 +17,7 @@ export function decodeProfile(raw) {
   if (!['male', 'female'].includes(source.sex)) throw new Error('Invalid saved sex');
   if (!['', 'sedentary', 'light', 'moderate', 'very'].includes(source.activity) || !['', 'lose', 'maintain', 'muscle', 'gain'].includes(source.goal)) throw new Error('Invalid saved selection');
   const profile = Object.fromEntries(['age', 'sex', 'height', 'weight', 'activity', 'goal'].map(field => [field, source[field]]));
-  if (saved.version === 5 && (!Object.hasOwn(source, 'targetWeight') || !Object.hasOwn(source, 'weeklyRate') || typeof source.weeklyRate !== 'string')) throw new Error('Incomplete or incorrectly typed saved diet fields');
+  if (saved.version >= 5 && (!Object.hasOwn(source, 'targetWeight') || !Object.hasOwn(source, 'weeklyRate') || typeof source.weeklyRate !== 'string')) throw new Error('Incomplete or incorrectly typed saved diet fields');
   profile.targetWeight = source.targetWeight ?? null;
   profile.weeklyRate = source.weeklyRate ?? '';
   const noDiet = source.activity === '' && source.goal === '';
@@ -39,7 +39,7 @@ export function decodeProfile(raw) {
   const body = Object.fromEntries(bodyFields.map(field => [field, null]));
   body.regularTraining = false;
   const stored = source.body;
-  if (saved.version === 5) {
+  if (saved.version >= 5) {
     if (!stored || typeof stored !== 'object' || Array.isArray(stored) || typeof stored.regularTraining !== 'boolean') throw new Error('Invalid saved body');
     for (const field of bodyFields) {
       if (!Object.hasOwn(stored, field) || (stored[field] !== null && (typeof stored[field] !== 'number' || !Number.isFinite(stored[field])))) throw new Error('Invalid saved body type');
@@ -56,8 +56,8 @@ export function decodeProfile(raw) {
   return profile;
 }
 
-// Accepts a canonical, normalized profile and emits the consented v5 record.
+// v6 marks activity outside the planned workouts; legacy decoding stays unchanged.
 export function encodeProfile(profile) {
-  const canonical = decodeProfile(JSON.stringify({ version: 5, remember: true, profile }));
-  return JSON.stringify({ version: 5, remember: true, profile: canonical });
+  const canonical = decodeProfile(JSON.stringify({ version: 6, remember: true, profile }));
+  return JSON.stringify({ version: 6, remember: true, profile: canonical });
 }

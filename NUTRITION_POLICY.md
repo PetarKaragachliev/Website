@@ -27,18 +27,26 @@ Estimated maintenance kcal/day = RMR * activity factor
 
 These simplified coefficients are given in the original paper [S1]. RMR means resting metabolic rate; it is not maintenance energy. The source used male/female categories, which are equation assumptions, not a complete account of gender or physiology. Explain this limitation; do not infer a category from name or appearance. Suitability where neither category provides a useful estimate remains a review question.
 
-The original derivation sample comprised healthy normal-weight and obese adults aged 19-78 [S1]. Our age-18 boundary is an extrapolation and underweight users were not a represented study category. Record those limitations rather than promising accuracy throughout every profile.
+The original derivation sample comprised healthy normal-weight and obese adults aged 19-78 [S1]. Base nutrition at age 18 is an extrapolation; integrated training energy supports ages 19-56 only. Age 18 can exercise and retain supported rest nutrition, but training-day intake is withheld. Underweight users were not a represented study category. Do not promise accuracy throughout every profile.
 
 Implemented activity presets below are conventional calculator heuristics, not coefficients derived or validated by the Mifflin paper or guaranteed measures of expenditure:
 
 | Preset | Factor | Intended explanation |
 | --- | --- | --- |
-| Mostly sedentary | 1.2 | Mainly seated day, little intentional activity |
-| Lightly active | 1.375 | Some walking/light exercise across the week |
-| Moderately active | 1.55 | Regular activity plus structured training |
-| Very active | 1.725 | High daily movement and substantial training |
+| Mostly sedentary | 1.2 | Mainly seated outside planned training |
+| Lightly active | 1.375 | Some walking/light movement outside planned training |
+| Moderately active | 1.55 | Regular work/transport/daily movement outside planned training |
+| Very active | 1.725 | High daily movement/physical work outside planned training |
 
-Activity represents the whole day, including work, walking, and training. Workout days alone must not select the factor. Do not add workout calories again after using an inclusive activity estimate. UI descriptions are implemented; qualified review is still needed because these categories are imprecise.
+Activity now describes the baseline outside the planned training, chosen explicitly only on nutrition; the earlier whole-day/training-inclusive interpretation is superseded. Common age, weight and goal also originate there, not duplicated on training. Workout frequency must not select the factor. v6 records mark this semantic change; v1-v5 still decode, but the UI clears their activity and requires reselection rather than reinterpreting it. Qualified review remains needed because categories are imprecise.
+
+## Training-Day Integration
+
+The exact source-backed method and limitations are maintained in [TRAINING_ENERGY_POLICY.md](TRAINING_ENERGY_POLICY.md). After valid workout generation, both pages automatically show seven daily intakes. Rest retains the base goal-adjusted intake. Training intake is that base plus `max(0, grossPlannedEnergy - baselineMaintenance / 1440 * includedMinutes)`, calculated anew, never accumulated or multiplied by the goal surplus. Baseline maintenance is `RMR * outsideActivityFactor`, not goal-adjusted intake.
+
+Use 3.5 MET for prescribed sets plus ordinary between-set rests and 1.3 MET for setup. Gross kcal use `weightKg * 3.5 / 200 * MET-minutes`; include only those minutes in baseline subtraction. Warmup, cooldown, walking and afterburn earn no credit. Protein remains exactly 2 g/kg current weight every day, fat 25% of that day's intake, carbs the remainder. This is a low-confidence planned estimate pending professional review, not measured burn or a guarantee of need.
+
+BMI/base-energy-limited common profiles still allow otherwise eligible exercise but receive no calorie days. If all paces are blocked, shared state may explicitly retain `weeklyRate: ''`; never invent a selected pace. A blocked training day withholds its entire kcal/macro prescription, never clamps outside 1500-4500; other supported days remain available. Relevant profile/setup edits invalidate credits; unchanged inputs with renewed nutrition eligibility may preserve valid workout settings and recomputed totals.
 
 ## Goal Distinction
 
@@ -86,9 +94,9 @@ Carbohydrate grams/day = (target kcal - 4 * protein grams - 9 * fat grams) / 4
 
 ## Display and Arithmetic
 
-- Keep full numeric precision through calculation. Round only displayed kcal and grams to the nearest whole number using JavaScript `Math.round` for positive values.
+- Keep full numeric precision through calculation. Base calculator kcal and grams display as whole numbers using JavaScript `Math.round` for positive values; the integrated daily table displays kcal/extra kcal to the nearest 10 and grams to whole numbers. Never feed display rounding back into arithmetic.
 - Use 4 kcal/g for protein and carbohydrate and 9 kcal/g for fat for calculator consistency, not as a guarantee of exact food-label energy.
-- Unrounded macro energy must match target kcal within 0.000001 kcal in reference tests. The difference between displayed kcal and energy reconstructed from displayed whole grams must be at most 9 kcal, allowing for rounding.
+- Unrounded macro energy must match target kcal within 0.000001 kcal in reference tests. Base whole-kcal display differs from energy reconstructed from whole grams by at most 9 kcal; the daily table's nearest-10 display adds up to 5 kcal of display rounding and is not subject to that same bound.
 - Show the calculation assumptions and the fact that actual needs vary. Suggest reassessment using a multiweek weight trend and training/recovery, not a single weigh-in. This is guidance, not a new tracking feature or automatic adjustment algorithm.
 - Display desired weekly kg to two decimal places using decimal-aware `Intl.NumberFormat` (0.175 -> 0.18); show the exact selected bodyweight percentage beside it. Do not feed display rounding back into calorie calculations. Target weight displays to at most one decimal place.
 
@@ -120,7 +128,7 @@ Status: Nutrition support restrictions, a single eligibility confirmation, and o
 | V-006 | Support computed nutrition targets from 1500 through 4500 kcal/day inclusive, plus finite positive RMR/maintenance and positive macro amounts | Outside the envelope, explain that this calculator cannot provide a suitable automatic target; do not clamp calories, silently switch goal, or show a partial prescription. This all-user envelope is an unvalidated product guardrail, not a minimum/maximum safe intake or an endorsement of targets within it |
 | V-007 | Use the restricted goal/weekly-pace mapping above; no unrestricted rates, target-date promise, or automatic bulk/cut cycle | Explain priorities and uncertainty before selection; no promise of muscle-only gain or guaranteed progress; no automatic cut on reaching a scale weight |
 | V-008 | Invalidate dependent results when any relevant profile/eligibility/setup input changes; rerun validation before calculation and restoration | Hide outdated nutrition immediately after profile changes; hide outdated plans after setup/eligibility changes. Show actionable errors linked to fields; focus an error summary on failed submit; no stale result presented as current |
-| V-009 | Approved: optional "Remember on this device" checkbox, off by default, and "Delete my saved data" action | Store only profile/workout inputs, plan, and saving preference needed for the feature; do not persist eligibility confirmation, diagnostic history, or analytics. On a new visit, restore permitted inputs but require the single V-004 confirmation before showing personalized results. Recompute nutrition from validated inputs; validate saved plan data. Handle storage failure without blocking unsaved use; deletion removes only this app's data and clears its displayed profile/results. Turning remembering off removes previously saved app data but may retain current in-memory inputs |
+| V-009 | Approved: automatic tab-session input snapshots/drafts; optional "Remember on this device" off by default; explicit deletion | Persistent storage contains only profile, six workout settings (environment, equipment, experience, days, duration, currentTraining) and saving metadata, never eligibility/results/diagnoses. Drafts remain session-only. Restore/revalidate inputs and require fresh eligibility for generation; recompute outputs. Handle storage failures visibly without blocking unsaved use. Opt-out/deletion removes app-owned saved data, not unrelated keys; cross-tab revocation/replacement cannot resurrect stale data or credits |
 | V-010 | Validate target weight, direction, and destination BMI | Reject invalid/unsupported destinations; maintenance target is current weight; stale results disappear after target changes |
 | V-011 | Weekly pace is chosen from the goal-specific allowlist and computed from current weight | Recheck rates at the calculation boundary, not only in the dropdown; show approximate kg/week; disable unsupported choices; explain when none are available |
 | V-012 | Loss deficit cannot exceed 20% of estimated maintenance; final calorie and macro limits remain enforced | Withhold rather than clamp; the 20% ceiling is a conservative product guardrail, not a safety guarantee |
@@ -146,23 +154,24 @@ Workout guidance should also explain that sharp pain, dizziness, or chest pain i
 - AC-007 through AC-009: V-009 opt-in, restoration requiring the single eligibility confirmation, deletion, and malformed/unavailable-storage cases.
 - All affected result journeys: V-008 stale-result invalidation and accessible error feedback.
 - AC-011/AC-012: V-010 through V-012 target and weekly-pace validation, calculation effects, maintenance behavior, and unsupported-choice guidance.
-- AC-013/AC-020: Keep key `liftfuel.profile.v1`; strict version 5 stores required body inputs, independent RFM/midpoint waists and optional circumferences, plus explicitly completed nutrition choices if supplied. Version 3 waists restore only as midpoint; version 4 retains its recorded site. No missing measurements, eligibility, or calculated results are invented/restored. Consented analysis saves; incomplete optional diet fields are reported rather than persisted as a valid plan. See BODY_ASSESSMENT.md.
+- AC-013/AC-020: Keep key `liftfuel.profile.v1`; strict v6 stores normalized profile inputs with outside-training activity. v1-v5 decode remains available, but UI clears legacy activity for reselection. Preserve known waist origins only (v3 midpoint, v4 recorded site), never invented measurements/choices or stored eligibility/results. Shared input snapshots use `liftfuel.shared.session.v1` and opt-in `liftfuel.shared.saved.v1`; shared all-blocked profiles may explicitly retain blank pace. See BODY_ASSESSMENT.md.
+- AC-030 through AC-032: Seven-day integration, energy/support limits, nonaccumulative credit, tab drafts and revocation are covered in `tests/unit/training-nutrition.test.js`, `tests/unit/shared-plan.test.js` and `tests/e2e/integration.spec.js`.
 
-The nutrition/profile-saving portions are exercised by tests/unit/nutrition.test.js and tests/e2e/calculator.spec.js. Workout-specific parts remain planned, not implemented; no saved workout plan exists yet. JavaScript-disabled or failed-module visits cannot submit profile inputs because the submit control remains disabled until the application initializes.
+Base nutrition/profile saving is also exercised by tests/unit/nutrition.test.js and tests/e2e/calculator.spec.js. Workout inputs are saved as specified above; derived exercise plans and calorie results are recomputed, not persisted. JavaScript-disabled or failed-module visits cannot submit profile inputs because the submit control remains disabled until initialization.
 
 ## Approval and Remaining Gates
 
 Daily nutrient reference values, limits, and the optional meal-count/spacing example are specified in [NUTRIENT_REFERENCES.md](NUTRIENT_REFERENCES.md). They do not change the macro calculation or imply actual nutrient consumption. They appear only with eligible supported results and are not stored as observed intake.
 
-The central [body analyzer](BODY_ASSESSMENT.md) works independently of optional nutrition activity/goals. Its provisional composition profile, two-waist interpretation and training self-report do not alter the selected dietary goal or the calorie/macro formulas. Missing diet choices produce no calorie values. Users can clear nutrition only without losing measurements. Derived fat/fat-free mass uses only RFM; reported percentages and circumference-based muscle estimates are not used.
+The bonus [body analyzer](BODY_ASSESSMENT.md) has an independent calculation model within the nutrition-first shared form, not optional nutrition or a body-only/reset UI. Missing required diet choices produce focused errors, no calorie values and no successful saved submission; valid body bonus remains possible at nutrition limits. Composition, waist interpretation and training self-report do not override goals or formulas. Fat/fat-free mass uses only RFM, never reported percentages or circumference-based muscle estimates.
 
 - Retained approved baseline: Mifflin-St Jeor with activity-based maintenance estimation; protein 2.0 g/kg current weight, fat 25% of target calories, carbohydrate from remaining calories. The owner's new target/pace requirement replaces fixed goal multipliers with the documented pace-sensitive policy.
 - Activity descriptions, full-precision arithmetic, whole-number display, and parsing bounds are implemented and tested as the calculator baseline.
-- V-001 through V-012 calculator behavior is implemented; workout-specific storage/generation behavior is still deferred. Nutrition support limits and single-confirmation behavior are accepted product scope, not clinical validation.
+- V-001 through V-012 and shared workout input storage/generation are implemented. Nutrition support limits and per-flow single-confirmation behavior are accepted product scope, not clinical validation.
 - V-009 opt-in saving and deletion are approved; verify consent, restoration, deletion, and unavailable-storage behavior during implementation rather than seeking the same product approval again.
 - Assign qualified review of nutrition assumptions and user-facing safety guidance before release.
 
-APP-001/APP-002 now have implementation and unit/Chromium/Firefox evidence. WebKit verification is blocked by this host's executable installation permissions; no full browser or clinical validation is claimed. Qualified review remains a release gate, not a completed result.
+Earlier WebKit installation blocks are historical; later local runs include WebKit. Latest units: 426 passed. Initial integration matrix: 573 passed, 2 failed due to ineffective session-storage instance mocking in Firefox/WebKit; main fixed the prototype-level test and is running final verification. No final matrix or clinical-validation pass is claimed here. Qualified review remains a release gate.
 
 ## Sources
 

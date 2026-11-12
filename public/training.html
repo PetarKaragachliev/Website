@@ -4,22 +4,91 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#0b0f0c">
-  <meta name="description" content="Предстоящ генератор на тренировъчни планове от LiftFuel. Функцията все още не е достъпна.">
-  <title>LiftFuel | Тренировъчни планове предстоят</title>
-  <link rel="stylesheet" href="./styles.css">
+  <meta name="description" content="Начален силов план за зала или у дома и отделни насоки за ходене и кардио. Предварителна версия за общо здрави пълнолетни.">
+  <title>LiftFuel | Твоята тренировъчна програма</title>
+  <link rel="stylesheet" href="./styles.css?v=workout-1">
+  <script src="./js/training-start.js?v=shared-training-1" defer></script>
 </head>
-<body>
+<body class="training-page">
   <a class="skip-link" href="#main">Към съдържанието</a>
-  <div class="app-shell training-shell">
-    <header class="site-header"><a class="brand" href="./index.html" aria-label="LiftFuel, начало"><span class="brand-icon" aria-hidden="true">LF</span> LIFT<span>FUEL.</span></a><nav aria-label="Основна навигация"><a href="./index.html">Към анализа на телосложението</a></nav></header>
-    <main id="main" class="training-page">
-      <section class="panel" aria-labelledby="training-title">
-        <p class="eyebrow accent">СЛЕДВАЩАТА СТЪПКА / ПРЕДСТОИ</p>
-        <h1 id="training-title">Твоята тренировка.<br>С ясна посока.</h1>
-        <p class="section-intro">Генераторът на тренировъчни планове е в процес на разработка. Тази страница все още не създава тренировъчна програма и не използва данните от анализа.</p>
-        <p class="section-intro">Подборът на упражнения и правилата за натоварване и напредък предстоят. Междувременно можеш да се върнеш към ориентировъчния анализ на телосложението.</p>
-        <a class="training-link" href="./index.html">Обратно към анализа</a>
+  <div class="app-shell">
+    <header class="sidebar">
+      <a class="brand" href="./index.html" aria-label="LiftFuel, начало"><span class="brand-icon" aria-hidden="true">LF</span> LIFT<span>FUEL.</span></a>
+      <div class="sidebar-body"><p class="eyebrow nav-caption">ТВОИТЕ ИНСТРУМЕНТИ ЗА ТРЕНИРОВКИ</p>
+        <nav aria-label="Основна навигация"><a class="nav-link" href="./index.html"><span aria-hidden="true">01</span> Хранителен режим</a><a class="nav-link active" href="#workout-setup" aria-current="page"><span aria-hidden="true">02</span> Тренировъчен план</a></nav>
+        <div class="sidebar-note"><span class="small-label">ПОСЛЕДОВАТЕЛНОСТ ПРЕДИ ВСИЧКО.</span><p>Твоята седмица.<br>С ясен ритъм.</p><span class="status-dot"></span><span class="muted">Споделен план на устройството</span></div>
+      </div><span class="sidebar-version">ТРЕНИРОВКИ / ПРЕДВАРИТЕЛНА ВЕРСИЯ</span>
+    </header>
+    <main id="main">
+      <div class="topline"><span class="eyebrow">ПЛАН ЗА СЛЕДВАЩАТА ТИ СТЪПКА</span><span class="privacy-tag"><span class="status-dot"></span>Без регистрация. На твоето устройство.</span></div>
+      <section class="hero" aria-labelledby="training-title">
+        <div class="hero-copy"><p class="eyebrow accent">ОТ ПОСОКА КЪМ ДЕЙСТВИЕ</p><h1 id="training-title">ТВОЯТА ТРЕНИРОВКА.<br><span>С ЯСЕН ПЛАН.</span></h1><p class="hero-description">Силова програма според времето и оборудването ти. Един общ хранителен и тренировъчен план. Ходенето и кардиото остават отделни насоки, без задължителни 10 000 крачки.</p></div>
+        <div class="hero-art" aria-hidden="true"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="orbit orbit-three"></div><div class="art-mark">LF<span>+</span></div><div class="art-caption">ПОСОКА.<br>ДВИЖЕНИЕ. ПОСТОЯНСТВО.</div></div>
       </section>
+      <p class="preview-notice"><strong>Предварителна версия за преглед.</strong> Подборът и натоварването още не са прегледани от квалифициран специалист. Това не е медицинска или рехабилитационна програма.</p>
+      <div class="section-heading" id="workout-setup"><h2><span class="section-number">02 /</span> ПОДРЕДИ СЕДМИЦАТА СИ</h2><span class="small-label">ЗАЛА ИЛИ У ДОМА / 18-56 Г.</span></div>
+      <noscript><p class="notice">За създаване на програма е необходим JavaScript. Бутонът остава изключен; данните не се изпращат.</p></noscript>
+      <div class="training-layout">
+          <details id="workout-profile" class="panel profile-panel" open>
+            <summary>Твоите данни</summary>
+            <div class="panel-heading"><div><p class="eyebrow">ТВОЯТ РЕЖИМ</p><h2 id="setup-title">План, който се вписва в деня ти.</h2></div><span class="panel-index" aria-hidden="true">02</span></div>
+            <p class="section-intro">Възрастта, теглото, целта и активността извън планираните тренировки идват от хранителния план. Настройките се споделят в този раздел; запазване след затваряне има само при избрано запомняне в хранителната страница.</p>
+            <section aria-label="Общ профил"><p id="shared-profile-summary"></p><p id="shared-profile-status" class="notice" role="status"></p><a id="shared-profile-edit" href="./index.html">Попълни или редактирай хранителния план</a></section>
+            <form id="workout-form" novalidate>
+              <div id="workout-errors" class="notice error-summary" role="alert" tabindex="-1" hidden><strong>Провери посочените полета.</strong><ul id="workout-error-list"></ul></div>
+              <div class="field"><label for="workout-environment">Къде ще тренираш?</label><select id="workout-environment" name="environment" required aria-describedby="workout-environment-hint workout-environment-error"><option value="">Избери място</option><option value="gym">В зала</option><option value="home">У дома</option></select><small id="workout-environment-hint">За зала се приемат налични лег преса, машина за гърди, долен скрипец и леки дъмбели. Ако липсват или не познаваш настройката им, потърси инструктор.</small><p id="workout-environment-error" class="field-error" hidden></p></div>
+              <fieldset id="workout-equipment" class="goal-fieldset" tabindex="-1" disabled hidden aria-describedby="workout-equipment-hint workout-equipment-error"><legend>Оборудване у дома</legend>
+                <p id="workout-equipment-hint" class="field-hint">Собственото тегло е включено. За дърпане са нужни дъмбели, подходящ ластик, щанга, пудовка или комбиниран уред със станции за гърди и гребане. Само лост е вариант за опитни с усвоени набирания с резерв. Само пейка, стойка или успоредка не стигат. Наличният уред не означава усвоена техника; следвай ограниченията в плана.</p>
+                <div class="goal-grid">
+                  <label class="goal-option"><input type="checkbox" name="equipment" value="dumbbells"><span>Дъмбели</span></label>
+                  <label class="goal-option"><input type="checkbox" name="equipment" value="bands"><span>Тренировъчни ластици</span></label>
+                  <label class="goal-option"><input type="checkbox" name="equipment" value="bench"><span>Тренировъчна лежанка или пейка</span></label>
+                  <label class="goal-option"><input type="checkbox" name="equipment" value="pullup"><span>Лост за набирания</span></label>
+                  <label class="goal-option"><input type="checkbox" name="equipment" value="barbell"><span>Щанга и тежести</span></label>
+                  <label class="goal-option"><input type="checkbox" name="equipment" value="dips"><span>Успоредка за кофички</span></label>
+                  <label class="goal-option"><input type="checkbox" name="equipment" value="kettlebell"><span>Пудовка</span></label>
+                  <label class="goal-option"><input type="checkbox" name="equipment" value="rack"><span>Стойка за клекове</span></label>
+                  <label class="goal-option"><input type="checkbox" name="equipment" value="multigym"><span>Комбиниран фитнес уред</span></label>
+                </div>
+                <p id="workout-equipment-error" class="field-error" hidden></p>
+              </fieldset>
+              <div class="field"><label for="workout-experience">Опит със силови тренировки</label><select id="workout-experience" name="experience" required aria-describedby="workout-experience-hint workout-experience-error"><option value="">Избери ниво</option><option value="beginner">Начинаещ</option><option value="intermediate">Средно напреднал</option><option value="advanced">Напреднал</option></select><small id="workout-experience-hint">Това е консервативна начална програма, не специализирана подготовка за напреднали атлети.</small><p id="workout-experience-error" class="field-error" hidden></p></div>
+              <div class="measurement-grid">
+                <div class="field"><label for="workout-days">Дни седмично</label><select id="workout-days" name="days" required aria-describedby="workout-days-error"><option value="">Избери</option><option value="2">2 дни</option><option value="3">3 дни</option><option value="4">4 дни</option><option value="5">5 дни, петият е лека техника</option></select><p id="workout-days-error" class="field-error" hidden></p></div>
+                <div class="field"><label for="workout-duration">Време за една тренировка</label><select id="workout-duration" name="duration" required aria-describedby="workout-duration-error"><option value="">Избери</option><option value="30">До 30 минути</option><option value="45">До 45 минути</option><option value="60">До 60 минути</option></select><p id="workout-duration-error" class="field-error" hidden></p></div>
+              </div>
+              <div class="field"><label for="workout-currentTraining">Колко тренираш в момента?</label><select id="workout-currentTraining" name="currentTraining" required aria-describedby="workout-currentTraining-error"><option value="">Избери текущ режим</option><option value="none">Не тренирам редовно</option><option value="one-two">1-2 тренировки седмично</option><option value="three-plus">3 или повече тренировки седмично</option></select><p id="workout-currentTraining-error" class="field-error" hidden></p></div>
+              <div class="consent-block"><label class="check-label"><input id="workout-eligible" name="eligible" type="checkbox" required aria-describedby="workout-eligible-hint workout-eligible-error"><span>Потвърждавам, че съм в общо добро здраве, не съм бременна и не кърмя, не съм в рехабилитация след травма и нямам медицинско състояние, изискващо индивидуални указания за упражнения.</span></label><p id="workout-eligible-hint" class="field-hint">Потвърждава се за всяко генериране. Това не е медицинско разрешение за тренировки. При болка или притеснения потърси квалифициран специалист.</p><p id="workout-eligible-error" class="field-error" hidden></p></div>
+              <button id="generate-workout" class="primary-button" type="submit" disabled>Създай тренировъчния ми план</button>
+              <p id="workout-load-status" class="field-hint" role="status">Генераторът се зарежда. Ако съобщението остане, провери дали JavaScript е разрешен за сайта. Настройките не се изпращат.</p><button id="reload-workout" class="text-button" type="button" hidden>Опитай зареждането отново</button>
+            </form>
+          </details>
+        <aside class="panel result-panel workout-output" aria-label="Тренировъчна програма">
+          <div class="result-topline"><h2 class="eyebrow">ТВОЯТА ПРОГРАМА</h2><span class="small-label accent">ПРЕДВАРИТЕЛЕН ПРЕГЛЕД</span></div>
+          <p id="workout-storage-status" class="notice" role="status" hidden></p>
+          <div id="empty-workout" class="empty-result"><span class="target-symbol" aria-hidden="true"></span><h3>Силова основа.<br>Движение с мярка.</h3><p>Избери режима и оборудването. Тук ще се появят седмичният график, упражненията, прогресът и отделните насоки за ходене и кардио.</p></div>
+          <section id="workout-result" tabindex="-1" hidden aria-labelledby="workout-title"><h2 id="workout-title"></h2><p id="workout-summary" class="section-intro"></p><p id="training-nutrition-note" class="field-hint"></p><div id="training-nutrition"></div><div id="workout-sessions"></div></section>
+        </aside>
+        <aside id="workout-media" class="panel" aria-labelledby="media-title">
+          <p class="eyebrow accent">ДВИЖЕНИЕТО ОТБЛИЗО</p><h2 id="media-title">Насоки за упражненията</h2>
+          <p class="section-intro">Видеата са предварително подбрани по метаданни на източника, без визуален или професионален преглед. Не заменят инструктор.</p>
+          <p class="field-hint">YouTube се свързва само при натискане на бутона чрез youtube-nocookie.com. Тогава доставчикът получава технически данни, включително IP адрес и само адреса на сайта (origin), без настройки или здравни данни. Няма автоматично пускане. При недостъпно видео използвай външната връзка.</p>
+          <p id="workout-media-empty" class="section-intro">Отвори тренировъчен ден, за да видиш неговите упражнения.</p><div id="workout-media-list"></div>
+        </aside>
+        <section id="gym-map" class="panel" hidden aria-labelledby="gym-map-title">
+          <p class="eyebrow accent">МЯСТО ЗА ДВИЖЕНИЕ</p><h2 id="gym-map-title">Фитнес зали в Пловдив</h2>
+          <p class="section-intro">Предварителен преглед с една примерна зала: Атлетик Фитнес Марково тепе. Пловдив, Мол Марково тепе, бул. „Руски“ 52-54, ет. 3. Списъкът предстои да бъде допълнен.</p>
+          <p class="field-hint">При избор на зала се зарежда Google Maps с фиксиран идентификатор за Атлетик Фитнес Марково тепе. Ако картата не показва детайли, използвай връзката към залата. Не изпращаме настройки, здравни данни или местоположение от браузъра. Google получава технически данни, включително IP адрес.</p>
+          <div id="gym-map-frame"></div><a href="https://www.google.com/maps?cid=5854447715591440372" target="_blank" rel="noopener noreferrer">Отвори Атлетик Фитнес Марково тепе в Google Maps (нов раздел)</a>
+        </section>
+        <div id="workout-guidance" class="panel" hidden>
+          <section class="result-section" aria-labelledby="warnings-title"><h3 id="warnings-title">Важно преди да започнеш</h3><ul id="workout-warnings"></ul></section>
+          <section class="result-section" aria-labelledby="movement-title"><h3 id="movement-title"></h3><ul id="movement-items"></ul><p id="movement-caveat"></p></section>
+          <section class="result-section" aria-labelledby="progression-title"><h3 id="progression-title">Как да напредваш</h3><ul id="workout-progression"></ul></section>
+        </div>
+      </div>
+      <details id="training-method" class="disclosure"><summary>Методика и ограничения</summary><p>Два или три дни: цяло тяло. Четири дни: горна и долна част. Пет дни: същото разпределение плюс лека техника. Времето включва загряване, серии, почивки, подготовка и спокойно завършване; то е оценка, не обещание.</p><p>Начинаещите започват с 2-3 силови дни. Насоките за движение са отделни и не изчисляват изгорени калории. Подробните правила остават предварителни до професионален преглед.</p><div class="source-links"><a href="https://www.who.int/publications/i/item/9789240015128" target="_blank" rel="noopener noreferrer">Насоки на СЗО (нов раздел)</a><a href="https://doi.org/10.1249/MSS.0b013e3181915670" target="_blank" rel="noopener noreferrer">ACSM: прогрес при силови тренировки, 2009 (нов раздел)</a></div></details>
+      <a class="training-link" href="./index.html">Обратно към анализа</a>
       <footer><a class="brand footer-brand" href="./index.html">LIFT<span>FUEL.</span></a><p>Последователност преди съвършенство.</p></footer>
     </main>
   </div>

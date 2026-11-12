@@ -7,9 +7,9 @@ const profile = { age: 30, sex: 'male', height: 180, weight: 75, activity: '', g
 const record = (version, value) => JSON.stringify({ version, remember: true, profile: value });
 const diet = { activity: 'moderate', goal: 'maintain', targetWeight: 75, weeklyRate: '0' };
 
-test('v5 body-only round trip stores only canonical inputs, never consent or results', () => {
+test('v6 body-only round trip stores only canonical inputs, never consent or results', () => {
   const raw = encodeProfile({ ...profile, eligible: true, assessment: { bmi: 23 } });
-  assert.equal(JSON.parse(raw).version, 5);
+  assert.equal(JSON.parse(raw).version, 6);
   assert.deepEqual(decodeProfile(raw), profile);
   assert.equal(raw.includes('eligible'), false);
   assert.equal(raw.includes('assessment'), false);
@@ -55,7 +55,7 @@ test('v1/v2 absent body restores blank waists and v1 preserves its old goal', ()
 });
 
 test('malformed records and unknown v4 waist protocols are rejected', () => {
-  for (const raw of ['{', 'null', '[]', record(6, profile), JSON.stringify({ version: 5, remember: false, profile }), record(4, { ...profile, ...diet, body: { waist: 80, waistSite: 'unknown' } })]) {
+  for (const raw of ['{', 'null', '[]', record(7, profile), JSON.stringify({ version: 5, remember: false, profile }), record(4, { ...profile, ...diet, body: { waist: 80, waistSite: 'unknown' } })]) {
     assert.throws(() => decodeProfile(raw));
   }
 });
@@ -70,10 +70,18 @@ test('v5 rejects incomplete bodies, incorrectly typed extras and invalid diet ch
 });
 
 test('eligibility is never returned from any stored version', () => {
-  for (const version of [1, 2, 3, 4, 5]) {
-    const value = version === 5 ? profile : { ...profile, ...diet, body: version < 3 ? null : { waist: 80, waistSite: 'iliac' } };
+  for (const version of [1, 2, 3, 4, 5, 6]) {
+    const value = version >= 5 ? profile : { ...profile, ...diet, body: version < 3 ? null : { waist: 80, waistSite: 'iliac' } };
     const restored = decodeProfile(record(version, { ...value, eligible: true, includeAssessment: true }));
     assert.equal(Object.hasOwn(restored, 'eligible'), false);
     assert.equal(Object.hasOwn(restored, 'includeAssessment'), false);
+  }
+});
+
+test('v5 and v6 decode identically without inventing activity semantics or losing waists', () => {
+  assert.deepEqual(decodeProfile(record(5, profile)), decodeProfile(record(6, profile)));
+  assert.deepEqual(decodeProfile(record(6, profile)).body, body);
+  for (const version of [5, 6]) {
+    assert.throws(() => decodeProfile(record(version, { ...profile, body: { ...body, hip: '95' } })));
   }
 });
