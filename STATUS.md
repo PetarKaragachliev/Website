@@ -1,6 +1,6 @@
 # Development Status
 
-Last updated: 2026-11-12.
+Last updated: 2026-11-17.
 
 ## Snapshot
 
@@ -12,12 +12,18 @@ Last updated: 2026-11-12.
 | Stack and hosting | Native HTML/CSS/JavaScript; public PetarKaragachliev/Website repository and GitHub Pages preview verified; test-gated publishing on main pushes |
 | Name and design | LiftFuel (temporary); dark/green direction agreed; supplied fitness mockup reviewed |
 | Active implementation sprint | Shared nutrition/workout inputs, session-only drafts and opted-in profile/workout-setting persistence |
-| Application code | Native Bulgarian HTML/JS with shared profile, workout-specific setup and automatic seven-day nutrition updates; outside-workout activity, per-session net energy and unchanged rest intake; no food diary or stored calculated results |
-| Automated tests and CI | Final integration: 427 unit tests and all 590 browser checks passed across Chromium desktop/mobile/tablet, Firefox and WebKit; no capture; CI gates deployment |
+| Application code | BG-default native HTML/JS with local BG/EN switch, shared profile, workout-specific setup and automatic seven-day nutrition updates; calculation/profile contracts unchanged |
+| Automated tests and CI | BG/EN follow-up: all 431 units and 630 browser checks passed across Chromium desktop/mobile/tablet, Firefox and WebKit; no capture; CI gates deployment |
 | Active local checkout | C:\Users\Petar\Projects\LiftFuel; independent clone, Git origin unchanged; old OneDrive copy left untouched and no longer used for development |
-| Release readiness | Expanded workout preview locally verified, not published; explicit detailed policy approval, qualified review, manual accessibility/device checks and full MVP plan persistence incomplete; WebKit now executes locally |
+| Release readiness | Workout preview published in f76acf3 with successful test/deploy run 43206799867; BG/EN follow-up locally verified, not published. Qualified review, manual accessibility/device checks and full MVP plan persistence remain incomplete |
 
 ## Current Focus
+
+Publishing update: the owner approved committing and pushing the verified BG/EN dropdown and translations. GitHub's complete unit/browser workflow gates deployment; inspect its result for the published state. Previous local-only notes below describe the implementation milestones before this approval.
+
+Dropdown refinement: replaced adjacent BG/EN controls with one current-language tab and chevron, revealing only the alternative below. BG remains the default, with the existing remembered choice respected. Two regression scenarios failed before implementation; all 50 language browser checks then passed across all five projects, and unit tests passed again. Keyboard selection, focus return, Escape, outside-click dismissal and retained result/media state are verified. Full non-language browser matrix not rerun for this UI-only follow-up. Still local, not published.
+
+Owner-requested BG/EN switch (D-021) is implemented locally, not published; no commit/push requested. Top `#language-toggle [data-language]` buttons default to BG, with guarded `liftfuel.language` persistence independent of health-profile consent. Local static/dynamic presentation changes without reload preserve inputs, results, loaded iframes and disclosures; calculations and profile schemas are unchanged. Delete clears the language choice and resets BG only if removal succeeds, retaining truthful failure feedback. Verification: `npm test` passed 431 tests and `npm run test:e2e -- --reporter=line` passed 630 checks (8.2 minutes), including 40 new language checks across all five projects. `git diff --check` passed; no screenshots, video or traces.
 
 Shared nutrition/workout integration is implemented locally. Repeated age/goal/activity fields are removed from training, which uses the committed nutrition profile. Activity now excludes workouts; legacy saved activity must be reselected. Per-session low-confidence MET estimates update the same seven daily targets on both pages, without cumulative credit; rest days retain baseline and protein stays unchanged. Inputs/settings persist beyond the tab only on opt-in, with fresh health affirmation and cross-tab revocation safeguards. See TRAINING_ENERGY_POLICY.md for research, arithmetic and remaining qualified-review limits. The passing engineering tests do not validate individual energy accuracy or clinical suitability. Not published.
 
@@ -25,7 +31,7 @@ Local blue training design preview implemented: native input minimization and re
 
 Preview: https://petarkaragachliev.github.io/Website/ . Repository/workflow: https://github.com/PetarKaragachliev/Website/actions/workflows/pages.yml . Local edits alone are not uploaded: approved work is committed/pushed, then test-gated deployment publishes it. Nutrient output is reference guidance, not measured intake or a supplement plan; four-hour meal spacing is optional. Current work is owner review of the locally verified provisional [WORKOUT_POLICY.md](WORKOUT_POLICY.md), not an unimplemented generator.
 
-The strength catalog and exercise eligibility remain independent of nutrition BMI/calorie support limits. A valid shared profile is required, but a valid exercise plan still works when nutrition targets are withheld, including all-blocked paces without inventing a selection. Walking/cardio suggestions receive no additional calorie credit. Insufficient equipment refuses incomplete plans. Versioned startup retains error/retry and no-JavaScript native-submit protection. Media, maps, blue training theme and green nutrition theme are retained. All display remains Bulgarian; no capture is enabled.
+The strength catalog and exercise eligibility remain independent of nutrition BMI/calorie support limits. A valid shared profile is required, but a valid exercise plan still works when nutrition targets are withheld, including all-blocked paces without inventing a selection. Walking/cardio suggestions receive no additional calorie credit. Insufficient equipment refuses incomplete plans. Versioned startup retains error/retry and no-JavaScript native-submit protection. Media, maps, blue training theme and green nutrition theme are retained. Local display now supports BG/EN; no capture is enabled.
 
 Nutrition-first shared calculation was published in d8bb22e (successful run 41903924455). Activity and goal are explicit, nutrition controls are noncollapsible, and one button computes nutrition with bonus body analysis. Current follow-up fixes startup: a versioned loader bypasses a stale unversioned app entry point and explains network/initialization failures with a reload action. The owner's screenshot proves initialization did not finish; their exact browser-side cause remains unconfirmed. Publishing this fix is explicitly approved; verify the live site after deployment.
 

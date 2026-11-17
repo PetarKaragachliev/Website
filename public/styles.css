@@ -299,3 +299,15 @@ footer p { color: var(--muted); font-size: 12px; }
   .training-page #workout-form { grid-template-columns: minmax(0, 1fr); }
   .training-page #gym-map iframe { height: 280px; }
 }
+.language-bar { display: flex; align-items: center; justify-content: flex-end; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
+#language-toggle { position: relative; flex-shrink: 0; min-width: 76px; }
+#language-toggle summary, #language-toggle button { min-height: 44px; padding: 10px 14px; border: 1px solid var(--border); border-radius: 6px; background: var(--panel); color: var(--text); font: inherit; cursor: pointer; }
+#language-toggle summary { display: flex; align-items: center; justify-content: space-between; gap: 14px; list-style: none; }
+#language-toggle summary::-webkit-details-marker { display: none; }
+#language-toggle summary::after { content: ''; width: 7px; height: 7px; border-right: 1.5px solid var(--accent); border-bottom: 1.5px solid var(--accent); transform: translateY(-2px) rotate(45deg); }
+#language-toggle[open] summary::after { transform: translateY(2px) rotate(225deg); }
+.language-options { position: absolute; top: calc(100% + 4px); right: 0; z-index: 10; width: 100%; box-shadow: 0 8px 24px #0006; }
+#language-toggle button { width: 100%; text-align: left; }
+#language-toggle button:hover { border-color: var(--accent); }
+#language-toggle summary:focus-visible, #language-toggle button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+#language-status { max-width: 36em; font-size: .85rem; }

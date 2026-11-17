@@ -3,6 +3,7 @@ import { workoutMedia } from './workout-media.js';
 import { readSharedPlan, writeSharedPlan, SHARED_LOCAL_KEY } from './shared-plan.js';
 import { buildTrainingNutrition } from './training-nutrition.js';
 import { renderDayNutrition } from './day-nutrition-view.js';
+import { languageBoundary } from './language.js';
 
 const form = document.querySelector('#workout-form');
 const result = document.querySelector('#workout-result');
@@ -72,14 +73,14 @@ function renderMedia(exercises = []) {
       button.type = 'button';
       button.className = 'media-button';
       button.textContent = `Зареди видео: ${exercise.name}`;
-      button.addEventListener('click', () => {
+      button.addEventListener('click', languageBoundary(() => {
         const frame = document.createElement('iframe');
         frame.title = `${exercise.name} / ${media.source}`;
         frame.referrerPolicy = 'strict-origin-when-cross-origin';
         frame.allowFullscreen = true;
         frame.src = `https://www.youtube-nocookie.com/embed/${media.videoId}`;
         button.replaceWith(frame);
-      }, { once: true });
+      }), { once: true });
       const link = document.createElement('a');
       link.href = `https://www.youtube.com/watch?v=${media.videoId}`;
       link.target = '_blank';
@@ -171,13 +172,13 @@ function renderPlan(plan) {
     const card = document.createElement('details');
     card.className = 'workout-session disclosure';
     card.open = index === 0;
-    card.addEventListener('toggle', () => {
+    card.addEventListener('toggle', languageBoundary(() => {
       if (!card.isConnected) return;
       if (card.open) {
         for (const other of document.querySelectorAll('.workout-session')) if (other !== card) other.open = false;
         renderMedia(session.exercises);
       } else if (!document.querySelector('.workout-session[open]')) renderMedia();
-    });
+    }));
     const title = document.createElement('summary');
     title.textContent = `${session.dayLabel} / ${session.title}`;
     const timing = document.createElement('p');
@@ -224,7 +225,7 @@ function renderPlan(plan) {
   window.scrollTo({ top: window.scrollY + result.getBoundingClientRect().top, behavior: 'instant' });
 }
 
-form.addEventListener('submit', event => {
+form.addEventListener('submit', languageBoundary(event => {
   event.preventDefault();
   invalidatePlan();
   if (JSON.stringify(readSharedPlan()) !== JSON.stringify(shared)) {
@@ -250,7 +251,7 @@ form.addEventListener('submit', event => {
     : 'Хранителните ориентири не са налични поради ограниченията на хранителния модел. Не показваме измислени калории. Това не спира валидния тренировъчен план.';
   renderPlan(plan);
   form.elements.eligible.checked = false;
-});
+}));
 
 function handleEdit(event) {
   if (event.target.name !== 'eligible' && shared?.workoutSetup) {
@@ -265,17 +266,17 @@ function handleEdit(event) {
   const { errors } = calculateWorkout(readSetup());
   showErrors(Object.fromEntries(Object.keys(displayedErrors).filter(name => errors[name]).map(name => [name, errors[name]])));
 }
-form.addEventListener('input', handleEdit);
-form.addEventListener('change', handleEdit);
-form.addEventListener('reset', () => queueMicrotask(() => {
+form.addEventListener('input', languageBoundary(handleEdit));
+form.addEventListener('change', languageBoundary(handleEdit));
+form.addEventListener('reset', () => queueMicrotask(languageBoundary(() => {
   if (shared?.workoutSetup && JSON.stringify(readSharedPlan()) === JSON.stringify(shared)) persistSetup(null);
   resetOnEntry(false);
-}));
+})));
 
-window.addEventListener('pageshow', () => resetOnEntry());
-window.addEventListener('storage', event => {
+window.addEventListener('pageshow', languageBoundary(() => resetOnEntry()));
+window.addEventListener('storage', languageBoundary(event => {
   if (![SHARED_LOCAL_KEY, null].includes(event.key) || (shared && !shared.remember)) return;
   resetOnEntry();
-});
+}));
 resetOnEntry();
 document.querySelector('#workout-load-status').hidden = true;

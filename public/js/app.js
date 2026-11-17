@@ -5,6 +5,7 @@ import { PROFILE_STORAGE_KEY, decodeProfile, encodeProfile } from './profile-sto
 import { readSharedPlan, writeSharedPlan, clearSharedPlan, invalidateSharedPlan, normalizeSharedProfile, SHARED_SESSION_KEY, SHARED_LOCAL_KEY } from './shared-plan.js';
 import { buildTrainingNutrition } from './training-nutrition.js';
 import { renderDayNutrition } from './day-nutrition-view.js';
+import { languageBoundary, clearLanguagePreference } from './language.js';
 
 const t = (message, values) => translate(message, 'bg', values);
 const $ = selector => document.querySelector(selector);
@@ -376,7 +377,7 @@ function restoreProfile() {
   }
 }
 
-form.addEventListener('submit', event => {
+form.addEventListener('submit', languageBoundary(event => {
   event.preventDefault();
   invalidateResults();
   const { body, nutrition, errors } = evaluate(readInputs());
@@ -396,9 +397,9 @@ form.addEventListener('submit', event => {
     }
     if (!hasErrors && nutrition.limitation) $('#limitation').focus();
   } else if (remember.checked) setStorageStatus('Невалидните данни не са запазени. Коригирай посочените полета и анализирай отново.');
-});
+}));
 
-form.addEventListener('input', event => {
+form.addEventListener('input', languageBoundary(event => {
   if (event.target === remember) return;
   if (['goal', 'weight', 'targetWeight', 'activity', 'sex', 'age', 'height'].includes(event.target.name)) updatePlanFields(event.target.name === 'goal');
   if (event.target.name !== 'eligible') {
@@ -412,9 +413,9 @@ form.addEventListener('input', event => {
   }
   invalidateResults();
   if (remember.checked) setStorageStatus('Промените не са запазени. Анализирай отново, за да ги запазиш.');
-});
+}));
 
-remember.addEventListener('change', () => {
+remember.addEventListener('change', languageBoundary(() => {
   if (remember.checked) setStorageStatus('Данните ще се запазят след валиден анализ. Използвай само браузър, на който имаш доверие.');
   else {
     const shared = readSharedPlan();
@@ -426,14 +427,13 @@ remember.addEventListener('change', () => {
       : 'Запомнянето е изключено. Текущите валидни входни данни остават само за сесията.');
   }
   if (pendingDraft) storeDraft();
-});
+}));
 
-$('#delete-data').addEventListener('click', () => {
+$('#delete-data').addEventListener('click', languageBoundary(() => {
   clearDraft();
   sharedDeletionFailed = !clearSharedPlan();
   const profileRemoved = removeSavedProfile();
-  let languageRemoved = true;
-  try { localStorage.removeItem('liftfuel.language'); } catch { languageRemoved = false; }
+  const languageRemoved = clearLanguagePreference();
   form.reset();
   remember.checked = false;
   form.elements.eligible.checked = false;
@@ -445,7 +445,7 @@ $('#delete-data').addEventListener('click', () => {
   if (profileRemoved && languageRemoved) setStorageStatus('Запазеният профил и старото езиково предпочитание са изтрити. Данни няма да се запазват без ново съгласие.');
   else if (profileRemoved) setStorageStatus('Профилът е изтрит, но старото езиково предпочитание не можа да бъде изтрито. Изчисти данните за сайта от настройките на браузъра.');
   else setStorageStatus(languageRemoved ? 'Старото езиково предпочитание е изтрито.' : 'Старото езиково предпочитание също не можа да бъде изтрито.');
-});
+}));
 
 function storageSnapshot() {
   try { return JSON.stringify([localStorage.getItem(SHARED_LOCAL_KEY), localStorage.getItem(PROFILE_STORAGE_KEY)]); }
@@ -480,8 +480,8 @@ function reconcileStorage(event) {
   if (removed) storeDraft();
   setStorageStatus('Запазените данни са променени в друг раздел. Запомнянето и допустимостта са изключени; провери данните преди нов анализ.');
 }
-window.addEventListener('storage', reconcileStorage);
-window.addEventListener('pageshow', reconcileStorage);
+window.addEventListener('storage', languageBoundary(reconcileStorage));
+window.addEventListener('pageshow', languageBoundary(reconcileStorage));
 window.addEventListener('pagehide', () => { lastStorageSnapshot = storageSnapshot(); });
 
 updatePlanFields();

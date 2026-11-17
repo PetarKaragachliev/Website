@@ -8,7 +8,7 @@ Website preview: https://petarkaragachliev.github.io/Website/ . Source: https://
 
 [![Test and Publish Preview](https://github.com/PetarKaragachliev/Website/actions/workflows/pages.yml/badge.svg)](https://github.com/PetarKaragachliev/Website/actions/workflows/pages.yml)
 
-The site opens directly in Bulgarian, with no English selector. The original sidebar, central input panel, right-hand results panel and LF hero artwork are retained. Nutrition is primary in one shared form: explicitly choose activity and goal (neither has a default), enter the five required measurements (formula category, age, height, current weight and `waistRfm`), confirm eligibility, and select **Изчисли моите резултати**. Additional measurements are optional. **Хранителна цел** (`section#nutrition-details`) is an ordinary noncollapsible section before waist. One click computes nutrition and bonus body analysis, focusing the nutrition output on success. The right panel shows calorie/protein/carbohydrate/fat placeholders before calculation, not invented targets, with the remaining nutrients vertically below fats.
+The site defaults to Bulgarian. The top language dropdown shows BG with a chevron; opening it reveals EN below (or BG when English is selected). The verified bilingual preview is owner-approved for test-gated publishing. The original sidebar, central input panel, right-hand results panel and LF hero artwork are retained. Nutrition is primary in one shared form: explicitly choose activity and goal (neither has a default), enter the five required measurements (formula category, age, height, current weight and `waistRfm`), confirm eligibility, and select **Изчисли моите резултати**. Additional measurements are optional. **Хранителна цел** (`section#nutrition-details`) is an ordinary noncollapsible section before waist. One click computes nutrition and bonus body analysis, focusing the nutrition output on success. The right panel shows calorie/protein/carbohydrate/fat placeholders before calculation, not invented targets, with the remaining nutrients vertically below fats.
 
 Body analysis retains its existing formulas and limits and can still provide a valid bonus when nutrition reaches support limits or a goal is missing. Missing required nutrition choices produces a focused error summary with linked field errors and does not save the submission. There is no body-only UI or nutrition-only reset.
 
@@ -22,7 +22,7 @@ The Bulgarian workout preview supports home/gym, beginner/intermediate/advanced,
 
 Enter common data once on nutrition: age, current weight, goal and everyday activity **outside workouts**. Workout setup reads the committed shared profile and asks only workout-specific questions plus a fresh health affirmation. Valid common inputs are required, not an available calorie target: nutrition support limits do not gate exercise generation. Generating a plan automatically updates seven daily calorie/macro targets on both pages; rest days keep the base intake and training days add only estimated expenditure above the already allocated baseline. No accumulation on regeneration. Method, limitations and sources: [TRAINING_ENERGY_POLICY.md](TRAINING_ENERGY_POLICY.md).
 
-Inputs and pending drafts use current-tab session storage. Only Remember opt-in persists the profile and six workout settings beyond the tab. Plans/results are recomputed, not stored; eligibility is never stored or transferred. Pending edits invalidate old credits, and cross-tab deletion/consent withdrawal cannot revive stale remembered snapshots. Fresh workout affirmation clears after success, initialization and `pageshow`. All display is Bulgarian; no capture is enabled.
+Inputs and pending drafts use current-tab session storage. Only Remember opt-in persists the profile and six workout settings beyond the tab. Plans/results are recomputed, not stored; eligibility is never stored or transferred. Pending edits invalidate old credits, and cross-tab deletion/consent withdrawal cannot revive stale remembered snapshots. Fresh workout affirmation clears after success, initialization and `pageshow`. Local BG/EN switching changes presentation only; no capture is enabled.
 
 ## Documents
 
@@ -36,7 +36,7 @@ Inputs and pending drafts use current-tab session storage. Only Remember opt-in 
 | [TRAINING_ENERGY_POLICY.md](TRAINING_ENERGY_POLICY.md) | Researched MET method, baseline subtraction, per-day targets, shared inputs and uncertainty limits |
 | [NUTRIENT_REFERENCES.md](NUTRIENT_REFERENCES.md) | Daily nutrient reference tables, limits, sources, and flexible meal guidance; not a food diary or supplement plan |
 | [BODY_ASSESSMENT.md](BODY_ASSESSMENT.md) | Bonus body assessment, required RFM waist, optional measurements, interpretation limits, and storage/consent behavior |
-| [LOCALIZATION.md](LOCALIZATION.md) | Bulgarian-only interface, retained local nutrition translations, and cleanup of old language preferences |
+| [LOCALIZATION.md](LOCALIZATION.md) | Verified local BG/EN dropdown, independent language preference and deletion behavior |
 | [STATUS.md](STATUS.md) | Current state, blockers, and recorded results |
 
 ## Start Here
@@ -101,6 +101,7 @@ Future updates: review changes, commit the intended files, and use **Push origin
 - `public/js/training-nutrition.js`, `public/js/day-nutrition-view.js`: pure planned energy/day-target calculation and the shared seven-day results table.
 - `public/js/measurements.js`: Strict metric parsing shared by nutrition and body assessment.
 - `public/js/i18n.js`, `public/js/bg-models.js`, `public/js/bg-app.js`: local Bulgarian nutrition-model translations; static analyzer text is Bulgarian directly.
+- `public/js/language.js`, `public/js/en*.js`: local static/dynamic BG/EN presentation through the top `#language-toggle` dropdown; shows the current language and reveals the alternative below; no reload or calculation/profile changes, preserving inputs, results, iframes and disclosures.
 - `public/training.html`: Bulgarian workout preview with common-profile summary, workout-only setup, day targets, media and gym map; no health data in URLs.
 - `public/js/workout.js`: pure deterministic workout model; equipment/time constraints and separate movement guidance, independent of nutrition/body analysis.
 - `public/js/training-app.js`, `public/js/training-start.js`: in-memory setup/rendering, fresh eligibility, stale-result invalidation and versioned startup with error/retry feedback. Generate stays disabled without JavaScript or successful initialization to prevent native form submission.
@@ -110,4 +111,4 @@ Future updates: review changes, commit the intended files, and use **Push origin
 
 No profile data is sent to an application backend. Device remembering is off by default. Shared inputs use `liftfuel.shared.session.v1`, with pending nutrition drafts at `liftfuel.nutrition.draft.v1`; consent additionally permits `liftfuel.shared.saved.v1` and version-6 inputs at the existing `liftfuel.profile.v1` key. Legacy records retain distinct waist origins without guessed choices; old activity is explicitly reselected. Eligibility and calculated results are never saved. External maps/videos receive ordinary provider traffic as explained in EXERCISE_MEDIA.md, never form inputs.
 
-The old `liftfuel.language` preference is no longer read or written; Delete still removes it if present. Browser-storage failures do not stop unsaved analysis and do not falsely claim retained data was deleted.
+The guarded `liftfuel.language` choice is independent of health-profile consent, defaults to BG and permits visit-only switching if saving fails. Delete clears the language key and resets BG only when removal succeeds. Browser-storage failures do not stop unsaved analysis and do not falsely claim retained data was deleted. All 50 language browser checks passed across the five projects; verification details are in LOCALIZATION.md.
